@@ -1,9 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MapPin, LogOut, User } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore";
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch {
+      navigate("/login");
+    }
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -26,7 +36,7 @@ const Navbar = () => {
                 <span>{user?.name}</span>
               </div>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors"
               >
                 <LogOut size={16} />

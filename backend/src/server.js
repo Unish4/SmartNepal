@@ -1,20 +1,22 @@
-// ─── Config 
-import ENV from "./src/config/env.js";
-import connectDB from "./src/config/db.js";
+// ─── Config
+import ENV from "./config/env.js";
+import connectDB from "./config/db.js";
 
-// ─── Core 
+// ─── Core
 import express from "express";
 
-// ─── Security & Logging 
+// ─── Security & Logging
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
 
-// ─── Routes ───────────────────────────────────────────────
-// (none yet — added phase by phase from Phase 3 onward)
+// ─── Routes
+import authRoutes from "./routes/authRoutes.js";
 
-// ─── Error Handlers ───────────────────────────────────────
-import { notFound, errorHandler } from "./src/middleware/errorHandler.js";
+// ─── Error Handlers
+import { notFound, errorHandler } from "./middleware/errorHandler.js";
+
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -29,11 +31,11 @@ app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 
 // Parse incoming JSON request bodies
 app.use(express.json());
+app.use(cookieParser());
 
-// ─── Routes 
-// (mounted here as phases are added)
-
-// ─── Error middleware — must be last 
+// ─── Routes
+app.use("/api/auth", authRoutes);
+// ─── Error middleware — must be last
 app.use(notFound);
 app.use(errorHandler);
 
