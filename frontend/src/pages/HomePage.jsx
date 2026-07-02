@@ -35,7 +35,7 @@ const HomePage = () => {
       {/* CTAs */}
       <div className="flex gap-3">
         <Link
-          to="/register"
+          to="/issues/new"
           className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
         >
           Report an issue

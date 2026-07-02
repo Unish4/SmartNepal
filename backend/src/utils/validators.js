@@ -31,3 +31,48 @@ export const loginValidator = [
     .normalizeEmail(),
   body("password").notEmpty().withMessage("Password is required"),
 ];
+
+const VALID_CATEGORIES = [
+  "Road Damage",
+  "Garbage",
+  "Water Issue",
+  "Street Light",
+  "Illegal Construction",
+  "Public Space",
+  "Other",
+];
+
+const VALID_PRIORITIES = ["low", "medium", "high", "critical"];
+
+export const createIssueValidator = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Title is required")
+    .isLength({ max: 100, min: 5 })
+    .withMessage("Title must be between 5 and 100 characters"),
+
+  body("description")
+    .trim()
+    .notEmpty()
+    .withMessage("Description is required")
+    .isLength({ min: 10 })
+    .withMessage("Description must be at least 10 characters"),
+
+  body("category")
+    .notEmpty()
+    .withMessage("Category is required")
+    .isIn(VALID_CATEGORIES)
+    .withMessage(`Category must be one of: ${VALID_CATEGORIES.join(", ")}`),
+
+  body("priority")
+    .optional() // not required — defaults to "low" in the schema
+    .isIn(VALID_PRIORITIES)
+    .withMessage("Invalid priority value"),
+
+  body("location.address")
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Address too long"),
+];

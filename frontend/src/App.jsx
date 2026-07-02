@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // Layout and pages
@@ -8,6 +8,16 @@ import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import IssuesPage from "./pages/issues/IssuesPage";
+import CreateIssuePage from "./pages/issues/CreateIssuePage";
+import IssueDetailPage from "./pages/issues/IssueDetailPage";
+import useAuthStore from "./store/useAuthStore";
+
+// Public only route - redirects authenticated users away from auth pages
+const PublicOnlyRoute = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <Navigate to="/" replace /> : children;
+};
 
 function App() {
   return (
@@ -24,20 +34,41 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Layout />}>
+          {/* Public routes */}
           <Route index element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-          {/* Protected routes — auth required */}
 
+          {/* Auth pages - only accessible when NOT logged in */}
           <Route
-            path="/issues"
+            path="login"
+            element={
+              <PublicOnlyRoute>
+                <LoginPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="register"
+            element={
+              <PublicOnlyRoute>
+                <RegisterPage />
+              </PublicOnlyRoute>
+            }
+          />
+
+          {/* Issues routes */}
+          <Route path="issues" element={<IssuesPage />} />
+          <Route
+            path="issues/new"
             element={
               <ProtectedRoute>
-                <div>Issues page (protected)</div>
+                <CreateIssuePage />
               </ProtectedRoute>
             }
           />
+          <Route path="issues/:id" element={<IssueDetailPage />} />
+
+          {/* 404 page */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </>
