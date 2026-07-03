@@ -1,42 +1,42 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FileText } from "lucide-react";
 import useIssueStore from "../../store/useIssueStore.js";
 import { CATEGORIES } from "../../constants/issue.js";
+import ImageUploader from "../../components/issues/ImageUploader.jsx";
 
 const CreateIssuePage = () => {
   const navigate = useNavigate();
   const { createIssue, isLoading } = useIssueStore();
 
+  const [imageFiles, setImageFiles] = useState([]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      priority: "low", // match the schema default
-    },
-  });
+  } = useForm({ defaultValues: { priority: "low" } });
 
   const onSubmit = async (data) => {
-    // Restructure location into the nested object the backend expects.
     const payload = {
       title: data.title,
       description: data.description,
       category: data.category,
       priority: data.priority,
-      // Only include location if the user typed an address.
-      ...(data.address && { location: { address: data.address } }),
+      address: data.address || "",
+      images: imageFiles, // File[] — service converts to FormData entries
     };
 
     try {
       const res = await createIssue(payload);
       toast.success("Issue reported successfully!");
-      // Navigate to the new issue's detail page immediately.
       navigate(`/issues/${res.issue._id}`);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to submit report.");
+      toast.error(
+        error.response?.data?.message || "Failed to submit. Try again.",
+      );
     }
   };
 
@@ -58,7 +58,7 @@ const CreateIssuePage = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
-        {/* ── Title  */}
+        {/* Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Issue title <span className="text-red-500">*</span>
@@ -73,7 +73,8 @@ const CreateIssuePage = () => {
                 message: "Title cannot exceed 100 characters",
               },
             })}
-            className={`w-full px-3.5 py-2.5 text-sm rounded-lg border outline-none transition-all
+            className={`w-full px-3.5 py-2.5 text-sm rounded-lg border outline-none
+              transition-all
               ${
                 errors.title
                   ? "border-red-400 bg-red-50/30"
@@ -85,7 +86,7 @@ const CreateIssuePage = () => {
           )}
         </div>
 
-        {/* ── Category + Priority row  */}
+        {/* Category + Priority */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -95,8 +96,9 @@ const CreateIssuePage = () => {
               {...register("category", {
                 required: "Please select a category",
               })}
-              className={`w-full px-3.5 py-2.5 text-sm rounded-lg border bg-white outline-none
-                transition-all ${
+              className={`w-full px-3.5 py-2.5 text-sm rounded-lg border bg-white
+                outline-none transition-all
+                ${
                   errors.category
                     ? "border-red-400"
                     : "border-gray-200 focus:border-green-500"
@@ -133,7 +135,7 @@ const CreateIssuePage = () => {
           </div>
         </div>
 
-        {/* ── Description  */}
+        {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Description <span className="text-red-500">*</span>
@@ -149,7 +151,8 @@ const CreateIssuePage = () => {
               },
             })}
             className={`w-full px-3.5 py-2.5 text-sm rounded-lg border outline-none
-              transition-all resize-vertical ${
+              transition-all resize-vertical
+              ${
                 errors.description
                   ? "border-red-400 bg-red-50/30"
                   : "border-gray-200 focus:border-green-500 focus:bg-green-50/20"
@@ -162,7 +165,7 @@ const CreateIssuePage = () => {
           )}
         </div>
 
-        {/* ── Location */}
+        {/* Location text — map picker added in Phase 6 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Location address{" "}
@@ -176,22 +179,22 @@ const CreateIssuePage = () => {
               outline-none focus:border-green-500 focus:bg-green-50/20 transition-all"
           />
           <p className="text-xs text-gray-400 mt-1">
-            📍 Map picker will be added in the next update.
+            Map picker will be added in the next update.
           </p>
         </div>
 
-        {/* ── Image upload placeholder  */}
-        <div
-          className="border-2 border-dashed border-gray-200 rounded-lg p-6
-          text-center bg-gray-50"
-        >
-          <p className="text-sm text-gray-400">📷 Photo upload coming soon</p>
-          <p className="text-xs text-gray-400 mt-1">
-            Image upload will be enabled in the next update.
-          </p>
+        {/* Photos — Phase 5 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Photos{" "}
+            <span className="text-gray-400 font-normal">
+              (optional · up to 3)
+            </span>
+          </label>
+          <ImageUploader onFilesChange={setImageFiles} />
         </div>
 
-        {/* ── Actions  */}
+        {/* Actions */}
         <div className="flex items-center gap-3 pt-1">
           <button
             type="submit"

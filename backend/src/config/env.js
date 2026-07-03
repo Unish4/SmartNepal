@@ -5,6 +5,9 @@ dotenv.config();
 const REQUIRED_ENV_VARS = [
   "MONGODB_URI",
   "JWT_SECRET",
+  "CLOUDINARY_CLOUD_NAME",
+  "CLOUDINARY_API_KEY",
+  "CLOUDINARY_API_SECRET",
 ];
 REQUIRED_ENV_VARS.forEach((varName) => {
   if (!process.env[varName]) {
@@ -18,6 +21,9 @@ const ENV = {
   NODE_ENV: process.env.NODE_ENV || "development",
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
   JWT_SECRET: process.env.JWT_SECRET,
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 };
 
 export default ENV;

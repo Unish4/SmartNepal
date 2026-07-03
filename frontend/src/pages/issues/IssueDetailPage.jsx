@@ -9,14 +9,11 @@ import {
 } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
 
-// IssueDetailPage — full detail view for a single issue.
-// Public — anyone can view without logging in.
 const IssueDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentIssue, isLoading, error, getIssueById } = useIssueStore();
 
-  // Fetch the issue when the ID param changes (e.g. navigating
   useEffect(() => {
     getIssueById(id);
   }, [id, getIssueById]);
@@ -24,19 +21,17 @@ const IssueDetailPage = () => {
   // ── Loading skeleton
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto animate-pulse">
-        <div className="h-4 w-32 bg-gray-100 rounded mb-6" />
-        <div className="h-64 bg-gray-100 rounded-xl mb-6" />
-        <div className="space-y-3">
-          <div className="h-5 w-3/4 bg-gray-100 rounded" />
-          <div className="h-4 w-full bg-gray-100 rounded" />
-          <div className="h-4 w-5/6 bg-gray-100 rounded" />
-        </div>
+      <div className="max-w-3xl mx-auto animate-pulse space-y-4">
+        <div className="h-4 w-28 bg-gray-100 rounded" />
+        <div className="h-64 bg-gray-100 rounded-xl" />
+        <div className="h-5 w-2/3 bg-gray-100 rounded" />
+        <div className="h-4 w-full bg-gray-100 rounded" />
+        <div className="h-4 w-4/5 bg-gray-100 rounded" />
       </div>
     );
   }
 
-  // ── Error state
+  // ── Error / not found
   if (error || !currentIssue) {
     return (
       <div className="max-w-3xl mx-auto text-center py-20">
@@ -56,10 +51,11 @@ const IssueDetailPage = () => {
   const priority =
     PRIORITY_CONFIG[currentIssue.priority] || PRIORITY_CONFIG.low;
   const CategoryIcon = CATEGORY_ICONS[currentIssue.category] || AlertCircle;
+  const hasImages = currentIssue.images?.length > 0;
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* ── Back navigation  */}
+      {/* Back button */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-sm text-gray-500
@@ -69,17 +65,43 @@ const IssueDetailPage = () => {
         Back to issues
       </button>
 
-      {/* ── Image / placeholder  */}
-      <div
-        className="w-full h-56 bg-gray-50 rounded-xl flex items-center
-        justify-center mb-6 border border-gray-100"
-      >
-        <CategoryIcon size={48} className="text-gray-200" />
-      </div>
+      {/* ── Image gallery 
+          Phase 5: show real Cloudinary images.
+          Cover image is full width. Additional images in a thumbnail row. */}
+      {hasImages ? (
+        <div className="mb-6">
+          <img
+            src={currentIssue.images[0]}
+            alt={currentIssue.title}
+            className="w-full h-64 object-cover rounded-xl border border-gray-100"
+          />
+          {/* Thumbnail strip for images 2 and 3 */}
+          {currentIssue.images.length > 1 && (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {currentIssue.images.slice(1).map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt={`Image ${i + 2}`}
+                  className="w-full h-32 object-cover rounded-lg border border-gray-100"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        // No images — category icon placeholder
+        <div
+          className="w-full h-56 bg-gray-50 rounded-xl flex items-center
+          justify-center mb-6 border border-gray-100"
+        >
+          <CategoryIcon size={48} className="text-gray-200" />
+        </div>
+      )}
 
       {/* ── Main content card  */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
-        {/* Badges row */}
+        {/* Badges */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span
             className={`flex items-center gap-1.5 text-xs font-medium
@@ -93,7 +115,10 @@ const IssueDetailPage = () => {
           >
             {priority.label} priority
           </span>
-          <span className="text-xs font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
+          <span
+            className="text-xs font-medium text-gray-600 bg-gray-100
+            px-3 py-1.5 rounded-full"
+          >
             {currentIssue.category}
           </span>
         </div>
@@ -103,11 +128,11 @@ const IssueDetailPage = () => {
           {currentIssue.title}
         </h1>
 
-        {/* Meta row */}
+        {/* Meta */}
         <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-5">
           <span className="flex items-center gap-1.5">
             <User size={13} />
-            Reported by {currentIssue.author?.name ?? "Anonymous"}
+            {currentIssue.author?.name ?? "Anonymous"}
           </span>
           <span className="flex items-center gap-1.5">
             <Calendar size={13} />
@@ -121,7 +146,6 @@ const IssueDetailPage = () => {
           )}
         </div>
 
-        {/* Divider */}
         <div className="border-t border-gray-100 mb-5" />
 
         {/* Description */}
@@ -131,12 +155,12 @@ const IssueDetailPage = () => {
         </p>
       </div>
 
-      {/* ── Issue details sidebar card  */}
+      {/* ── Details sidebar card  */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <h2 className="text-sm font-medium text-gray-700 mb-4">
           Issue details
         </h2>
-        <dl className="space-y-3">
+        <dl className="space-y-0">
           {[
             {
               label: "Issue ID",
@@ -155,6 +179,10 @@ const IssueDetailPage = () => {
             },
             { label: "Ward", value: currentIssue.location?.ward || "—" },
             {
+              label: "Photos",
+              value: `${currentIssue.images?.length ?? 0} attached`,
+            },
+            {
               label: "Submitted",
               value: new Date(currentIssue.createdAt).toLocaleDateString(
                 "en-NP",
@@ -168,8 +196,8 @@ const IssueDetailPage = () => {
           ].map(({ label, value }) => (
             <div
               key={label}
-              className="flex justify-between items-center py-2
-              border-b border-gray-50 last:border-0"
+              className="flex justify-between items-center
+              py-2.5 border-b border-gray-50 last:border-0"
             >
               <dt className="text-xs text-gray-400">{label}</dt>
               <dd className="text-xs font-medium text-gray-700">{value}</dd>

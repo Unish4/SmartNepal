@@ -1,5 +1,6 @@
 import { body } from "express-validator";
 
+// ─── Auth validators 
 export const registerValidator = [
   body("name")
     .trim()
@@ -27,11 +28,11 @@ export const loginValidator = [
     .notEmpty()
     .withMessage("Email is required")
     .isEmail()
-    .withMessage("Please provide a valid email")
-    .normalizeEmail(),
+    .withMessage("Please provide a valid email"),
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
+// ─── Issue validators 
 const VALID_CATEGORIES = [
   "Road Damage",
   "Garbage",
@@ -49,8 +50,8 @@ export const createIssueValidator = [
     .trim()
     .notEmpty()
     .withMessage("Title is required")
-    .isLength({ max: 100, min: 5 })
-    .withMessage("Title must be between 5 and 100 characters"),
+    .isLength({ max: 100 })
+    .withMessage("Title cannot exceed 100 characters"),
 
   body("description")
     .trim()
@@ -66,13 +67,13 @@ export const createIssueValidator = [
     .withMessage(`Category must be one of: ${VALID_CATEGORIES.join(", ")}`),
 
   body("priority")
-    .optional() // not required — defaults to "low" in the schema
+    .optional()
     .isIn(VALID_PRIORITIES)
     .withMessage("Invalid priority value"),
 
-  body("location.address")
+  body("address")
     .optional()
     .trim()
     .isLength({ max: 200 })
-    .withMessage("Address too long"),
+    .withMessage("Address is too long"),
 ];
