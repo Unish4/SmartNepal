@@ -14,17 +14,19 @@ const checkValidation = (req, res) => {
 export const createIssue = async (req, res, next) => {
   try {
     checkValidation(req, res);
+    const { title, description, category, priority, address, lat, lng } =
+      req.body;
 
-    const { title, description, category, priority, address } = req.body;
+    const parsedLat = lat ? parseFloat(lat) : undefined;
+    const parsedLng = lng ? parseFloat(lng) : undefined;
 
     let imageUrls = [];
     if (req.files?.length > 0) {
       const results = await Promise.all(
         req.files.map((file) =>
-          uploadToCloudinary(file.buffer, "SmartNepal/issues"),
+          uploadToCloudinary(file.buffer, "smartnepal/issues"),
         ),
       );
-      // secure_url is an HTTPS Cloudinary CDN URL — safe to store and serve.
       imageUrls = results.map((r) => r.secure_url);
     }
 
@@ -33,9 +35,13 @@ export const createIssue = async (req, res, next) => {
       description,
       category,
       priority: priority || "low",
-      location: { address: address || "" },
+      location: {
+        address: address || "",
+        lat: parsedLat,
+        lng: parsedLng,
+      },
       images: imageUrls,
-      author: req.user._id, // guaranteed by protect middleware
+      author: req.user._id,
     });
 
     await issue.populate("author", "name email");
@@ -53,14 +59,13 @@ export const getIssues = async (req, res, next) => {
     const limit = Math.min(20, parseInt(req.query.limit) || 12);
     const skip = (page - 1) * limit;
 
-    // Run both queries in parallel — count doesn't depend on the data query.
     const [issues, total] = await Promise.all([
       Issue.find()
         .populate("author", "name")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean(), // lean() returns plain JS objects — faster for read-only data
+        .lean(),
       Issue.countDocuments(),
     ]);
 
@@ -85,7 +90,7 @@ export const getIssues = async (req, res, next) => {
 export const getIssueById = async (req, res, next) => {
   try {
     const issue = await Issue.findById(req.params.id)
-      .populate("author", "name  province")
+      .populate("author", "name email province")
       .lean();
 
     if (!issue) {

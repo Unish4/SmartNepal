@@ -4,6 +4,10 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 
+import "leaflet/dist/leaflet.css";
+
+import "./lib/leafletSetup.js";
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>

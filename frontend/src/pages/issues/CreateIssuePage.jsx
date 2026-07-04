@@ -6,12 +6,15 @@ import { FileText } from "lucide-react";
 import useIssueStore from "../../store/useIssueStore.js";
 import { CATEGORIES } from "../../constants/issue.js";
 import ImageUploader from "../../components/issues/ImageUploader.jsx";
+import LocationPicker from "../../components/map/LocationPicker.jsx";
 
 const CreateIssuePage = () => {
   const navigate = useNavigate();
   const { createIssue, isLoading } = useIssueStore();
 
   const [imageFiles, setImageFiles] = useState([]);
+
+  const [location, setLocation] = useState(null);
 
   const {
     register,
@@ -25,8 +28,10 @@ const CreateIssuePage = () => {
       description: data.description,
       category: data.category,
       priority: data.priority,
-      address: data.address || "",
-      images: imageFiles, // File[] — service converts to FormData entries
+      address: location?.address || "",
+      lat: location?.lat,
+      lng: location?.lng,
+      images: imageFiles,
     };
 
     try {
@@ -42,7 +47,7 @@ const CreateIssuePage = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Page header */}
+      {/* Header */}
       <div className="mb-7">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center">
@@ -165,25 +170,7 @@ const CreateIssuePage = () => {
           )}
         </div>
 
-        {/* Location text — map picker added in Phase 6 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Location address{" "}
-            <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
-          <input
-            type="text"
-            placeholder="e.g. Near Buddha Chowk, Ward 7, Lalitpur"
-            {...register("address")}
-            className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200
-              outline-none focus:border-green-500 focus:bg-green-50/20 transition-all"
-          />
-          <p className="text-xs text-gray-400 mt-1">
-            Map picker will be added in the next update.
-          </p>
-        </div>
-
-        {/* Photos — Phase 5 */}
+        {/* Photos */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Photos{" "}
@@ -192,6 +179,23 @@ const CreateIssuePage = () => {
             </span>
           </label>
           <ImageUploader onFilesChange={setImageFiles} />
+        </div>
+
+        {/* Location — Phase 6: replaced text input with interactive map */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Location{" "}
+            <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <LocationPicker onLocationChange={setLocation} />
+
+          {/* Show the reverse-geocoded address below the map if set */}
+          {location?.address && (
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              <span className="font-medium text-gray-700">Address: </span>
+              {location.address}
+            </p>
+          )}
         </div>
 
         {/* Actions */}

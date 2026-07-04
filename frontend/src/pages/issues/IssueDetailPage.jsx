@@ -8,6 +8,7 @@ import {
   CATEGORY_ICONS,
 } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
+import MiniMap from "../../components/map/MiniMap.jsx";
 
 const IssueDetailPage = () => {
   const { id } = useParams();
@@ -18,7 +19,7 @@ const IssueDetailPage = () => {
     getIssueById(id);
   }, [id, getIssueById]);
 
-  // ── Loading skeleton
+  //  Loading skeleton ─
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto animate-pulse space-y-4">
@@ -31,7 +32,7 @@ const IssueDetailPage = () => {
     );
   }
 
-  // ── Error / not found
+  //  Error / not found 
   if (error || !currentIssue) {
     return (
       <div className="max-w-3xl mx-auto text-center py-20">
@@ -53,6 +54,10 @@ const IssueDetailPage = () => {
   const CategoryIcon = CATEGORY_ICONS[currentIssue.category] || AlertCircle;
   const hasImages = currentIssue.images?.length > 0;
 
+  // Convenience booleans for location rendering
+  const hasCoords = currentIssue.location?.lat && currentIssue.location?.lng;
+  const hasAddress = !!currentIssue.location?.address;
+
   return (
     <div className="max-w-3xl mx-auto">
       {/* Back button */}
@@ -65,9 +70,7 @@ const IssueDetailPage = () => {
         Back to issues
       </button>
 
-      {/* ── Image gallery 
-          Phase 5: show real Cloudinary images.
-          Cover image is full width. Additional images in a thumbnail row. */}
+      {/*  Image gallery  */}
       {hasImages ? (
         <div className="mb-6">
           <img
@@ -75,7 +78,6 @@ const IssueDetailPage = () => {
             alt={currentIssue.title}
             className="w-full h-64 object-cover rounded-xl border border-gray-100"
           />
-          {/* Thumbnail strip for images 2 and 3 */}
           {currentIssue.images.length > 1 && (
             <div className="grid grid-cols-2 gap-2 mt-2">
               {currentIssue.images.slice(1).map((url, i) => (
@@ -90,7 +92,6 @@ const IssueDetailPage = () => {
           )}
         </div>
       ) : (
-        // No images — category icon placeholder
         <div
           className="w-full h-56 bg-gray-50 rounded-xl flex items-center
           justify-center mb-6 border border-gray-100"
@@ -99,7 +100,7 @@ const IssueDetailPage = () => {
         </div>
       )}
 
-      {/* ── Main content card  */}
+      {/*  Main content card  */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
         {/* Badges */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -111,7 +112,8 @@ const IssueDetailPage = () => {
             {status.label}
           </span>
           <span
-            className={`text-xs font-medium px-3 py-1.5 rounded-full ${priority.className}`}
+            className={`text-xs font-medium px-3 py-1.5 rounded-full
+            ${priority.className}`}
           >
             {priority.label} priority
           </span>
@@ -138,10 +140,12 @@ const IssueDetailPage = () => {
             <Calendar size={13} />
             {timeAgo(currentIssue.createdAt)}
           </span>
-          {currentIssue.location?.address && (
+          {hasAddress && (
             <span className="flex items-center gap-1.5">
               <MapPin size={13} />
-              {currentIssue.location.address}
+              <span className="truncate max-w-xs">
+                {currentIssue.location.address}
+              </span>
             </span>
           )}
         </div>
@@ -153,9 +157,24 @@ const IssueDetailPage = () => {
         <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
           {currentIssue.description}
         </p>
+
+        {hasCoords && (
+          <div className="mt-6">
+            <h2 className="text-sm font-medium text-gray-700 mb-2">Location</h2>
+            <MiniMap
+              lat={currentIssue.location.lat}
+              lng={currentIssue.location.lng}
+            />
+            {hasAddress && (
+              <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                {currentIssue.location.address}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ── Details sidebar card  */}
+      {/*  Details card  */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <h2 className="text-sm font-medium text-gray-700 mb-4">
           Issue details
@@ -169,6 +188,14 @@ const IssueDetailPage = () => {
             { label: "Category", value: currentIssue.category },
             { label: "Status", value: status.label },
             { label: "Priority", value: priority.label },
+            {
+              label: "Latitude",
+              value: hasCoords ? currentIssue.location.lat.toFixed(6) : "—",
+            },
+            {
+              label: "Longitude",
+              value: hasCoords ? currentIssue.location.lng.toFixed(6) : "—",
+            },
             {
               label: "Province",
               value: currentIssue.location?.province || "—",
