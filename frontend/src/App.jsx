@@ -75,14 +75,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="issues/:id"
-            element={
-              <PublicOnlyRoute>
-                <IssueDetailPage />
-              </PublicOnlyRoute>
-            }
-          />
+          <Route path="issues/:id" element={<IssueDetailPage />} />
           <Route
             path="issues/:id/edit"
             element={

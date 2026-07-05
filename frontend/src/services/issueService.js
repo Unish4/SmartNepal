@@ -10,13 +10,11 @@ export const fetchIssueById = async (id) => {
   return response.data;
 };
 
-// GET /api/issues/me — only the logged-in user's own reports
 export const fetchMyIssues = async (params = {}) => {
   const response = await api.get("/api/issues/me", { params });
   return response.data;
 };
 
-// POST — always FormData because Phase 5 added image upload support
 export const createIssueRequest = async (issueData) => {
   const formData = new FormData();
   formData.append("title", issueData.title);
@@ -33,14 +31,18 @@ export const createIssueRequest = async (issueData) => {
   return response.data;
 };
 
-// PUT — JSON body (no image changes in Phase 7)
 export const updateIssueRequest = async (id, issueData) => {
   const response = await api.put(`/api/issues/${id}`, issueData);
   return response.data;
 };
 
-// DELETE
 export const deleteIssueRequest = async (id) => {
   const response = await api.delete(`/api/issues/${id}`);
+  return response.data;
+};
+
+// POST /api/issues/:id/upvote — toggle on/off in one call
+export const upvoteIssueRequest = async (id) => {
+  const response = await api.post(`/api/issues/${id}/upvote`);
   return response.data;
 };

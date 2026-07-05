@@ -20,6 +20,7 @@ import {
 import { timeAgo } from "../../utils/timeAgo.js";
 import MiniMap from "../../components/map/MiniMap.jsx";
 import ConfirmDialog from "../../components/ui/ConfirmDialog.jsx";
+import UpvoteButton from "../../components/issues/UpvoteButton.jsx";
 
 const IssueDetailPage = () => {
   const { id } = useParams();
@@ -33,7 +34,7 @@ const IssueDetailPage = () => {
 
   useEffect(() => {
     getIssueById(id);
-  }, [id, getIssueById]);
+  }, [id]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -47,7 +48,7 @@ const IssueDetailPage = () => {
     }
   };
 
-  // Loading 
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto animate-pulse space-y-4">
@@ -60,7 +61,7 @@ const IssueDetailPage = () => {
     );
   }
 
-  // Error 
+  // ── Error ──────────────────────────────────────────────────────────────────
   if (error || !currentIssue) {
     return (
       <div className="max-w-3xl mx-auto text-center py-20">
@@ -88,11 +89,13 @@ const IssueDetailPage = () => {
 
   const isOwner =
     isAuthenticated &&
-    (user?._id === currentIssue.author?._id || user?.role === "admin");
+    (user?._id === currentIssue.author?._id ||
+      user?._id === currentIssue.author ||
+      user?.role === "admin");
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Header row — back button left, owner actions right */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate(-1)}
@@ -103,7 +106,6 @@ const IssueDetailPage = () => {
           Back to issues
         </button>
 
-        {/* Edit + Delete buttons — only visible to the issue owner or admin */}
         {isOwner && (
           <div className="flex items-center gap-2">
             <Link
@@ -160,6 +162,7 @@ const IssueDetailPage = () => {
 
       {/* Main content card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
+        {/* Badges */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span
             className={`flex items-center gap-1.5 text-xs font-medium
@@ -186,6 +189,7 @@ const IssueDetailPage = () => {
           {currentIssue.title}
         </h1>
 
+        {/* Meta */}
         <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-5">
           <span className="flex items-center gap-1.5">
             <User size={13} />
@@ -207,11 +211,27 @@ const IssueDetailPage = () => {
 
         <div className="border-t border-gray-100 mb-5" />
 
+        {/* Description */}
         <h2 className="text-sm font-medium text-gray-700 mb-2">Description</h2>
-        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
           {currentIssue.description}
         </p>
 
+        {/* ── Upvote section — Phase 8 ─────────────────────────────────────
+            Sits between description and map. The detail variant is wider and
+            shows "Upvoted" / "Upvote" text alongside the count.            */}
+        <div className="border-t border-gray-100 pt-5">
+          <div className="flex items-center gap-4">
+            <UpvoteButton issue={currentIssue} variant="detail" />
+            <p className="text-xs text-gray-400">
+              {currentIssue.upvoterIds?.length === 1
+                ? "1 person supports this report"
+                : `${currentIssue.upvoterIds?.length ?? 0} people support this report`}
+            </p>
+          </div>
+        </div>
+
+        {/* MiniMap */}
         {hasCoords && (
           <div className="mt-6">
             <h2 className="text-sm font-medium text-gray-700 mb-2">Location</h2>
@@ -242,6 +262,7 @@ const IssueDetailPage = () => {
             { label: "Category", value: currentIssue.category },
             { label: "Status", value: status.label },
             { label: "Priority", value: priority.label },
+            { label: "Upvotes", value: currentIssue.upvoterIds?.length ?? 0 },
             {
               label: "Latitude",
               value: hasCoords ? currentIssue.location.lat.toFixed(6) : "—",
