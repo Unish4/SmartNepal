@@ -1,5 +1,5 @@
 import {
-  Construction,
+  AlertTriangle,
   Trash2,
   Droplets,
   Lightbulb,
@@ -18,60 +18,60 @@ export const CATEGORIES = [
   "Other",
 ];
 
+// Matches Figma's CATEGORY_CFG exactly — icon, colour, background
 export const CATEGORY_ICONS = {
-  "Road Damage": Construction,
-  "Garbage": Trash2,
+  "Road Damage": AlertTriangle,
+  Garbage: Trash2,
   "Water Issue": Droplets,
   "Street Light": Lightbulb,
   "Illegal Construction": Building2,
   "Public Space": Trees,
-  "Other": AlertCircle,
+  Other: AlertCircle,
 };
 
+export const CATEGORY_CONFIG = {
+  "Road Damage": { color: "#64748b", bg: "#f1f5f9" },
+  Garbage: { color: "#65a30d", bg: "#f7fee7" },
+  "Water Issue": { color: "#0284c7", bg: "#f0f9ff" },
+  "Street Light": { color: "#ca8a04", bg: "#fefce8" },
+  "Illegal Construction": { color: "#ea580c", bg: "#fff7ed" },
+  "Public Space": { color: "#16a34a", bg: "#f0fdf4" },
+  Other: { color: "#94a3b8", bg: "#f8fafc" },
+};
+
+// Figma STATUS_CFG with exact hex values
 export const STATUS_CONFIG = {
-  open: {
-    label: "Open",
-    className: "bg-blue-50 text-blue-700 border border-blue-200",
-    dot: "bg-blue-500",
-  },
+  open: { label: "Open", dot: "#3b82f6", bg: "#eff6ff", text: "#1d4ed8" },
   verified: {
     label: "Verified",
-    className: "bg-purple-50 text-purple-700 border border-purple-200",
-    dot: "bg-purple-500",
+    dot: "#8b5cf6",
+    bg: "#f5f3ff",
+    text: "#6d28d9",
   },
   "in-progress": {
     label: "In Progress",
-    className: "bg-amber-50 text-amber-700 border border-amber-200",
-    dot: "bg-amber-500",
+    dot: "#f59e0b",
+    bg: "#fffbeb",
+    text: "#b45309",
   },
   resolved: {
     label: "Resolved",
-    className: "bg-green-50 text-green-700 border border-green-200",
-    dot: "bg-green-500",
+    dot: "#22c55e",
+    bg: "#f0fdf4",
+    text: "#15803d",
   },
   rejected: {
     label: "Rejected",
-    className: "bg-red-50 text-red-700 border border-red-200",
-    dot: "bg-red-400",
+    dot: "#ef4444",
+    bg: "#fef2f2",
+    text: "#b91c1c",
   },
 };
 
-// Priority badge styles.
+// Figma PRIORITY_CFG with pulse for critical
 export const PRIORITY_CONFIG = {
-  low: {
-    label: "Low",
-    className: "bg-slate-100 text-slate-600",
-  },
-  medium: {
-    label: "Medium",
-    className: "bg-amber-100 text-amber-700",
-  },
-  high: {
-    label: "High",
-    className: "bg-orange-100 text-orange-700",
-  },
-  critical: {
-    label: "Critical",
-    className: "bg-red-100 text-red-700",
-  },
+  low: { label: "Low", color: "#64748b", bg: "#f1f5f9", pulse: false },
+  medium: { label: "Medium", color: "#b45309", bg: "#fffbeb", pulse: false },
+  high: { label: "High", color: "#ea580c", bg: "#fff7ed", pulse: false },
+  critical: { label: "Critical", color: "#dc2626", bg: "#fef2f2", pulse: true },
 };

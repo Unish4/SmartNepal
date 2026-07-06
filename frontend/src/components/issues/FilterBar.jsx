@@ -66,7 +66,7 @@ const FilterBar = ({
           <button
             key={option.value}
             onClick={() => onFilterChange("status", option.value)}
-            className={`shrink-0 px-3 py-1.5 text-xs font-medium rounded-full
+            className={`shrink-0 px-3 py-1.5 text-xs font-medium 
               border transition-all whitespace-nowrap
               ${
                 filters.status === option.value

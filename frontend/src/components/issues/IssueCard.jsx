@@ -1,118 +1,161 @@
 import { Link } from "react-router-dom";
-import { MapPin, AlertCircle } from "lucide-react";
+import { MapPin, Eye, AlertCircle, ThumbsUp } from "lucide-react";
 import {
+  CATEGORY_CONFIG,
+  CATEGORY_ICONS,
   STATUS_CONFIG,
   PRIORITY_CONFIG,
-  CATEGORY_ICONS,
 } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
 import UpvoteButton from "./UpvoteButton.jsx";
 
+// CategoryBadge — icon + label, category-specific colour
+const CategoryBadge = ({ category }) => {
+  const Icon = CATEGORY_ICONS[category] || AlertCircle;
+  const c = CATEGORY_CONFIG[category] || CATEGORY_CONFIG["Other"];
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
+      style={{ backgroundColor: c.bg, color: c.color }}
+    >
+      <Icon size={10} />
+      {category}
+    </span>
+  );
+};
+
+// PriorityBadge — pulsing dot for critical
+const PriorityBadge = ({ priority }) => {
+  const c = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.low;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium"
+      style={{ backgroundColor: c.bg, color: c.color }}
+    >
+      {c.pulse ? (
+        <span className="relative flex w-1.5 h-1.5 shrink-0">
+          <span
+            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+            style={{ backgroundColor: c.color }}
+          />
+          <span
+            className="relative inline-flex rounded-full w-1.5 h-1.5"
+            style={{ backgroundColor: c.color }}
+          />
+        </span>
+      ) : (
+        <span
+          className="w-1.5 h-1.5 rounded-full shrink-0"
+          style={{ backgroundColor: c.color }}
+        />
+      )}
+      {c.label}
+    </span>
+  );
+};
+
 const IssueCard = ({ issue }) => {
-  const status = STATUS_CONFIG[issue.status] || STATUS_CONFIG.open;
-  const priority = PRIORITY_CONFIG[issue.priority] || PRIORITY_CONFIG.low;
+  const st = STATUS_CONFIG[issue.status] || STATUS_CONFIG.open;
   const CategoryIcon = CATEGORY_ICONS[issue.category] || AlertCircle;
 
   return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
-      hover:shadow-md hover:border-gray-200 transition-all duration-150 flex flex-col"
+    <Link
+      to={`/issues/${issue._id}`}
+      className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden
+        hover:shadow-lg hover:border-[#cbd5e1] hover:-translate-y-0.5
+        transition-all duration-200 group flex flex-col"
     >
-      {/* Image area */}
-      <div className="relative h-40 bg-gray-50 flex-shrink-0 overflow-hidden">
+      {/* Image */}
+      <div className="relative h-45 bg-slate-100 overflow-hidden shrink-0">
         {issue.images?.[0] ? (
           <img
             src={issue.images[0]}
             alt={issue.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <CategoryIcon size={36} className="text-gray-200" />
+          <div className="w-full h-full flex items-center justify-center bg-[#f8fafc]">
+            <CategoryIcon size={36} className="text-[#e2e8f0]" />
           </div>
         )}
+        <div className="absolute inset-0 bg-linear-to-t from-black/10 to-transparent" />
 
         {/* Status badge — top left */}
-        <span
-          className={`absolute top-3 left-3 flex items-center gap-1.5
-          text-xs font-medium px-2.5 py-1 rounded-full ${status.className}`}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-          {status.label}
-        </span>
+        <div className="absolute top-2.5 left-2.5">
+          <span
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium"
+            style={{ backgroundColor: st.bg, color: st.text }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: st.dot }}
+            />
+            {st.label}
+          </span>
+        </div>
 
-        {/* Upvote button — top right, overlay variant, now fully functional */}
-        <div className="absolute top-3 right-3">
+        {/* Upvote — top right */}
+        <div className="absolute top-2.5 right-2.5">
           <UpvoteButton issue={issue} variant="overlay" />
         </div>
       </div>
 
-      {/* Card body */}
+      {/* Body */}
       <div className="p-4 flex flex-col flex-1">
-        {/* Category + Priority */}
-        <div className="flex items-center gap-2 mb-2.5">
-          <span
-            className="text-xs font-medium text-gray-600 bg-gray-100
-            px-2.5 py-1 rounded-full"
-          >
-            {issue.category}
-          </span>
-          <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full
-            ${priority.className}`}
-          >
-            {priority.label}
-          </span>
+        {/* Badges */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+          <CategoryBadge category={issue.category} />
+          <PriorityBadge priority={issue.priority} />
         </div>
 
-        <h3 className="text-sm font-semibold text-gray-900 mb-1.5 line-clamp-2 leading-snug">
+        {/* Title */}
+        <h3 className="text-sm font-semibold text-[#0f172a] leading-snug line-clamp-2 mb-1.5">
           {issue.title}
         </h3>
 
-        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-3 flex-1">
+        {/* Description */}
+        <p className="text-xs text-[#64748b] line-clamp-2 leading-relaxed mb-3 flex-1">
           {issue.description}
         </p>
 
-        {issue.location?.address && (
-          <div className="flex items-center gap-1 text-xs text-gray-400 mb-3">
-            <MapPin size={11} className="flex-shrink-0" />
-            <span className="truncate">{issue.location.address}</span>
-          </div>
-        )}
+        {/* Location + time */}
+        <div className="flex items-center justify-between text-xs text-[#94a3b8] mb-3">
+          <span className="flex items-center gap-1 truncate">
+            <MapPin size={10} className="shrink-0" />
+            <span className="truncate">
+              {issue.location?.address || "Location not set"}
+            </span>
+          </span>
+          <span className="shrink-0 ml-2">{timeAgo(issue.createdAt)}</span>
+        </div>
 
         {/* Footer */}
-        <div
-          className="border-t border-gray-100 pt-3 flex items-center
-          justify-between mt-auto"
-        >
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9]">
+          <div className="flex items-center gap-2 min-w-0">
             <div
-              className="w-6 h-6 rounded-full bg-green-100 flex items-center
-              justify-center flex-shrink-0"
+              className="w-7 h-7 rounded-full bg-[#f0fdf4] text-[#16a34a] font-semibold
+              text-xs border border-[#bbf7d0] flex items-center justify-center shrink-0"
             >
-              <span className="text-xs font-semibold text-green-700">
-                {issue.author?.name?.[0]?.toUpperCase() ?? "?"}
-              </span>
+              {issue.author?.name?.[0]?.toUpperCase() ?? "?"}
             </div>
-            <span className="text-xs text-gray-500 truncate max-w-[80px]">
+            <span className="text-xs text-[#64748b] truncate">
               {issue.author?.name ?? "Anonymous"}
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400">
-              {timeAgo(issue.createdAt)}
+          <div className="flex items-center gap-3 text-xs text-[#94a3b8] shrink-0">
+            <span className="flex items-center gap-1">
+              <Eye size={10} />
+              {issue.views ?? 0}
             </span>
-            <Link
-              to={`/issues/${issue._id}`}
-              className="text-xs text-green-600 hover:text-green-700
-                font-medium hover:underline flex-shrink-0"
-            >
-              View →
-            </Link>
-          </div>
+
+            <span className="flex items-center gap-1">
+              <ThumbsUp size={10} />
+              {issue.upvoterIds?.length ?? 0}
+            </span>
+          </div>{" "}
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

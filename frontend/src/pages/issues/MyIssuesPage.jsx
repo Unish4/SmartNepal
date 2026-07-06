@@ -50,7 +50,7 @@ const MyIssuesPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto py-8 px-4">
       {/* Page header */}
       <div className="flex items-start justify-between mb-6">
         <div>

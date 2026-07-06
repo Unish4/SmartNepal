@@ -250,50 +250,30 @@ export const deleteIssue = async (req, res, next) => {
 export const upvoteIssue = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const updated = await Issue.findOneAndUpdate(
-      { _id: req.params.id },
-      [
-        {
-          $set: {
-            upvoterIds: {
-              $let: {
-                vars: { voters: { $ifNull: ["$upvoterIds", []] } },
-                in: {
-                  $cond: [
-                    { $in: [userId, "$voters"] },
-                    {
-                      $filter: {
-                        input: "$voters",
-                        as: "id",
-                        cond: { $ne: ["$id", userId] },
-                      },
-                    },
-                    { $concatArrays: ["$voters", [userId]] },
-                  ],
-                },
-              },
-            },
-          },
-        },
-      ],
-      { new: true },
-    ).select("upvoterIds");
-
-    if (!updated) {
+    const existing = await Issue.findById(req.params.id).select("upvoterIds");
+    if (!existing) {
       return res
         .status(404)
         .json({ success: false, message: "Issue not found" });
     }
 
-    const isUpvoted = updated.upvoterIds.some(
-      (id) => id.toString() === userId.toString(),
+    const alreadyUpvoted = existing.upvoterIds.some(
+      (id) => id && id.toString() === userId.toString(),
     );
+
+    const update = alreadyUpvoted
+      ? { $pull: { upvoterIds: userId } }
+      : { $addToSet: { upvoterIds: userId } };
+
+    const updated = await Issue.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+    }).select("upvoterIds");
 
     res.status(200).json({
       success: true,
       upvoterIds: updated.upvoterIds,
       upvoteCount: updated.upvoterIds.length,
-      isUpvoted,
+      isUpvoted: !alreadyUpvoted,
     });
   } catch (error) {
     if (error.name === "CastError") {

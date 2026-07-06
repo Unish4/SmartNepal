@@ -13,6 +13,7 @@ import cors from "cors";
 // ─── Routes
 import authRoutes from "./routes/authRoutes.js";
 import issueRoutes from "./routes/issueRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 // ─── Error Handlers
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -37,6 +38,7 @@ app.use(cookieParser());
 // ─── Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/issues", issueRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ─── Error middleware — must be last
 app.use(notFound);
