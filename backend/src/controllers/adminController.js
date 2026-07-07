@@ -152,8 +152,13 @@ export const updateIssueStatus = async (req, res, next) => {
     }
 
     issue.status = status;
-    if (rejectionReason) issue.rejectionReason = rejectionReason.trim();
-
+    if (status === "rejected") {
+      issue.rejectionReason = rejectionReason
+        ? rejectionReason.trim()
+        : undefined;
+    } else {
+      issue.rejectionReason = undefined;
+    }
     await issue.save();
     await issue.populate("author", "name email");
 

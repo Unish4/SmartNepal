@@ -18,11 +18,12 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout();
+    } catch {
+      // ignore — proceed to navigate regardless
     } finally {
       navigate("/login");
     }
   };
-
   const isAdmin = user?.role === "admin";
 
   const navLinks = [
@@ -122,7 +123,9 @@ const Navbar = () => {
                   alt={user.name}
                   className="w-full h-full rounded-full object-cover"
                 />
-              ) : user?.name?.[0]?.toUpperCase() ?? <User size={14} />}
+              ) : (
+                (user?.name?.[0]?.toUpperCase() ?? <User size={14} />)
+              )}
             </Link>
 
             <button

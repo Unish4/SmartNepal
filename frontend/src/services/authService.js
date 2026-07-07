@@ -33,8 +33,6 @@ export const updateProfileRequest = async (profileData) => {
 export const uploadAvatarRequest = async (file) => {
   const formData = new FormData();
   formData.append("avatar", file);
-  const response = await api.post("/api/auth/avatar", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/api/auth/avatar", formData);
   return response.data;
 };

@@ -70,7 +70,7 @@ function ProfileSkeleton() {
 }
 
 export default function ProfilePage() {
-  const { user, isLoading, updatePreferences, updateProfile, uploadAvatar } = useAuthStore();
+  const { user, updatePreferences, updateProfile, uploadAvatar } = useAuthStore();
 
   const [emailNotif, setEmailNotif] = useState(
     user?.emailNotifications ?? true,
@@ -159,7 +159,7 @@ export default function ProfilePage() {
   const districts = editForm.province ? getDistricts(editForm.province) : [];
   const cities = selectedDistrict ? getCities(editForm.province, selectedDistrict) : [];
 
-  if (isLoading || !user) {
+  if (!user) {
     return <ProfileSkeleton />;
   }
 
@@ -347,6 +347,7 @@ export default function ProfilePage() {
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all bg-white"
+                      required
                     />
                   </div>
                   <div>

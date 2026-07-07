@@ -177,7 +177,7 @@ export const updateProfile = async (req, res, next) => {
       });
     }
 
-    const allowed = ["name", "phone", "province", "district", "city", "avatar"];
+    const allowed = ["name", "phone", "province", "district", "city"];
     const updates = {};
     for (const field of allowed) {
       if (req.body[field] !== undefined) {
