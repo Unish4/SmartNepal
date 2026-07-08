@@ -38,12 +38,16 @@ app.use(
           "'self'",
           "data:",
           "blob:",
+          "*",
           // Cloudinary CDN — issue and avatar photos
           "https://res.cloudinary.com",
+          "https://*.cloudinary.com",
           // OpenStreetMap tile subdomains (a/b/c)
           "https://*.tile.openstreetmap.org",
+          "https://*.openstreetmap.org",
           // Unsplash placeholder images used in dev
           "https://images.unsplash.com",
+          "https://*.unsplash.com",
         ],
         connectSrc: [
           "'self'",
