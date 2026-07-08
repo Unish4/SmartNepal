@@ -7,6 +7,8 @@ import useIssueStore from "../../store/useIssueStore.js";
 import useAuthStore from "../../store/useAuthStore.js";
 import { CATEGORIES } from "../../constants/issue.js";
 import LocationPicker from "../../components/map/LocationPicker.jsx";
+import { EditIssueSkeleton } from "../../components/ui/SkeletonLoader.jsx";
+
 
 const EditIssuePage = () => {
   const { id } = useParams();
@@ -77,12 +79,7 @@ const EditIssuePage = () => {
 
   if (isLoading && !currentIssue) {
     return (
-      <div className="max-w-2xl mx-auto py-8 px-4 animate-pulse space-y-4">
-        <div className="h-6 w-40 bg-gray-100 rounded" />
-        <div className="h-10 w-full bg-gray-100 rounded-lg" />
-        <div className="h-10 w-full bg-gray-100 rounded-lg" />
-        <div className="h-32 w-full bg-gray-100 rounded-lg" />
-      </div>
+      <EditIssueSkeleton />
     );
   }
 

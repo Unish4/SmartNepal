@@ -10,6 +10,7 @@ import {
 import { timeAgo } from "../../utils/timeAgo.js";
 import { useDebounce } from "../../hooks/useDebounce.js";
 import StatusUpdateModal from "../admin/StatusUpdateModal.jsx";
+import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 
 const AdminIssuesPage = () => {
   const [issues, setIssues] = useState([]);
@@ -236,13 +237,7 @@ const AdminIssuesPage = () => {
             <tbody className="divide-y divide-[#f8fafc]">
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    {Array.from({ length: 8 }).map((__, j) => (
-                      <td key={j} className="px-4 py-3.5">
-                        <div className="h-4 bg-[#f1f5f9] rounded" />
-                      </td>
-                    ))}
-                  </tr>
+                  <TableRowSkeleton key={i} colCount={8} />
                 ))
               ) : issues.length > 0 ? (
                 issues.map((issue) => {

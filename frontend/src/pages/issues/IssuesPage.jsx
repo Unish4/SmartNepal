@@ -12,7 +12,7 @@ import {
 import useIssueStore from "../../store/useIssueStore.js";
 import useAuthStore from "../../store/useAuthStore.js";
 import IssueCard from "../../components/issues/IssueCard.jsx";
-import IssueCardSkeleton from "../../components/issues/IssueCardSkeleton.jsx";
+import { IssueCardSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 import { useDebounce } from "../../hooks/useDebounce.js";
 import { CATEGORIES } from "../../constants/issue.js";
 
