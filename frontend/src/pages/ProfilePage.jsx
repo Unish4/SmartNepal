@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 import useAuthStore from "../store/useAuthStore.js";
 import { NEPAL_LOCATIONS, getDistricts, getCities } from "../constants/nepalLocations.js";
+import { ProfileSkeleton } from "../components/ui/SkeletonLoader.jsx";
 
 const Toggle = ({ checked, onChange, disabled }) => (
   <button
@@ -40,34 +41,7 @@ const Toggle = ({ checked, onChange, disabled }) => (
   </button>
 );
 
-const Skeleton = ({ className = "" }) => (
-  <div className={`animate-pulse bg-[#e2e8f0] rounded ${className}`} />
-);
 
-function ProfileSkeleton() {
-  return (
-    <div className="bg-[#f8fafc]">
-      <section className="bg-white border-b border-[#e2e8f0]">
-        <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-          <Skeleton className="h-6 w-28 rounded-full mb-5" />
-          <Skeleton className="h-10 w-56 mb-3" />
-          <Skeleton className="h-5 w-80" />
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <div className="grid lg:grid-cols-3 gap-6">
-          <Skeleton className="h-72 rounded-2xl" />
-          <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-56 rounded-2xl" />
-            <Skeleton className="h-44 rounded-2xl" />
-            <Skeleton className="h-36 rounded-2xl" />
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
 
 export default function ProfilePage() {
   const { user, updatePreferences, updateProfile, uploadAvatar } = useAuthStore();

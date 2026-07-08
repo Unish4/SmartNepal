@@ -1,34 +1,65 @@
 import { Router } from "express";
-import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import rateLimit from "express-rate-limit";
 import {
   suggestCategorization,
   generateTitleController,
   checkDuplicates,
 } from "../controllers/aiController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import {
+  aiSuggestValidator,
+  aiTitleValidator,
+  aiDuplicateValidator,
+} from "../utils/validators.js";
+import { validationResult } from "express-validator";
 
 const router = Router();
 
-const aiLimiterOptions = {
+const aiLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
+  max: 20,
   message: {
     success: false,
     message: "Too many AI requests. Please slow down.",
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) =>
-    req.user?._id?.toString() ?? ipKeyGenerator(req.ip),
+});
+
+// Shared validation check middleware
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ success: false, message: errors.array()[0].msg });
+  }
+  next();
 };
 
-const createAiLimiter = (max) => rateLimit({ ...aiLimiterOptions, max });
-
-const suggestLimiter = createAiLimiter(15);
-const generateTitleLimiter = createAiLimiter(10);
-const checkDuplicatesLimiter = createAiLimiter(10);
-
-router.post("/suggest", protect, suggestLimiter, suggestCategorization);
-router.post("/generate-title", protect, generateTitleLimiter, generateTitleController); // ← Phase 13
-router.post("/check-duplicates", protect, checkDuplicatesLimiter, checkDuplicates); // ← Phase 13
+router.post(
+  "/suggest",
+  protect,
+  aiLimiter,
+  aiSuggestValidator,
+  validate,
+  suggestCategorization,
+);
+router.post(
+  "/generate-title",
+  protect,
+  aiLimiter,
+  aiTitleValidator,
+  validate,
+  generateTitleController,
+);
+router.post(
+  "/check-duplicates",
+  protect,
+  aiLimiter,
+  aiDuplicateValidator,
+  validate,
+  checkDuplicates,
+);
 
 export default router;

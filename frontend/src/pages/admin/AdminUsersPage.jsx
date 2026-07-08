@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
 import { fetchAllUsers } from "../../services/adminService.js";
 import { timeAgo } from "../../utils/timeAgo.js";
+import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -90,13 +91,7 @@ const AdminUsersPage = () => {
             <tbody className="divide-y divide-[#f8fafc]">
               {isLoading ? (
                 Array.from({ length: 10 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    {Array.from({ length: 6 }).map((__, j) => (
-                      <td key={j} className="px-4 py-3.5">
-                        <div className="h-4 bg-[#f1f5f9] rounded" />
-                      </td>
-                    ))}
-                  </tr>
+                  <TableRowSkeleton key={i} colCount={6} />
                 ))
               ) : users.length > 0 ? (
                 users.map((user) => (

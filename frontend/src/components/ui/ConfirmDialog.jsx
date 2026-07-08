@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AlertTriangle } from "lucide-react";
 
 const ConfirmDialog = ({
@@ -10,22 +10,41 @@ const ConfirmDialog = ({
   onConfirm,
   onClose,
 }) => {
+  const cancelRef = useRef(null);
+
+  // Escape key support
   useEffect(() => {
     if (!isOpen) return;
-    const handleKey = (e) => {
-      if (e.key === "Escape") onClose();
+    const handle = (e) => {
+      if (e.key === "Escape" && !isLoading) onClose();
     };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
+    document.addEventListener("keydown", handle);
+    return () => document.removeEventListener("keydown", handle);
+  }, [isOpen, isLoading, onClose]);
+
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => cancelRef.current?.focus());
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Semi-transparent backdrop — clicking closes the dialog */}
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-description"
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={() => !isLoading && onClose()}
+      />
 
+      {/* Dialog card */}
       <div
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
         onClick={(e) => e.stopPropagation()}
@@ -38,23 +57,29 @@ const ConfirmDialog = ({
           <AlertTriangle size={22} className="text-red-500" />
         </div>
 
-        {/* Content */}
-        <h2 className="text-base font-semibold text-gray-900 text-center mb-2">
+        <h2
+          id="confirm-title"
+          className="text-base font-bold text-[#0f172a] text-center mb-2"
+        >
           {title}
         </h2>
-        <p className="text-sm text-gray-500 text-center leading-relaxed mb-6">
+        <p
+          id="confirm-description"
+          className="text-sm text-[#64748b] text-center leading-relaxed mb-6"
+        >
           {description}
         </p>
 
-        {/* Actions */}
         <div className="flex gap-3">
           <button
+            ref={cancelRef}
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 py-2.5 border border-gray-200 text-gray-600 text-sm
-              font-medium rounded-lg hover:bg-gray-50 transition-colors
-              disabled:opacity-50"
+            className="flex-1 h-11 border border-[#e2e8f0] text-[#475569]
+              text-sm font-semibold rounded-xl hover:bg-[#f8fafc]
+              transition-colors disabled:opacity-50 focus:outline-none
+              focus:ring-2 focus:ring-[#16a34a]/30"
           >
             Cancel
           </button>
@@ -62,11 +87,12 @@ const ConfirmDialog = ({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex-1 py-2.5 bg-red-600 text-white text-sm font-medium
-              rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50
-              disabled:cursor-not-allowed"
+            className="flex-1 h-11 bg-red-600 text-white text-sm
+              font-semibold rounded-xl hover:bg-red-700 transition-colors
+              disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none
+              focus:ring-2 focus:ring-red-400/50"
           >
-            {isLoading ? "Deleting..." : confirmLabel}
+            {isLoading ? "Deleting…" : confirmLabel}
           </button>
         </div>
       </div>

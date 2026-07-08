@@ -1,24 +1,58 @@
 import { body } from "express-validator";
 
+// ─── Auth validators 
 export const registerValidator = [
   body("name")
     .trim()
     .notEmpty()
     .withMessage("Name is required")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters"),
+    .isLength({ min: 2, max: 60 })
+    .withMessage("Name must be between 2 and 60 characters")
+    // Prevent names with only special characters
+    .matches(/^[a-zA-Z\u0900-\u097F\s'-]+$/)
+    .withMessage(
+      "Name may only contain letters, spaces, hyphens, or apostrophes",
+    ),
+
   body("email")
     .trim()
     .notEmpty()
     .withMessage("Email is required")
     .isEmail()
-    .withMessage("Please provide a valid email")
+    .withMessage("Please provide a valid email address")
+    .isLength({ max: 100 })
+    .withMessage("Email is too long")
     .normalizeEmail(),
+
   body("password")
     .notEmpty()
     .withMessage("Password is required")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .isLength({ min: 6, max: 72 })
+    // bcrypt silently truncates passwords over 72 bytes — cap it here so
+    // users aren't surprised that "password123..." and "password456..." are the same.
+    .withMessage("Password must be between 6 and 72 characters"),
+
+  // Phone is optional but if provided must be a valid Nepali number:
+  // 10 digits, starting with 9 (mobile) or 0 (landline prefix).
+  body("phone")
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^[0-9]{10}$/)
+    .withMessage("Phone number must be 10 digits"),
+
+  body("province")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isIn([
+      "Koshi Province",
+      "Madhesh Province",
+      "Bagmati Province",
+      "Gandaki Province",
+      "Lumbini Province",
+      "Karnali Province",
+      "Sudurpashchim Province",
+    ])
+    .withMessage("Invalid province"),
 ];
 
 export const loginValidator = [
@@ -27,14 +61,17 @@ export const loginValidator = [
     .notEmpty()
     .withMessage("Email is required")
     .isEmail()
-    .withMessage("Please provide a valid email"),
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
 export const updatePreferencesValidator = [
   body("emailNotifications")
+    .optional()
     .isBoolean()
-    .withMessage("emailNotifications must be true or false"),
+    .withMessage("emailNotifications must be a boolean"),
 ];
 
 export const updateProfileValidator = [
@@ -43,18 +80,50 @@ export const updateProfileValidator = [
     .trim()
     .notEmpty()
     .withMessage("Name cannot be empty")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters"),
+    .isLength({ min: 2, max: 60 })
+    .withMessage("Name must be between 2 and 60 characters")
+    .matches(/^[a-zA-Z\u0900-\u097F\s'-]+$/)
+    .withMessage("Name may only contain letters, spaces, hyphens, or apostrophes"),
+
   body("phone")
-    .optional({ values: "null" })
+    .optional({ checkFalsy: true })
     .trim()
-    .matches(/^[0-9+\-\s()]{7,15}$/)
-    .withMessage("Please provide a valid phone number"),
-  body("province").optional().trim(),
-  body("district").optional().trim(),
-  body("city").optional().trim(),
+    .matches(/^[0-9]{10}$/)
+    .withMessage("Phone number must be 10 digits"),
+
+  body("province")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isIn([
+      "Koshi Province",
+      "Madhesh Province",
+      "Bagmati Province",
+      "Gandaki Province",
+      "Lumbini Province",
+      "Karnali Province",
+      "Sudurpashchim Province",
+    ])
+    .withMessage("Invalid province"),
+
+  body("district")
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage("District cannot be empty"),
+
+  body("city")
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage("City cannot be empty"),
+
+  body("avatar")
+    .optional()
+    .isURL()
+    .withMessage("Avatar must be a valid URL"),
 ];
 
+// ─── Issue validators 
 const VALID_CATEGORIES = [
   "Road Damage",
   "Garbage",
@@ -71,36 +140,42 @@ export const createIssueValidator = [
     .trim()
     .notEmpty()
     .withMessage("Title is required")
-    .isLength({ max: 100 })
-    .withMessage("Title cannot exceed 100 characters"),
+    .isLength({ min: 5, max: 100 })
+    .withMessage("Title must be between 5 and 100 characters"),
+
   body("description")
     .trim()
     .notEmpty()
     .withMessage("Description is required")
-    .isLength({ min: 10 })
-    .withMessage("Description must be at least 10 characters"),
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Description must be between 10 and 2000 characters"),
+
   body("category")
     .notEmpty()
     .withMessage("Category is required")
     .isIn(VALID_CATEGORIES)
     .withMessage(`Category must be one of: ${VALID_CATEGORIES.join(", ")}`),
+
   body("priority")
     .optional()
     .isIn(VALID_PRIORITIES)
     .withMessage("Invalid priority value"),
+
   body("address")
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ max: 300 })
     .withMessage("Address is too long"),
+
   body("lat")
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: -90, max: 90 })
-    .withMessage("Invalid latitude value"),
+    .withMessage("Invalid latitude"),
+
   body("lng")
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: -180, max: 180 })
-    .withMessage("Invalid longitude value"),
+    .withMessage("Invalid longitude"),
 ];
 
 export const updateIssueValidator = [
@@ -109,34 +184,111 @@ export const updateIssueValidator = [
     .trim()
     .notEmpty()
     .withMessage("Title cannot be empty")
-    .isLength({ max: 100 })
-    .withMessage("Title cannot exceed 100 characters"),
+    .isLength({ min: 5, max: 100 })
+    .withMessage("Title must be between 5 and 100 characters"),
+
   body("description")
     .optional()
     .trim()
     .notEmpty()
     .withMessage("Description cannot be empty")
-    .isLength({ min: 10 })
-    .withMessage("Description must be at least 10 characters"),
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Description must be between 10 and 2000 characters"),
+
   body("category")
     .optional()
     .isIn(VALID_CATEGORIES)
     .withMessage(`Category must be one of: ${VALID_CATEGORIES.join(", ")}`),
+
   body("priority")
     .optional()
     .isIn(VALID_PRIORITIES)
     .withMessage("Invalid priority value"),
+
   body("address")
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ max: 300 })
     .withMessage("Address is too long"),
+
   body("lat")
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: -90, max: 90 })
     .withMessage("Invalid latitude"),
+
   body("lng")
-    .optional()
+    .optional({ checkFalsy: true })
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Invalid longitude"),
+];
+
+// ─── Admin status update validator 
+export const statusUpdateValidator = [
+  body("status")
+    .notEmpty()
+    .withMessage("Status is required")
+    .isIn(["open", "verified", "in-progress", "resolved", "rejected"])
+    .withMessage("Invalid status value"),
+
+  body("rejectionReason")
+    .if(body("status").equals("rejected"))
+    .trim()
+    .notEmpty()
+    .withMessage("Rejection reason is required when rejecting an issue")
+    .isLength({ max: 500 })
+    .withMessage("Rejection reason cannot exceed 500 characters"),
+];
+
+// ─── AI endpoint validators 
+export const aiSuggestValidator = [
+  body("title")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Title too long"),
+
+  body("description")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage("Description too long for AI analysis"),
+];
+
+export const aiTitleValidator = [
+  body("description")
+    .trim()
+    .notEmpty()
+    .withMessage("Description is required")
+    .isLength({ min: 20, max: 2000 })
+    .withMessage("Description must be between 20 and 2000 characters"),
+
+  body("category")
+    .optional({ checkFalsy: true })
+    .isIn(VALID_CATEGORIES)
+    .withMessage("Invalid category"),
+];
+
+export const aiDuplicateValidator = [
+  body("category")
+    .notEmpty()
+    .withMessage("Category is required for duplicate detection")
+    .isIn(VALID_CATEGORIES)
+    .withMessage("Invalid category"),
+
+  body("title").optional({ checkFalsy: true }).trim().isLength({ max: 200 }),
+
+  body("description")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 2000 }),
+
+  body("lat")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: -90, max: 90 })
+    .withMessage("Invalid latitude"),
+
+  body("lng")
+    .optional({ checkFalsy: true })
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
 ];

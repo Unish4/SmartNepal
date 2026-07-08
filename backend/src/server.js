@@ -9,6 +9,8 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
 
 // ─── Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -19,12 +21,47 @@ import aiRoutes from "./routes/aiRoutes.js";
 // ─── Error Handlers
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
-import cookieParser from "cookie-parser";
-
 const app = express();
 
 // Security headers — must be first middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        // unsafe-inline is needed for Tailwind's inline styles and Vite HMR
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          // Cloudinary CDN — issue and avatar photos
+          "https://res.cloudinary.com",
+          // OpenStreetMap tile subdomains (a/b/c)
+          "https://*.tile.openstreetmap.org",
+          // Unsplash placeholder images used in dev
+          "https://images.unsplash.com",
+        ],
+        connectSrc: [
+          "'self'",
+          // Nominatim reverse geocoding called by LocationPicker
+          "https://nominatim.openstreetmap.org",
+          // Allow frontend origin (dev and prod)
+          ENV.CLIENT_URL,
+        ],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        // Upgrade HTTP to HTTPS in production only
+        ...(ENV.NODE_ENV === "production"
+          ? { upgradeInsecureRequests: [] }
+          : {}),
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 // HTTP request logging — dev only
 if (ENV.NODE_ENV !== "production") app.use(morgan("dev"));
@@ -32,12 +69,34 @@ if (ENV.NODE_ENV !== "production") app.use(morgan("dev"));
 // Allow cross-origin requests from the frontend (cookie-safe)
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  skipSuccessfulRequests: true,
+  message: {
+    success: false,
+    message: "Too many login attempts. Please try again in 15 minutes.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  message: { success: false, message: "Too many requests. Please slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(generalLimiter);
+
 // Parse incoming JSON request bodies
-app.use(express.json());
+app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 
 // ─── Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/issues", issueRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/ai", aiRoutes);

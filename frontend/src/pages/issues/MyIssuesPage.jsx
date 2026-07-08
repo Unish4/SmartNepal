@@ -13,7 +13,7 @@ import useIssueStore from "../../store/useIssueStore.js";
 import { STATUS_CONFIG, PRIORITY_CONFIG } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
 import ConfirmDialog from "../../components/ui/ConfirmDialog.jsx";
-import IssueCardSkeleton from "../../components/issues/IssueCardSkeleton.jsx";
+import { IssueRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 
 const MyIssuesPage = () => {
   const navigate = useNavigate();
@@ -86,7 +86,7 @@ const MyIssuesPage = () => {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <IssueCardSkeleton key={i} />
+            <IssueRowSkeleton key={i} />
           ))}
         </div>
       ) : myIssues.length > 0 ? (
