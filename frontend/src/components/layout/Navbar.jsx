@@ -28,10 +28,9 @@ const Navbar = () => {
 
   const navLinks = [
     { to: "/issues", label: "Issues", Icon: FileText },
-    { to: "/issues/me", label: "My Reports", Icon: Activity },
     ...(isAdmin
       ? [{ to: "/admin", label: "Admin", Icon: ShieldCheck, admin: true }]
-      : []),
+      : [{ to: "/issues/me", label: "My Reports", Icon: Activity }]),
   ];
 
   return (
@@ -84,17 +83,19 @@ const Navbar = () => {
       <div className="ml-auto flex items-center gap-3">
         {isAuthenticated ? (
           <>
-            {/* Report issue */}
-            <button
-              onClick={() => navigate("/issues/new")}
-              className="flex items-center gap-2 px-4 h-9 rounded-lg
-                bg-[#16a34a] hover:bg-[#15803d] text-white text-sm
-                font-semibold transition-all shadow-sm hover:shadow-md"
-            >
-              <Plus size={15} />
-              <span className="hidden sm:inline">Report Issue</span>
-              <span className="sm:hidden">Report</span>
-            </button>
+            {/* Report issue - only for non-admin users */}
+            {!isAdmin && (
+              <button
+                onClick={() => navigate("/issues/new")}
+                className="flex items-center gap-2 px-4 h-9 rounded-lg
+                  bg-[#16a34a] hover:bg-[#15803d] text-white text-sm
+                  font-semibold transition-all shadow-sm hover:shadow-md"
+              >
+                <Plus size={15} />
+                <span className="hidden sm:inline">Report Issue</span>
+                <span className="sm:hidden">Report</span>
+              </button>
+            )}
 
             {/* Notification bell */}
             <button
