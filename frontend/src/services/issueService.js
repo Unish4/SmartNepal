@@ -15,6 +15,11 @@ export const fetchMyIssues = async (params = {}) => {
   return response.data;
 };
 
+export const fetchBoundaryOptions = async () => {
+  const response = await api.get("/api/issues/boundaries");
+  return response.data;
+};
+
 export const createIssueRequest = async (issueData) => {
   const formData = new FormData();
   formData.append("title", issueData.title);

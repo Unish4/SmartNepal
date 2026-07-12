@@ -6,7 +6,6 @@ import {
   Users,
   BarChart2,
   LogOut,
-  MapPin,
   Menu,
   X,
 } from "lucide-react";
@@ -25,8 +24,8 @@ const SidebarContent = ({ user, onLogout, onLinkClick }) => (
   <div className="flex flex-col h-full bg-[#0b0f19] text-slate-300">
     {/* Logo */}
     <div className="h-16 flex items-center px-6 border-b border-slate-800/60 shrink-0 gap-2.5">
-      <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0 shadow-md">
-        <MapPin size={15} className="text-white" />
+      <div className="w-8 h-8 flex items-center justify-center">
+        <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
       </div>
       <span className="font-extrabold text-white text-[16px] tracking-tight shrink-0">
         Digital<span className="text-emerald-400">Sewa</span>
@@ -172,7 +171,13 @@ const AdminLayout = () => {
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-[#16a34a]" />
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img
+                src="/icon.png"
+                alt=""
+                className="w-full h-full rounded-lg"
+              />
+            </div>
             <span className="font-bold text-sm text-[#0f172a]">
               Admin Panel
             </span>

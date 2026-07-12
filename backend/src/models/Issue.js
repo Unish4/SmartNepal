@@ -44,14 +44,15 @@ const issueSchema = new mongoose.Schema(
       required: true,
     },
     location: {
-      address: { type: String, trim: true },
+      address: { type: String, trim: true, default: "" },
       lat: { type: Number },
       lng: { type: Number },
-      ward: { type: String },
-      district: { type: String },
-      province: { type: String },
+      province: { type: String, default: "" },
+      district: { type: String, default: "" },
+      municipality: { type: String, default: "" },
+      ward: { type: String, default: "" },
     },
-    images: [{ type: String }],
+    images: [{ type: String, default: [] }],
     upvoterIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -69,12 +70,12 @@ const issueSchema = new mongoose.Schema(
   },
 );
 
+issueSchema.index({ "location.province": 1 });
+issueSchema.index({ "location.district": 1 });
+issueSchema.index({ "location.province": 1, "location.district": 1 });
+issueSchema.index({ "location.province": 1, status: 1 });
 issueSchema.index({ status: 1, category: 1 });
-
-// Index on author for "my issues" queries (Phase 7).
 issueSchema.index({ author: 1 });
-
-// Index on createdAt for the default newest-first sort.
 issueSchema.index({ createdAt: -1 });
 
 const Issue = mongoose.model("Issue", issueSchema);

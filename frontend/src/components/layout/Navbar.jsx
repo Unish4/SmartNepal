@@ -1,6 +1,5 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
-  MapPin,
   Bell,
   Plus,
   FileText,
@@ -40,11 +39,12 @@ const Navbar = () => {
     >
       {/* Brand */}
       <Link to="/" className="flex items-center gap-2 mr-2 shrink-0 group">
-        <div
-          className="w-8 h-8 rounded-lg bg-[#16a34a] flex items-center
-          justify-center shadow-sm group-hover:bg-[#15803d] transition-colors"
-        >
-          <MapPin size={15} className="text-white" />
+        <div className="w-8 h-8 flex items-center justify-center">
+          <img
+            src="/icon.png"
+            alt=""
+            className="w-full h-full rounded-lg"
+          />
         </div>
         <span className="font-bold text-[#0f172a] text-[15px] tracking-tight">
           Digital<span className="text-[#16a34a]">Sewa</span>

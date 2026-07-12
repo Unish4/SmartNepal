@@ -399,13 +399,14 @@ export default function AdminAnalyticsPage() {
                   axisLine={false}
                   width={110}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip />} cursor={false} />
                 <Bar
                   dataKey="count"
                   name="Issues"
                   fill="url(#barCategoryGradient)"
                   radius={[0, 6, 6, 0]}
                   maxBarSize={16}
+                  activeBar={false}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -478,12 +479,13 @@ export default function AdminAnalyticsPage() {
                   axisLine={false}
                   allowDecimals={false}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip />} cursor={false} />
                 <Bar
                   dataKey="count"
                   name="Issues"
                   radius={[6, 6, 0, 0]}
                   maxBarSize={40}
+                  activeBar={false}
                 >
                   {analytics.issuesByPriority.map((e) => (
                     <Cell
@@ -548,6 +550,7 @@ export default function AdminAnalyticsPage() {
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={(v) => [`${v}h`, "Avg time"]}
+                  cursor={false}
                 />
                 <Bar
                   dataKey="avgHours"
@@ -555,6 +558,7 @@ export default function AdminAnalyticsPage() {
                   fill="url(#barResolutionGradient)"
                   radius={[0, 6, 6, 0]}
                   maxBarSize={16}
+                  activeBar={false}
                 />
               </BarChart>
             </ResponsiveContainer>

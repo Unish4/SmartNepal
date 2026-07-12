@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import Issue from "../models/Issue.js";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 import { categorizeIssue } from "../services/aiService.js";
+import { detectBoundary } from "../services/gisService.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -32,7 +33,9 @@ export const createIssue = async (req, res, next) => {
     let imageUrls = [];
     if (req.files?.length > 0) {
       const results = await Promise.all(
-        req.files.map((f) => uploadToCloudinary(f.buffer, "DigitalSewa/issues")),
+        req.files.map((f) =>
+          uploadToCloudinary(f.buffer, "DigitalSewa/issues"),
+        ),
       );
       imageUrls = results.map((r) => r.secure_url);
     }
@@ -46,6 +49,24 @@ export const createIssue = async (req, res, next) => {
       images: imageUrls,
       author: req.user._id,
     });
+
+    if (parsedLat && parsedLng) {
+      detectBoundary(parsedLat, parsedLng)
+        .then(async (boundary) => {
+          if (boundary) {
+            await Issue.findByIdAndUpdate(issue._id, {
+              "location.province": boundary.province || "",
+              "location.district": boundary.district || "",
+              "location.municipality": boundary.municipality || "",
+            });
+          }
+        })
+        .catch((err) =>
+          console.error(
+            `GIS update failed for issue ${issue._id}: ${err.message}`,
+          ),
+        );
+    }
 
     categorizeIssue(title, description)
       .then(async (aiResult) => {
@@ -62,7 +83,7 @@ export const createIssue = async (req, res, next) => {
           `Post-creation AI update failed for ${issue._id}: ${err.message}`,
         ),
       );
-      
+
     await issue.populate("author", "name email");
     res.status(201).json({ success: true, issue });
   } catch (error) {
@@ -77,7 +98,8 @@ export const getIssues = async (req, res, next) => {
     const limit = Math.min(20, parseInt(req.query.limit) || 12);
     const skip = (page - 1) * limit;
 
-    const { search, category, status, priority, sort } = req.query;
+    const { search, category, status, priority, sort, province, district } =
+      req.query;
 
     const match = {};
 
@@ -91,6 +113,8 @@ export const getIssues = async (req, res, next) => {
     if (category) match.category = category;
     if (status) match.status = status;
     if (priority) match.priority = priority;
+    if (province) match["location.province"] = province;
+    if (district) match["location.district"] = district;
     const sortStage = {
       oldest: { createdAt: 1 },
       "most-upvoted": { upvoteCount: -1 },
@@ -223,10 +247,41 @@ export const updateIssue = async (req, res, next) => {
     if (category !== undefined) issue.category = category;
     if (priority !== undefined) issue.priority = priority;
     if (address !== undefined) issue.location.address = address;
+    const latChanged =
+      lat !== undefined && parseFloat(lat) !== issue.location.lat;
+    const lngChanged =
+      lng !== undefined && parseFloat(lng) !== issue.location.lng;
     if (lat !== undefined) issue.location.lat = parseFloat(lat);
     if (lng !== undefined) issue.location.lng = parseFloat(lng);
 
     await issue.save();
+    if (
+      (latChanged || lngChanged) &&
+      issue.location.lat &&
+      issue.location.lng
+    ) {
+      detectBoundary(issue.location.lat, issue.location.lng)
+        .then(async (boundary) => {
+          const boundaryUpdate = boundary
+            ? {
+                "location.province": boundary.province || "",
+                "location.district": boundary.district || "",
+                "location.municipality": boundary.municipality || "",
+              }
+            : {
+                "location.province": "",
+                "location.district": "",
+                "location.municipality": "",
+              };
+
+          await Issue.findByIdAndUpdate(issue._id, boundaryUpdate);
+        })
+        .catch((err) =>
+          console.error(
+            `GIS re-detect failed for issue ${issue._id}: ${err.message}`,
+          ),
+        );
+    }
     await issue.populate("author", "name email");
     res.status(200).json({ success: true, issue });
   } catch (error) {
@@ -298,6 +353,23 @@ export const upvoteIssue = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Invalid issue ID format" });
     }
+    next(error);
+  }
+};
+
+export const getBoundaryOptions = async (req, res, next) => {
+  try {
+    const [provinces, districts] = await Promise.all([
+      Issue.distinct("location.province", { "location.province": { $ne: "" } }),
+      Issue.distinct("location.district", { "location.district": { $ne: "" } }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      provinces: provinces.filter(Boolean).sort(),
+      districts: districts.filter(Boolean).sort(),
+    });
+  } catch (error) {
     next(error);
   }
 };

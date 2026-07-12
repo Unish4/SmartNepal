@@ -11,6 +11,7 @@ import {
   Pencil,
   Trash2,
   AlertCircle,
+  Building2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import useIssueStore from "../../store/useIssueStore.js";
@@ -506,36 +507,115 @@ export default function IssueDetailPage() {
             </div>
 
             {/* Issue details */}
+
             <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-[#f1f5f9]">
                 <h4 className="text-sm font-semibold text-[#0f172a]">
                   Issue Details
                 </h4>
               </div>
+
+              {/* Phase 17 — GIS boundary card — shown when province/district detected */}
+              {(currentIssue.location?.province ||
+                currentIssue.location?.district) && (
+                <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm p-5 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Building2 size={14} className="text-[#16a34a]" />
+                    <h2 className="text-sm font-semibold text-[#0f172a]">
+                      Administrative Location
+                    </h2>
+                    <span
+                      className="text-[10px] font-semibold text-[#16a34a] bg-[#f0fdf4]
+        border border-[#bbf7d0] px-2 py-0.5 rounded-full ml-auto"
+                    >
+                      Auto-detected
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {currentIssue.location.ward && (
+                      <span
+                        className="text-xs font-medium text-[#475569] bg-[#f8fafc]
+          border border-[#e2e8f0] px-3 py-1.5 rounded-full"
+                      >
+                        {currentIssue.location.ward}
+                      </span>
+                    )}
+                    {currentIssue.location.municipality && (
+                      <span
+                        className="text-xs font-medium text-[#475569] bg-[#f8fafc]
+          border border-[#e2e8f0] px-3 py-1.5 rounded-full"
+                      >
+                        {currentIssue.location.municipality}
+                      </span>
+                    )}
+                    {currentIssue.location.district && (
+                      <span
+                        className="text-xs text-[#0f172a] bg-white
+          border border-[#cbd5e1] px-3 py-1.5 rounded-full font-semibold"
+                      >
+                        {currentIssue.location.district}
+                      </span>
+                    )}
+                    {currentIssue.location.province && (
+                      <span
+                        className="text-xs font-semibold text-[#16a34a] bg-[#f0fdf4]
+          border border-[#bbf7d0] px-3 py-1.5 rounded-full"
+                      >
+                        {currentIssue.location.province}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
               {[
                 {
-                  key: "Issue ID",
-                  val: `#${currentIssue._id.slice(-8).toUpperCase()}`,
+                  label: "Issue ID",
+                  value: `#${currentIssue._id.slice(-8).toUpperCase()}`,
                 },
-                { key: "Category", val: currentIssue.category },
-                { key: "Priority", val: pr.label },
-                { key: "Upvotes", val: currentIssue.upvoterIds?.length ?? 0 },
+                { label: "Category", value: currentIssue.category },
+                { label: "Status", value: st.label },
+                { label: "Priority", value: pr.label },
                 {
-                  key: "Province",
-                  val: currentIssue.location?.province || "—",
+                  label: "Upvotes",
+                  value: currentIssue.upvoterIds?.length ?? 0,
+                },
+
+                // Phase 17 — GIS-detected admin boundaries
+                ...(currentIssue.location?.province
+                  ? [
+                      {
+                        label: "Province",
+                        value: currentIssue.location.province,
+                      },
+                    ]
+                  : []),
+                ...(currentIssue.location?.district
+                  ? [
+                      {
+                        label: "District",
+                        value: currentIssue.location.district,
+                      },
+                    ]
+                  : []),
+                ...(currentIssue.location?.municipality
+                  ? [
+                      {
+                        label: "Municipality",
+                        value: currentIssue.location.municipality,
+                      },
+                    ]
+                  : []),
+                ...(currentIssue.location?.ward
+                  ? [{ label: "Ward", value: currentIssue.location.ward }]
+                  : []),
+
+                {
+                  label: "Photos",
+                  value: `${currentIssue.images?.length ?? 0} attached`,
                 },
                 {
-                  key: "District",
-                  val: currentIssue.location?.district || "—",
-                },
-                { key: "Ward", val: currentIssue.location?.ward || "—" },
-                {
-                  key: "Photos",
-                  val: `${currentIssue.images?.length ?? 0} attached`,
-                },
-                {
-                  key: "Submitted",
-                  val: new Date(currentIssue.createdAt).toLocaleDateString(
+                  label: "Submitted",
+                  value: new Date(currentIssue.createdAt).toLocaleDateString(
                     "en-NP",
                     {
                       year: "numeric",
@@ -544,16 +624,16 @@ export default function IssueDetailPage() {
                     },
                   ),
                 },
-              ].map(({ key, val }) => (
+              ].map(({ label, value }) => (
                 <div
-                  key={key}
-                  className="flex items-center justify-between px-5 py-2.5
-                  border-b border-[#f8fafc] last:border-0"
+                  key={label}
+                  className="flex justify-between items-center
+    px-5 py-2.5 border-b border-[#f8fafc] last:border-0"
                 >
-                  <span className="text-xs text-[#94a3b8]">{key}</span>
-                  <span className="text-xs font-medium text-[#0f172a] text-right">
-                    {val}
-                  </span>
+                  <dt className="text-xs text-[#94a3b8]">{label}</dt>
+                  <dd className="text-xs font-medium text-[#0f172a] text-right max-w-45 truncate">
+                    {value}
+                  </dd>
                 </div>
               ))}
             </div>

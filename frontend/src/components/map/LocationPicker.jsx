@@ -88,7 +88,7 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
           headers: {
             "Accept-Language": "en",
           },
-        }
+        },
       );
       const data = await res.json();
       setSearchResults(data);
@@ -132,7 +132,10 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
               placeholder:text-[#94a3b8] text-[#0f172a] outline-none
               focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all"
           />
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8]"
+          />
         </div>
         <button
           type="submit"
@@ -141,7 +144,11 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
             font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed
             flex items-center gap-1.5"
         >
-          {isSearching ? <Loader2 size={14} className="animate-spin" /> : "Search"}
+          {isSearching ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            "Search"
+          )}
         </button>
       </form>
 
