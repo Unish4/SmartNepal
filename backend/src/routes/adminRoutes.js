@@ -4,10 +4,17 @@ import {
   getAllIssues,
   updateIssueStatus,
   getAllUsers,
+  createFieldWorker,
+  getFieldWorkers,
+  assignIssue,
 } from "../controllers/adminController.js";
 import { getAnalytics } from "../controllers/analyticsController.js";
 import { protect, requireAdmin } from "../middleware/authMiddleware.js";
-import { statusUpdateValidator } from "../utils/validators.js";
+import {
+  statusUpdateValidator,
+  createFieldWorkerValidator,
+  assignIssueValidator,
+} from "../utils/validators.js";
 import { validationResult } from "express-validator";
 
 const router = Router();
@@ -34,5 +41,14 @@ router.patch(
   validate,
   updateIssueStatus,
 );
+
+router.post(
+  "/field-workers",
+  createFieldWorkerValidator,
+  validate,
+  createFieldWorker,
+);
+router.get("/field-workers", getFieldWorkers);
+router.patch("/issues/:id/assign", assignIssueValidator, validate, assignIssue);
 
 export default router;

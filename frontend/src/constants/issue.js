@@ -75,3 +75,34 @@ export const PRIORITY_CONFIG = {
   high: { label: "High", color: "#ea580c", bg: "#fff7ed", pulse: false },
   critical: { label: "Critical", color: "#dc2626", bg: "#fef2f2", pulse: true },
 };
+
+//  Role & department config 
+export const ROLE_CONFIG = {
+  citizen: {
+    label: "Citizen",
+    color: "#16a34a",
+    bg: "#f0fdf4",
+    border: "#bbf7d0",
+  },
+  admin: {
+    label: "Administrator",
+    color: "#7c3aed",
+    bg: "#faf5ff",
+    border: "#e9d5ff",
+  },
+  field_worker: {
+    label: "Field Worker",
+    color: "#d97706",
+    bg: "#fffbeb",
+    border: "#fde68a",
+  },
+};
+
+export const FIELD_DEPARTMENTS = [
+  "Road Maintenance",
+  "Water Supply",
+  "Sanitation",
+  "Electrical",
+  "Parks & Public Spaces",
+  "General",
+];

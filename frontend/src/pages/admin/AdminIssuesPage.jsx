@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, X, ChevronDown } from "lucide-react";
+import { Search, X, ChevronDown, UserPlus } from "lucide-react";
 import { fetchAllIssues } from "../../services/adminService.js";
 import {
   STATUS_CONFIG,
@@ -10,6 +10,7 @@ import {
 import { timeAgo } from "../../utils/timeAgo.js";
 import { useDebounce } from "../../hooks/useDebounce.js";
 import StatusUpdateModal from "../admin/StatusUpdateModal.jsx";
+import AssignIssueModal from "../../components/admin/AssignIssueModal.jsx";
 import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 
 const AdminIssuesPage = () => {
@@ -22,6 +23,7 @@ const AdminIssuesPage = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [editingIssue, setEditingIssue] = useState(null);
+  const [assigningIssue, setAssigningIssue] = useState(null);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -76,7 +78,7 @@ const AdminIssuesPage = () => {
 
   return (
     <div>
-      {/* ── Page header ────────────────────────────────────────────────── */}
+      {/* ── Page header  */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#0f172a] tracking-tight">
@@ -90,7 +92,7 @@ const AdminIssuesPage = () => {
         </div>
       </div>
 
-      {/* ── Filter bar ─────────────────────────────────────────────────── */}
+      {/* ── Filter bar  */}
       <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm p-4 mb-5">
         <div className="flex flex-wrap items-center gap-3">
           {/* Search */}
@@ -198,7 +200,7 @@ const AdminIssuesPage = () => {
         </div>
       </div>
 
-      {/* ── Error ──────────────────────────────────────────────────────── */}
+      {/* ── Error  */}
       {error && (
         <div
           className="bg-red-50 border-l-4 border-red-500 text-red-700 text-sm
@@ -208,7 +210,7 @@ const AdminIssuesPage = () => {
         </div>
       )}
 
-      {/* ── Table ──────────────────────────────────────────────────────── */}
+      {/* ── Table  */}
       <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -223,6 +225,7 @@ const AdminIssuesPage = () => {
                   "↑",
                   "Date",
                   "Actions",
+                  "Assigned",
                 ].map((h) => (
                   <th
                     key={h}
@@ -308,6 +311,23 @@ const AdminIssuesPage = () => {
                         </div>
                       </td>
 
+                      {/* Assigned */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        {issue.assignedTo?.name ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs
+                            font-medium text-amber-700 bg-amber-50 border
+                            border-amber-200 px-2 py-0.5 rounded-full"
+                          >
+                            {issue.assignedTo.name}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-[#cbd5e1]">
+                            Unassigned
+                          </span>
+                        )}
+                      </td>
+
                       {/* Upvotes */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <p className="text-xs font-medium text-[#64748b]">
@@ -339,6 +359,17 @@ const AdminIssuesPage = () => {
                           >
                             Status
                           </button>
+                          {/* Assign Button */}
+                          {!issue.assignedTo && (
+                            <button
+                              onClick={() => setAssigningIssue(issue)}
+                              className="flex items-center gap-1 text-xs text-amber-600
+                                hover:underline font-medium cursor-pointer"
+                            >
+                              <UserPlus size={11} />
+                              Assign
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -398,6 +429,13 @@ const AdminIssuesPage = () => {
           issue={editingIssue}
           onClose={() => setEditingIssue(null)}
           onUpdated={handleIssueUpdated}
+        />
+      )}
+      {assigningIssue && (
+        <AssignIssueModal
+          issue={assigningIssue}
+          onClose={() => setAssigningIssue(null)}
+          onAssigned={handleIssueUpdated}
         />
       )}
     </div>

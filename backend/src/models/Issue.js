@@ -59,6 +59,18 @@ const issueSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    assignedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    assignedAt: { type: Date },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    resolutionProof: { type: [String], default: [] },
     aiCategory: { type: String },
     aiPriority: { type: String },
     aiConfidence: { type: Number },
@@ -76,6 +88,7 @@ issueSchema.index({ "location.province": 1, "location.district": 1 });
 issueSchema.index({ "location.province": 1, status: 1 });
 issueSchema.index({ status: 1, category: 1 });
 issueSchema.index({ author: 1 });
+issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ createdAt: -1 });
 
 const Issue = mongoose.model("Issue", issueSchema);

@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-// ─── Auth validators 
+// ─── Auth validators
 export const registerValidator = [
   body("name")
     .trim()
@@ -83,7 +83,9 @@ export const updateProfileValidator = [
     .isLength({ min: 2, max: 60 })
     .withMessage("Name must be between 2 and 60 characters")
     .matches(/^[a-zA-Z\u0900-\u097F\s'-]+$/)
-    .withMessage("Name may only contain letters, spaces, hyphens, or apostrophes"),
+    .withMessage(
+      "Name may only contain letters, spaces, hyphens, or apostrophes",
+    ),
 
   body("phone")
     .optional({ checkFalsy: true })
@@ -117,13 +119,10 @@ export const updateProfileValidator = [
     .notEmpty()
     .withMessage("City cannot be empty"),
 
-  body("avatar")
-    .optional()
-    .isURL()
-    .withMessage("Avatar must be a valid URL"),
+  body("avatar").optional().isURL().withMessage("Avatar must be a valid URL"),
 ];
 
-// ─── Issue validators 
+// ─── Issue validators
 const VALID_CATEGORIES = [
   "Road Damage",
   "Garbage",
@@ -222,7 +221,7 @@ export const updateIssueValidator = [
     .withMessage("Invalid longitude"),
 ];
 
-// ─── Admin status update validator 
+// ─── Admin status update validator
 export const statusUpdateValidator = [
   body("status")
     .notEmpty()
@@ -239,7 +238,7 @@ export const statusUpdateValidator = [
     .withMessage("Rejection reason cannot exceed 500 characters"),
 ];
 
-// ─── AI endpoint validators 
+// ─── AI endpoint validators
 export const aiSuggestValidator = [
   body("title")
     .optional({ checkFalsy: true })
@@ -291,4 +290,73 @@ export const aiDuplicateValidator = [
     .optional({ checkFalsy: true })
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
+];
+
+// ─── Phase 18 — Field worker validators ───────────────────────────────────
+const FIELD_DEPARTMENTS = [
+  "Road Maintenance",
+  "Water Supply",
+  "Sanitation",
+  "Electrical",
+  "Parks & Public Spaces",
+  "General",
+];
+
+export const createFieldWorkerValidator = [
+  body("name")
+    .trim()
+    .notEmpty()
+    .withMessage("Name is required")
+    .isLength({ min: 2, max: 60 })
+    .withMessage("Name must be between 2 and 60 characters"),
+
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6, max: 72 })
+    .withMessage("Password must be between 6 and 72 characters"),
+
+  body("department")
+    .notEmpty()
+    .withMessage("Department is required")
+    .isIn(FIELD_DEPARTMENTS)
+    .withMessage(`Department must be one of: ${FIELD_DEPARTMENTS.join(", ")}`),
+
+  body("phone")
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^[0-9]{10}$/)
+    .withMessage("Phone number must be 10 digits"),
+];
+
+export const assignIssueValidator = [
+  body("fieldWorkerId")
+    .notEmpty()
+    .withMessage("A field worker must be selected")
+    .isMongoId()
+    .withMessage("Invalid field worker ID"),
+];
+
+export const fieldStatusUpdateValidator = [
+  body("status")
+    .notEmpty()
+    .withMessage("Status is required")
+    .isIn(["in-progress", "resolved", "rejected"])
+    .withMessage("Invalid status value"),
+
+  body("rejectionReason")
+    .if(body("status").equals("rejected"))
+    .trim()
+    .notEmpty()
+    .withMessage("Please explain why this issue cannot be resolved")
+    .isLength({ max: 500 })
+    .withMessage("Reason cannot exceed 500 characters"),
 ];

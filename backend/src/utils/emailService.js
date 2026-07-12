@@ -6,7 +6,9 @@ import {
   inProgressTemplate,
   resolvedTemplate,
   rejectedTemplate,
+  assignedTemplate,
 } from "./emailTemplates.js";
+import User from "../models/User.js";
 
 // ── Transporter
 let transporter = null;
@@ -97,4 +99,23 @@ export const sendStatusChangeEmail = async (
 
   await sendEmail({ to: issue.author.email, ...emailData });
   console.log(`Email sent to ${issue.author.email} — status: ${newStatus}`);
+};
+
+export const sendAssignmentEmail = async (issueId, fieldWorkerId) => {
+  const [issue, fieldWorker] = await Promise.all([
+    Issue.findById(issueId).lean(),
+    User.findById(fieldWorkerId).select("name email emailNotifications").lean(),
+  ]);
+
+  if (!issue) return; // Issue deleted mid-flight
+  if (!fieldWorker?.email) return; // No email on record — skip silently
+  if (!fieldWorker.emailNotifications) return; // User opted out of emails
+
+  const frontendUrl = ENV.CLIENT_URL || "http://localhost:5173";
+  const emailData = assignedTemplate(issue, frontendUrl);
+
+  await sendEmail({ to: fieldWorker.email, ...emailData });
+  console.log(
+    `Assignment email sent to ${fieldWorker.email} for issue ${issueId}`,
+  );
 };

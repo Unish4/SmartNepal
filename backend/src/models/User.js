@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["citizen", "admin"],
+      enum: ["citizen", "admin", "field_worker"],
       default: "citizen",
     },
     phone: {
@@ -43,6 +43,17 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+    },
+    department: {
+      type: String,
+      enum: [
+        "Road Maintenance",
+        "Water Supply",
+        "Sanitation",
+        "Electrical",
+        "Parks & Public Spaces",
+        "General",
+      ],
     },
     emailNotifications: {
       type: Boolean,

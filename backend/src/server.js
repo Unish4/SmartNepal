@@ -18,6 +18,7 @@ import authRoutes from "./routes/authRoutes.js";
 import issueRoutes from "./routes/issueRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import fieldWorkerRoutes from "./routes/fieldWorkerRoutes.js";
 
 // ─── Error Handlers
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -106,6 +107,7 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/issues", issueRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/field", fieldWorkerRoutes);
 
 // ─── Error middleware — must be last
 app.use(notFound);

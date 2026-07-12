@@ -81,7 +81,7 @@ const HOW_IT_WORKS = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   return (
     <div className="bg-[#f8fafc]">
@@ -113,14 +113,16 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap gap-3 mb-6">
-                <Link
-                  to={isAuthenticated ? "/issues/new" : "/register"}
-                  className="inline-flex items-center gap-2 h-12 px-7 rounded-xl
-                    bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold text-[15px]
-                    transition-colors shadow-sm"
-                >
-                  Report an Issue
-                </Link>
+                {(!isAuthenticated || (user?.role !== "admin" && user?.role !== "field_worker")) && (
+                  <Link
+                    to={isAuthenticated ? "/issues/new" : "/register"}
+                    className="inline-flex items-center gap-2 h-12 px-7 rounded-xl
+                      bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold text-[15px]
+                      transition-colors shadow-sm"
+                  >
+                    Report an Issue
+                  </Link>
+                )}
                 <Link
                   to="/issues"
                   className="inline-flex items-center gap-2 h-12 px-7 rounded-xl

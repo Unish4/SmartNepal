@@ -4,7 +4,7 @@ import { fetchAllUsers } from "../../services/adminService.js";
 import { timeAgo } from "../../utils/timeAgo.js";
 import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 
-const AdminUsersPage = () => {
+const AdminAdminsPage = () => {
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +16,7 @@ const AdminUsersPage = () => {
     Promise.resolve().then(() => {
       if (isMounted) setIsLoading(true);
     });
-    fetchAllUsers({ page, limit: 15, role: "citizen" })
+    fetchAllUsers({ page, limit: 15, role: "admin" })
       .then((res) => {
         if (isMounted) {
           setUsers(res.users);
@@ -25,7 +25,7 @@ const AdminUsersPage = () => {
       })
       .catch(() => {
         if (isMounted) {
-          setError("Failed to load users");
+          setError("Failed to load administrators");
         }
       })
       .finally(() => {
@@ -44,11 +44,11 @@ const AdminUsersPage = () => {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#0f172a] tracking-tight">
-          Citizens
+          Administrators
         </h1>
         {pagination && (
           <p className="text-sm text-[#64748b] mt-1">
-            {pagination.total} registered account
+            {pagination.total} registered admin account
             {pagination.total !== 1 ? "s" : ""}
           </p>
         )}
@@ -71,7 +71,7 @@ const AdminUsersPage = () => {
             <thead>
               <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
                 {[
-                  "Citizen",
+                  "Admin",
                   "Email",
                   "Role",
                   "Province",
@@ -90,7 +90,7 @@ const AdminUsersPage = () => {
             </thead>
             <tbody className="divide-y divide-[#f8fafc]">
               {isLoading ? (
-                Array.from({ length: 10 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <TableRowSkeleton key={i} colCount={6} />
                 ))
               ) : users.length > 0 ? (
@@ -99,7 +99,7 @@ const AdminUsersPage = () => {
                     key={user._id}
                     className="hover:bg-[#f8fafc] transition-colors"
                   >
-                    {/* Citizen — avatar + name */}
+                    {/* Admin — avatar + name */}
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <div
@@ -124,12 +124,7 @@ const AdminUsersPage = () => {
                     {/* Role */}
                     <td className="px-4 py-3.5 whitespace-nowrap">
                       <span
-                        className={`text-xs font-semibold px-2.5 py-1 rounded-full
-                          ${
-                            user.role === "admin"
-                              ? "bg-purple-50 text-purple-700 border border-purple-200"
-                              : "bg-[#f1f5f9] text-[#64748b]"
-                          }`}
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200"
                       >
                         {user.role}
                       </span>
@@ -161,7 +156,7 @@ const AdminUsersPage = () => {
                 <tr>
                   <td colSpan={6} className="px-4 py-20 text-center">
                     <Users size={32} className="text-[#e2e8f0] mx-auto mb-3" />
-                    <p className="text-sm text-[#94a3b8]">No users found</p>
+                    <p className="text-sm text-[#94a3b8]">No administrators found</p>
                   </td>
                 </tr>
               )}
@@ -177,7 +172,7 @@ const AdminUsersPage = () => {
           >
             <p className="text-xs text-[#94a3b8]">
               Page {pagination.page} of {pagination.pages} · {pagination.total}{" "}
-              users
+              admins
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -206,4 +201,4 @@ const AdminUsersPage = () => {
   );
 };
 
-export default AdminUsersPage;
+export default AdminAdminsPage;

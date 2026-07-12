@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   ListChecks,
@@ -8,6 +8,8 @@ import {
   LogOut,
   Menu,
   X,
+  HardHat,
+  ShieldCheck,
 } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore.js";
 
@@ -15,6 +17,8 @@ const NAV_LINKS = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/issues", label: "All Issues", icon: ListChecks },
   { to: "/admin/users", label: "Citizens", icon: Users },
+  { to: "/admin/admins", label: "Admins", icon: ShieldCheck },
+  { to: "/admin/field-workers",label: "Field Workers", icon: HardHat },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart2 },
 ];
 
@@ -24,12 +28,14 @@ const SidebarContent = ({ user, onLogout, onLinkClick }) => (
   <div className="flex flex-col h-full bg-[#0b0f19] text-slate-300">
     {/* Logo */}
     <div className="h-16 flex items-center px-6 border-b border-slate-800/60 shrink-0 gap-2.5">
-      <div className="w-8 h-8 flex items-center justify-center">
-        <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
-      </div>
-      <span className="font-extrabold text-white text-[16px] tracking-tight shrink-0">
-        Digital<span className="text-emerald-400">Sewa</span>
-      </span>
+      <Link to="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity cursor-pointer">
+        <div className="w-8 h-8 flex items-center justify-center">
+          <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
+        </div>
+        <span className="font-extrabold text-white text-[16px] tracking-tight shrink-0">
+          Digital<span className="text-emerald-400">Sewa</span>
+        </span>
+      </Link>
       <span
         className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10
         border border-emerald-400/20 px-1.5 py-0.5 rounded-md shrink-0 uppercase tracking-wider"
@@ -170,7 +176,7 @@ const AdminLayout = () => {
           >
             <Menu size={20} />
           </button>
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
             <div className="w-8 h-8 flex items-center justify-center">
               <img
                 src="/icon.png"
@@ -181,7 +187,7 @@ const AdminLayout = () => {
             <span className="font-bold text-sm text-[#0f172a]">
               Admin Panel
             </span>
-          </div>
+          </Link>
           <div className="w-6" />
         </div>
 

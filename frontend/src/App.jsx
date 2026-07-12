@@ -14,13 +14,20 @@ import IssueDetailPage from "./pages/issues/IssueDetailPage";
 import MyIssuesPage from "./pages/issues/MyIssuesPage";
 import EditIssuePage from "./pages/issues/EditIssuePage";
 import ProfilePage from "./pages/ProfilePage";
-import useAuthStore from "./store/useAuthStore";
 
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminFieldWorkersPage from "./pages/admin/AdminFieldWorkersPage";
 import AdminIssuesPage from "./pages/admin/AdminIssuesPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminAdminsPage from "./pages/admin/AdminAdminsPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
+
+import FieldLayout from "./components/field/FieldLayout";
+import FieldDashboardPage from "./pages/field/FieldDashboardPage";
+import FieldIssueDetailPage from "./pages/field/FieldIssueDetailPage";
+
+import useAuthStore from "./store/useAuthStore";
 
 // Public only route - redirects authenticated users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
@@ -32,6 +39,20 @@ const AdminRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role !== "admin") return <Navigate to="/" replace />;
+  return children;
+};
+
+const FieldWorkerRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.role !== "field_worker") return <Navigate to="/" replace />;
+  return children;
+};
+
+const CitizenRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.role === "admin" || user?.role === "field_worker") return <Navigate to="/" replace />;
   return children;
 };
 
@@ -49,6 +70,25 @@ function App() {
       />
 
       <Routes>
+        {/* Auth pages - only accessible when NOT logged in */}
+        <Route
+          path="login"
+          element={
+            <PublicOnlyRoute>
+              <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
+
+        <Route
+          path="register"
+          element={
+            <PublicOnlyRoute>
+              <RegisterPage />
+            </PublicOnlyRoute>
+          }
+        />
+
         <Route
           path="/admin"
           element={
@@ -59,29 +99,25 @@ function App() {
         >
           <Route index element={<AdminDashboardPage />} />
           <Route path="issues" element={<AdminIssuesPage />} />
+          <Route path="field-workers" element={<AdminFieldWorkersPage />} />
           <Route path="users" element={<AdminUsersPage />} />
+          <Route path="admins" element={<AdminAdminsPage />} />
           <Route path="analytics" element={<AdminAnalyticsPage />} />
         </Route>
 
-        {/* Auth pages - only accessible when NOT logged in */}
         <Route
-          path="login"
+          path="/field"
           element={
-            <PublicOnlyRoute>
-              <LoginPage />
-            </PublicOnlyRoute>
+            <FieldWorkerRoute>
+              <FieldLayout />
+            </FieldWorkerRoute>
           }
-        />
-        <Route
-          path="register"
-          element={
-            <PublicOnlyRoute>
-              <RegisterPage />
-            </PublicOnlyRoute>
-          }
-        />
+        >
+          <Route index element={<FieldDashboardPage />} />
+          <Route path="assignments/:id" element={<FieldIssueDetailPage />} />
+        </Route>
+
         <Route path="/" element={<Layout />}>
-          {/* Public routes */}
           <Route index element={<HomePage />} />
 
           <Route
@@ -92,32 +128,32 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+
           {/* Issues routes */}
           <Route path="issues" element={<IssuesPage />} />
           <Route
             path="issues/new"
             element={
-              <ProtectedRoute>
+              <CitizenRoute>
                 <CreateIssuePage />
-              </ProtectedRoute>
+              </CitizenRoute>
             }
           />
           <Route
             path="issues/me"
             element={
-              <ProtectedRoute>
+              <CitizenRoute>
                 <MyIssuesPage />
-              </ProtectedRoute>
+              </CitizenRoute>
             }
           />
           <Route path="issues/:id" element={<IssueDetailPage />} />
           <Route
             path="issues/:id/edit"
             element={
-              <ProtectedRoute>
+              <CitizenRoute>
                 <EditIssuePage />
-              </ProtectedRoute>
+              </CitizenRoute>
             }
           />
 

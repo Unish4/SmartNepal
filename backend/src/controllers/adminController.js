@@ -1,7 +1,11 @@
 import { validationResult } from "express-validator";
+import bcrypt from "bcryptjs";
 import Issue from "../models/Issue.js";
 import User from "../models/User.js";
-import { sendStatusChangeEmail } from "../utils/emailService.js";
+import {
+  sendAssignmentEmail,
+  sendStatusChangeEmail,
+} from "../utils/emailService.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -188,15 +192,22 @@ export const getAllUsers = async (req, res, next) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, parseInt(req.query.limit) || 15);
     const skip = (page - 1) * limit;
+    const { role } = req.query;
+
+    const query = {};
+    const VALID_ROLES = ["citizen", "admin", "field_worker"];
+    if (role && VALID_ROLES.includes(role)) {
+      query.role = role;
+    }
 
     const [users, total] = await Promise.all([
-      User.find()
+      User.find(query)
         .select("-password")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      User.countDocuments(),
+      User.countDocuments(query),
     ]);
 
     res.status(200).json({
@@ -212,6 +223,142 @@ export const getAllUsers = async (req, res, next) => {
       },
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/admin/field-workers
+export const createFieldWorker = async (req, res, next) => {
+  try {
+    checkValidation(req, res);
+    const { name, email, password, department, phone } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let fieldWorker;
+    try {
+      fieldWorker = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        role: "field_worker",
+        department,
+        phone,
+      });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists",
+        });
+      }
+      throw err;
+    }
+
+    res.status(201).json({
+      success: true,
+      fieldWorker: {
+        _id: fieldWorker._id,
+        name: fieldWorker.name,
+        email: fieldWorker.email,
+        role: fieldWorker.role,
+        department: fieldWorker.department,
+        phone: fieldWorker.phone,
+        createdAt: fieldWorker.createdAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+// GET /api/admin/field-workers
+export const getFieldWorkers = async (req, res, next) => {
+  try {
+    const { department } = req.query;
+
+    const query = { role: "field_worker" };
+    if (department) query.department = department;
+
+    //  PATCH /api/admin/issues/:id/assign
+    // Assigns an issue to a field worker. This is the dispatch action.
+    export const assignIssue = async (req, res, next) => {
+      try {
+        checkValidation(req, res);
+        const { fieldWorkerId } = req.body;
+
+        const [issue, fieldWorker] = await Promise.all([
+          Issue.findById(req.params.id),
+          User.findOne({ _id: fieldWorkerId, role: "field_worker" }),
+        ]);
+
+        if (!issue) {
+          return res
+            .status(404)
+            .json({ success: false, message: "Issue not found" });
+        }
+        if (!fieldWorker) {
+          return res
+            .status(404)
+            .json({ success: false, message: "Field worker not found" });
+        }
+
+        if (["resolved", "rejected"].includes(issue.status)) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Cannot reassign an issue that has already been resolved or rejected",
+          });
+        }
+
+        const previousStatus = issue.status;
+
+        issue.assignedTo = fieldWorker._id;
+        issue.assignedBy = req.user._id;
+        issue.assignedAt = new Date();
+
+        if (issue.status === "open") {
+          issue.status = "verified";
+        }
+
+        await issue.save();
+        await issue.populate("author", "name email");
+        await issue.populate("assignedTo", "name department");
+
+        sendAssignmentEmail(issue._id, fieldWorker._id).catch((err) =>
+          console.error(`Assignment email failed: ${err.message}`),
+        );
+
+        if (issue.status !== previousStatus) {
+          sendStatusChangeEmail(issue._id, issue.status, null).catch((err) =>
+            console.error(`Status email failed: ${err.message}`),
+          );
+        }
+
+        res.status(200).json({ success: true, issue });
+      } catch (error) {
+        if (error.name === "CastError") {
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid issue ID format" });
+        }
+        next(error);
+      }
+    };
+    res.status(200).json({ success: true, issue });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid issue ID format" });
+    }
     next(error);
   }
 };

@@ -15,11 +15,17 @@ import {
   Loader2,
   X,
   ChevronDown,
+  HardHat,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../store/useAuthStore.js";
-import { NEPAL_LOCATIONS, getDistricts, getCities } from "../constants/nepalLocations.js";
+import {
+  NEPAL_LOCATIONS,
+  getDistricts,
+  getCities,
+} from "../constants/nepalLocations.js";
 import { ProfileSkeleton } from "../components/ui/SkeletonLoader.jsx";
+import { ROLE_CONFIG } from "../constants/issue.js";
 
 const Toggle = ({ checked, onChange, disabled }) => (
   <button
@@ -41,10 +47,9 @@ const Toggle = ({ checked, onChange, disabled }) => (
   </button>
 );
 
-
-
 export default function ProfilePage() {
-  const { user, updatePreferences, updateProfile, uploadAvatar } = useAuthStore();
+  const { user, updatePreferences, updateProfile, uploadAvatar } =
+    useAuthStore();
 
   const [emailNotif, setEmailNotif] = useState(
     user?.emailNotifications ?? true,
@@ -52,7 +57,9 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [selectedDistrict, setSelectedDistrict] = useState(user?.district || "");
+  const [selectedDistrict, setSelectedDistrict] = useState(
+    user?.district || "",
+  );
   const [editForm, setEditForm] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -131,7 +138,9 @@ export default function ProfilePage() {
   };
 
   const districts = editForm.province ? getDistricts(editForm.province) : [];
-  const cities = selectedDistrict ? getCities(editForm.province, selectedDistrict) : [];
+  const cities = selectedDistrict
+    ? getCities(editForm.province, selectedDistrict)
+    : [];
 
   if (!user) {
     return <ProfileSkeleton />;
@@ -147,14 +156,18 @@ export default function ProfilePage() {
   ];
 
   const quickLinks = [
-    {
-      to: "/issues/me",
-      icon: ClipboardList,
-      label: "My Reports",
-      sub: "View and manage issues you've reported",
-      color: "#16a34a",
-      bg: "#f0fdf4",
-    },
+    ...(user.role !== "admin" && user.role !== "field_worker"
+      ? [
+          {
+            to: "/issues/me",
+            icon: ClipboardList,
+            label: "My Reports",
+            sub: "View and manage issues you've reported",
+            color: "#16a34a",
+            bg: "#f0fdf4",
+          },
+        ]
+      : []),
     ...(user.role === "admin"
       ? [
           {
@@ -164,6 +177,18 @@ export default function ProfilePage() {
             sub: "Access the municipality dashboard",
             color: "#7c3aed",
             bg: "#f5f3ff",
+          },
+        ]
+      : []),
+    ...(user.role === "field_worker"
+      ? [
+          {
+            to: "/field",
+            icon: HardHat,
+            label: "My Assignments",
+            sub: "View issues dispatched to you",
+            color: "#16a34a",
+            bg: "#f0fdf4",
           },
         ]
       : []),
@@ -189,7 +214,8 @@ export default function ProfilePage() {
             My Profile
           </h1>
           <p className="text-[#475569] text-base md:text-lg max-w-2xl leading-relaxed">
-            Manage your account details and notification preferences in one place.
+            Manage your account details and notification preferences in one
+            place.
           </p>
         </div>
       </section>
@@ -247,19 +273,14 @@ export default function ProfilePage() {
               <p className="text-sm text-[#64748b] mb-4">{user.email}</p>
 
               <span
-                className={`inline-flex items-center gap-1.5 text-xs font-semibold
-                px-3 py-1.5 rounded-full ${
-                  user.role === "admin"
-                    ? "bg-purple-50 text-purple-700 border border-purple-200"
-                    : "bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]"
-                }`}
+                className="inline-block mt-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border"
+                style={{
+                  color: ROLE_CONFIG[user.role]?.color ?? "#64748b",
+                  backgroundColor: ROLE_CONFIG[user.role]?.bg ?? "#f1f5f9",
+                  borderColor: ROLE_CONFIG[user.role]?.border ?? "#e2e8f0",
+                }}
               >
-                {user.role === "admin" ? (
-                  <ShieldCheck size={12} />
-                ) : (
-                  <CheckCircle size={12} />
-                )}
-                {user.role === "admin" ? "Administrator" : "Citizen"}
+                {ROLE_CONFIG[user.role]?.label ?? "Citizen"}
               </span>
             </div>
 
@@ -319,7 +340,9 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, name: e.target.value })
+                      }
                       className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all bg-white"
                       required
                     />
@@ -331,7 +354,9 @@ export default function ProfilePage() {
                     <input
                       type="tel"
                       value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, phone: e.target.value })
+                      }
                       placeholder="98XXXXXXXX"
                       className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] placeholder:text-[#94a3b8] outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all bg-white"
                     />
@@ -344,7 +369,12 @@ export default function ProfilePage() {
                       <select
                         value={editForm.province}
                         onChange={(e) => {
-                          setEditForm({ ...editForm, province: e.target.value, district: "", city: "" });
+                          setEditForm({
+                            ...editForm,
+                            province: e.target.value,
+                            district: "",
+                            city: "",
+                          });
                           setSelectedDistrict("");
                         }}
                         className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all bg-white cursor-pointer appearance-none"
@@ -371,7 +401,11 @@ export default function ProfilePage() {
                       <select
                         value={editForm.district}
                         onChange={(e) => {
-                          setEditForm({ ...editForm, district: e.target.value, city: "" });
+                          setEditForm({
+                            ...editForm,
+                            district: e.target.value,
+                            city: "",
+                          });
                           setSelectedDistrict(e.target.value);
                         }}
                         disabled={!editForm.province}
@@ -379,7 +413,9 @@ export default function ProfilePage() {
                         style={{ paddingRight: "2.5rem" }}
                       >
                         <option value="">
-                          {editForm.province ? "Select your district" : "Select a province first"}
+                          {editForm.province
+                            ? "Select your district"
+                            : "Select a province first"}
                         </option>
                         {districts.map((d) => (
                           <option key={d} value={d}>
@@ -400,13 +436,17 @@ export default function ProfilePage() {
                     <div className="relative">
                       <select
                         value={editForm.city}
-                        onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, city: e.target.value })
+                        }
                         disabled={!selectedDistrict}
                         className={`w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all bg-white cursor-pointer appearance-none ${!selectedDistrict ? "opacity-50 cursor-not-allowed" : ""}`}
                         style={{ paddingRight: "2.5rem" }}
                       >
                         <option value="">
-                          {selectedDistrict ? "Select your city" : "Select a district first"}
+                          {selectedDistrict
+                            ? "Select your city"
+                            : "Select a district first"}
                         </option>
                         {cities.map((c) => (
                           <option key={c} value={c}>
@@ -553,7 +593,9 @@ export default function ProfilePage() {
               overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="px-6 py-5 border-b border-[#f1f5f9]">
-                <h3 className="text-lg font-bold text-[#0f172a]">Quick Links</h3>
+                <h3 className="text-lg font-bold text-[#0f172a]">
+                  Quick Links
+                </h3>
                 <p className="text-sm text-[#94a3b8] mt-0.5">
                   Jump to your reports and tools
                 </p>

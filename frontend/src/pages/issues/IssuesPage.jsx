@@ -49,7 +49,7 @@ function buildPages(current, total) {
 
 export default function IssuesPage() {
   const { issues, pagination, isLoading, error, getIssues } = useIssueStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -313,7 +313,7 @@ export default function IssuesPage() {
               </div>
             )}
           </div>
-          {isAuthenticated && (
+          {isAuthenticated && user?.role !== "admin" && user?.role !== "field_worker" && (
             <Link
               to="/issues/new"
               className="inline-flex items-center gap-2 h-10 px-5 rounded-lg
@@ -380,7 +380,7 @@ export default function IssuesPage() {
                   <p className="text-sm text-[#94a3b8] max-w-xs mb-6">
                     Be the first to report a civic issue.
                   </p>
-                  {isAuthenticated && (
+                  {isAuthenticated && user?.role !== "admin" && user?.role !== "field_worker" && (
                     <Link
                       to="/issues/new"
                       className="h-10 px-6 rounded-lg bg-[#16a34a] hover:bg-[#15803d]

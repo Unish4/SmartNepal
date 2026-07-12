@@ -400,6 +400,34 @@ export default function IssueDetailPage() {
                 {currentIssue.description}
               </p>
 
+              {/* Resolution Proof — shown once resolved */}
+              {currentIssue.resolutionProof?.length > 0 && (
+                <>
+                  <div className="border-t border-[#f1f5f9] mb-5" />
+                  <h4 className="text-sm font-semibold text-[#0f172a] mb-3 flex items-center gap-2">
+                    <CheckCircle size={15} className="text-[#16a34a]" />
+                    Resolution Proof
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
+                    {currentIssue.resolutionProof.map((url, i) => (
+                      <a
+                        key={i}
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="aspect-video rounded-xl overflow-hidden border border-[#e2e8f0] block hover:opacity-90 transition-opacity"
+                      >
+                        <img
+                          src={url}
+                          alt={`Resolution Proof ${i + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </>
+              )}
+
               {/* Location */}
               {hasCoords && (
                 <>

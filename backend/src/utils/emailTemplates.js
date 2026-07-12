@@ -58,7 +58,7 @@ const baseWrapper = (content) => `
 </html>
 `;
 
-// ── Status badge HTML 
+// ── Status badge HTML
 const STATUS_STYLES = {
   verified: {
     bg: "#f5f3ff",
@@ -100,7 +100,7 @@ const statusBadge = (status) => {
   `;
 };
 
-// ── Shared issue title block 
+// ── Shared issue title block
 const issueTitleBlock = (title) => `
   <div style="background:#f8fafc;border-left:3px solid #16a34a;
     padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;">
@@ -110,7 +110,7 @@ const issueTitleBlock = (title) => `
   </div>
 `;
 
-// ── CTA button 
+// ── CTA button
 const ctaButton = (href, label) => `
   <a href="${href}" target="_blank"
     style="display:inline-block;background:#16a34a;color:#ffffff;
@@ -120,7 +120,7 @@ const ctaButton = (href, label) => `
   </a>
 `;
 
-// ── Template 1: Verified 
+// ── Template 1: Verified
 export const verifiedTemplate = (issue, frontendUrl) => ({
   subject: `✓ Your report has been verified — DigitalSewa`,
   html: baseWrapper(`
@@ -157,7 +157,7 @@ export const verifiedTemplate = (issue, frontendUrl) => ({
   `),
 });
 
-// ── Template 2: In Progress 
+// ── Template 2: In Progress
 export const inProgressTemplate = (issue, frontendUrl) => ({
   subject: `🔧 Work has started on your report — DigitalSewa`,
   html: baseWrapper(`
@@ -181,7 +181,7 @@ export const inProgressTemplate = (issue, frontendUrl) => ({
   `),
 });
 
-// ── Template 3: Resolved 
+// ── Template 3: Resolved
 export const resolvedTemplate = (issue, frontendUrl) => ({
   subject: `🎉 Your issue has been resolved — DigitalSewa`,
   html: baseWrapper(`
@@ -205,7 +205,7 @@ export const resolvedTemplate = (issue, frontendUrl) => ({
   `),
 });
 
-// ── Template 4: Rejected 
+// ── Template 4: Rejected
 export const rejectedTemplate = (issue, rejectionReason, frontendUrl) => ({
   subject: `Your report could not be actioned — DigitalSewa`,
   html: baseWrapper(`
@@ -241,5 +241,52 @@ export const rejectedTemplate = (issue, rejectionReason, frontendUrl) => ({
       or if you have additional information.
     </p>
     ${ctaButton(`${frontendUrl}/issues/new`, "Submit a new report")}
+  `),
+});
+
+// - Template 5: New assignment for field worker
+export const assignedTemplate = (issue, frontendUrl) => ({
+  subject: `📋 New assignment: ${issue.title.slice(0, 60)} — SmartNepal`,
+  html: baseWrapper(`
+    <p style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0f172a;">
+      You have a new assignment
+    </p>
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;
+      border-radius:20px;font-size:13px;font-weight:600;
+      background:#fffbeb;color:#b45309;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;
+        background:#f59e0b;"></span>
+      New Assignment
+    </span>
+    <p style="margin:16px 0;font-size:14px;color:#475569;line-height:1.7;">
+      A municipal admin has assigned the following civic issue to you.
+      Please review the details and begin work when ready.
+    </p>
+    <div style="background:#f8fafc;border-left:3px solid #f59e0b;
+      padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;">
+      <p style="margin:0;font-size:14px;font-weight:600;color:#0f172a;line-height:1.5;">
+        ${issue.title}
+      </p>
+    </div>
+    <table cellpadding="0" cellspacing="0" style="margin:16px 0;">
+      <tr>
+        <td style="padding-right:24px;">
+          <p style="margin:0;font-size:12px;color:#94a3b8;font-weight:600;
+            text-transform:uppercase;letter-spacing:0.5px;">Category</p>
+          <p style="margin:4px 0 0;font-size:14px;color:#0f172a;font-weight:500;">
+            ${issue.category}
+          </p>
+        </td>
+        <td>
+          <p style="margin:0;font-size:12px;color:#94a3b8;font-weight:600;
+            text-transform:uppercase;letter-spacing:0.5px;">Priority</p>
+          <p style="margin:4px 0 0;font-size:14px;color:#0f172a;font-weight:500;
+            text-transform:capitalize;">
+            ${issue.priority}
+          </p>
+        </td>
+      </tr>
+    </table>
+    ${ctaButton(`${frontendUrl}/field/assignments/${issue._id}`, "View assignment")}
   `),
 });

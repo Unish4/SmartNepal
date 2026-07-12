@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   LogOut,
   User,
+  HardHat,
 } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore";
 
@@ -24,12 +25,19 @@ const Navbar = () => {
     }
   };
   const isAdmin = user?.role === "admin";
+  const isFieldWorker = user?.role === "field_worker";
 
   const navLinks = [
     { to: "/issues", label: "Issues", Icon: FileText },
     ...(isAdmin
       ? [{ to: "/admin", label: "Admin", Icon: ShieldCheck, admin: true }]
-      : [{ to: "/issues/me", label: "My Reports", Icon: Activity }]),
+      : []),
+    ...(!isAdmin && !isFieldWorker
+      ? [{ to: "/issues/me", label: "My Reports", Icon: Activity }]
+      : []),
+    ...(isFieldWorker
+      ? [{ to: "/field", label: "Field Tasks", Icon: HardHat, field: true }]
+      : []),
   ];
 
   return (
@@ -40,11 +48,7 @@ const Navbar = () => {
       {/* Brand */}
       <Link to="/" className="flex items-center gap-2 mr-2 shrink-0 group">
         <div className="w-8 h-8 flex items-center justify-center">
-          <img
-            src="/icon.png"
-            alt=""
-            className="w-full h-full rounded-lg"
-          />
+          <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
         </div>
         <span className="font-bold text-[#0f172a] text-[15px] tracking-tight">
           Digital<span className="text-[#16a34a]">Sewa</span>
@@ -54,21 +58,23 @@ const Navbar = () => {
       {/* Centre nav */}
       {isAuthenticated && (
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map(({ to, label, Icon, admin }) => (
+          {navLinks.map(({ to, label, Icon, admin, field }) => (
             <NavLink
               key={label}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm
-                font-semibold transition-all duration-200
-                ${
+                `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? admin
-                      ? "bg-purple-50 text-purple-700 shadow-sm"
-                      : "bg-[#f0fdf4] text-[#16a34a] shadow-sm"
+                      ? "bg-purple-50 text-purple-700"
+                      : field
+                        ? "bg-amber-50 text-amber-700"
+                        : "bg-[#f0fdf4] text-[#16a34a]"
                     : admin
-                      ? "text-[#7c3aed] hover:bg-purple-50/50"
-                      : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                      ? "text-[#7c3aed] hover:bg-purple-50"
+                      : field
+                        ? "text-amber-600 hover:bg-amber-50"
+                        : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a]"
                 }`
               }
             >
@@ -83,8 +89,8 @@ const Navbar = () => {
       <div className="ml-auto flex items-center gap-3">
         {isAuthenticated ? (
           <>
-            {/* Report issue - only for non-admin users */}
-            {!isAdmin && (
+            {/* Report issue - only for citizen users (not admin or field workers) */}
+            {!isAdmin && !isFieldWorker && (
               <button
                 onClick={() => navigate("/issues/new")}
                 className="flex items-center gap-2 px-4 h-9 rounded-lg

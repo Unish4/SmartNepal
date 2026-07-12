@@ -50,3 +50,13 @@ export const requireAdmin = (req, res, next) => {
     message: "Not authorized — admin access required",
   });
 };
+
+export const requireFieldWorker = (req, res, next) => {
+  if (req.user?.role !== "field_worker") {
+    return res.status(403).json({
+      success: false,
+      message: "Not authorized — field worker access required",
+    });
+  }
+  next();
+};

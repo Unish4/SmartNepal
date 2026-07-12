@@ -59,7 +59,7 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
@@ -123,6 +123,32 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
             </span>
           </div>
         </div>
+
+        {/* Resolution Proof images — shown if resolved */}
+        {issue.resolutionProof?.length > 0 && (
+          <div className="mb-4">
+            <label className="block text-xs font-semibold text-[#475569] mb-1.5 uppercase tracking-wider">
+              Resolution Proof
+            </label>
+            <div className="grid grid-cols-3 gap-2 border border-[#e2e8f0] rounded-xl p-2 bg-[#f8fafc]">
+              {issue.resolutionProof.map((url, i) => (
+                <a
+                  key={i}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="aspect-square rounded-lg overflow-hidden border border-slate-200 block hover:opacity-90 transition-opacity"
+                >
+                  <img
+                    src={url}
+                    alt={`Proof ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Status select */}
         <div className="mb-4">
