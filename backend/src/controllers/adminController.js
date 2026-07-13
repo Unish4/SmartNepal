@@ -287,13 +287,13 @@ export const getFieldWorkers = async (req, res, next) => {
     const query = { role: "field_worker" };
     if (department) query.department = department;
 
-    res.status(200).json({ success: true, issue });
+    const fieldWorkers = await User.find(query)
+      .select("-password")
+      .sort({ name: 1 })
+      .lean();
+
+    res.status(200).json({ success: true, fieldWorkers });
   } catch (error) {
-    if (error.name === "CastError") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid issue ID format" });
-    }
     next(error);
   }
 };

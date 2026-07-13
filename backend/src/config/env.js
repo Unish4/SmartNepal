@@ -28,6 +28,7 @@ const ENV = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD,
   GMAIL_USER: process.env.GMAIL_USER,
+  ARCJET_KEY: process.env.ARCJET_KEY
 };
 
 export default ENV;

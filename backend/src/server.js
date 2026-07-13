@@ -1,6 +1,7 @@
 // ─── Config
 import ENV from "./config/env.js";
 import connectDB from "./config/db.js";
+import arcjetClient from "./config/arcjet.js";
 
 // ─── Core
 import express from "express";
@@ -11,6 +12,7 @@ import morgan from "morgan";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
+import { shieldGuard } from "./middleware/arcjetMiddleware.js";
 
 // ─── Routes
 import healthRoutes from "./routes/healthRoutes.js";
@@ -95,6 +97,8 @@ const generalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.use(shieldGuard(arcjetClient)); // Global Arcjet Shield guard
+
 app.use(generalLimiter);
 
 // Parse incoming JSON request bodies
@@ -118,7 +122,7 @@ const startServer = async () => {
     await connectDB();
     app.listen(ENV.PORT, () => {
       console.log(
-        `Server running at http://localhost:${ENV.PORT} [${ENV.NODE_ENV}]`,
+        `Server running at http://localhost:${ENV.PORT} [${ENV.NODE_ENV}] ${ENV.ARCJET_KEY ? "(Arcjet enabled)" : "(Arcjet disabled)"}`,
       );
     });
   } catch (error) {

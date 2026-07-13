@@ -1,15 +1,9 @@
 import axios from "axios";
+import toast from "react-hot-toast";
 
-// VITE_API_URL is the Render backend URL set in Vercel's environment variables.
-// Vite bakes env vars starting with VITE_ into the production bundle at build time.
-// Without the VITE_ prefix, the variable is stripped and import.meta.env.VITE_API_URL
-// is undefined — the most common production-only bug in Vite projects.
-//
-// Dev:        VITE_API_URL=http://localhost:3000   (from frontend/.env)
-// Production: VITE_API_URL=https://your-app.onrender.com  (from Vercel dashboard)
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
-  withCredentials: true, // sends the httpOnly JWT cookie cross-origin
+  withCredentials: true,
 });
 
 // Request interceptor — passes all requests through unchanged.
@@ -30,7 +24,16 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       window.location.href = "/login";
+      return Promise.reject(error);
     }
+
+    if (error.response?.status === 429) {
+      toast.error(
+        error.response?.data?.message ||
+          "Too many requests. Please slow down and try again shortly.",
+      );
+    }
+
     return Promise.reject(error);
   },
 );

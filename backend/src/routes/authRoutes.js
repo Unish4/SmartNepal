@@ -16,13 +16,21 @@ import {
   updatePreferencesValidator,
   updateProfileValidator,
 } from "../utils/validators.js";
+import { registerArcjet, loginArcjet } from "../config/arcjet.js";
+import { arcjetGuard } from "../middleware/arcjetMiddleware.js";
 
 const router = Router();
 
-router.post("/register", registerValidator, register);
-router.post("/login", loginValidator, login);
-router.get("/me", protect, getMe);
+router.post(
+  "/register",
+  arcjetGuard(registerArcjet, (req) => ({ email: req.body?.email })),
+  registerValidator,
+  register,
+);
+
+router.post("/login", arcjetGuard(loginArcjet), loginValidator, login);
 router.post("/logout", protect, logout);
+router.get("/me", protect, getMe);
 router.patch(
   "/preferences",
   protect,

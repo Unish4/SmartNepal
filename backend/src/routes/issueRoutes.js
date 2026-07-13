@@ -15,6 +15,8 @@ import {
   updateIssueValidator,
 } from "../utils/validators.js";
 import { upload } from "../middleware/upload.js";
+import { issueCreateArcjet } from "../config/arcjet.js"; 
+import { arcjetGuard } from "../middleware/arcjetMiddleware.js";
 
 const router = Router();
 
@@ -25,6 +27,7 @@ router.get("/boundaries", getBoundaryOptions);
 router.post(
   "/",
   protect,
+  arcjetGuard(issueCreateArcjet),
   upload.array("images", 3),
   createIssueValidator,
   createIssue,
