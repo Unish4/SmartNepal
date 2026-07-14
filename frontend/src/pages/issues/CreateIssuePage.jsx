@@ -361,6 +361,7 @@ function Step1({ onNext, formMethods }) {
   // Auto-fetch AI suggestion when description is long enough
   useEffect(() => {
     if (
+      isOnline &&
       debouncedDescription.length >= 50 &&
       !aiLoading &&
       !aiSuggestion &&
@@ -372,6 +373,7 @@ function Step1({ onNext, formMethods }) {
       return () => clearTimeout(handle);
     }
   }, [
+    isOnline,
     debouncedDescription,
     aiLoading,
     aiSuggestion,
@@ -452,6 +454,10 @@ function Step1({ onNext, formMethods }) {
           placeholder="Briefly describe the issue"
           {...register("title", {
             required: "Title is required",
+            minLength: {
+              value: 5,
+              message: "Title must be at least 5 characters",
+            },
             maxLength: { value: 100, message: "Max 100 characters" },
           })}
           className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm
@@ -647,9 +653,11 @@ function Step1({ onNext, formMethods }) {
             <p className="text-xs text-red-500">{errors.description.message}</p>
           ) : (
             <p className="text-[10px] text-[#94a3b8]">
-              {description.length >= 50
-                ? "✓ Enough detail for AI analysis"
-                : `${50 - description.length} more characters to enable AI suggestions`}
+              {!isOnline
+                ? "AI suggestions are disabled offline"
+                : description.length >= 50
+                  ? "✓ Enough detail for AI analysis"
+                  : `${50 - description.length} more characters to enable AI suggestions`}
             </p>
           )}
           <p className="text-[10px] text-[#94a3b8]">{description.length}</p>
@@ -713,9 +721,35 @@ function Step1({ onNext, formMethods }) {
 }
 
 // ── Step 2: Photo
-function Step2({ onNext, onBack, imageFiles, setImageFiles }) {
+function Step2({ onNext, onBack, imageFiles, setImageFiles, setLocation }) {
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
+  const handleLocationFromPhoto = (coords) => {
+    if (
+      coords &&
+      typeof coords.lat === "number" &&
+      typeof coords.lng === "number"
+    ) {
+      // Reverse geocode to get address details
+      const reverseGeocode = async (lat, lng) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+          );
+          const data = await res.json();
+          return data.display_name || "";
+        } catch {
+          return "";
+        }
+      };
+
+      (async () => {
+        const address = await reverseGeocode(coords.lat, coords.lng);
+        setLocation({ lat: coords.lat, lng: coords.lng, address });
+        toast.success("Location detected and pinned from photo GPS metadata!");
+      })();
+    }
+  };
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold text-[#0f172a] mb-1">Add a photo</h2>
@@ -723,7 +757,11 @@ function Step2({ onNext, onBack, imageFiles, setImageFiles }) {
         A clear photo helps authorities assess the issue faster.
       </p>
 
-      <ImageUploader files={imageFiles} onFilesChange={setImageFiles} />
+      <ImageUploader
+        files={imageFiles}
+        onFilesChange={setImageFiles}
+        onLocationFromPhoto={handleLocationFromPhoto}
+      />
 
       {/* Guidelines */}
       <div className="border border-[#e2e8f0] rounded-xl mb-4 mt-4 overflow-hidden">
@@ -1025,9 +1063,15 @@ export default function CreateIssuePage() {
   const [location, setLocation] = useState(null);
 
   const formMethods = useForm({ defaultValues: { priority: "low" } });
-  const { getValues } = formMethods;
+  const { getValues, trigger } = formMethods;
 
   const handleSubmit = async () => {
+    const isValid = await trigger(["title", "description", "category"]);
+    if (!isValid) {
+      toast.error("Please fill in all required fields correctly.");
+      setStep(1);
+      return;
+    }
     const data = getValues();
     const payload = {
       title: data.title,
@@ -1121,13 +1165,24 @@ export default function CreateIssuePage() {
               onReportAnother={resetForm}
             />
           ) : step === 1 ? (
-            <Step1 onNext={() => setStep(2)} formMethods={formMethods} />
+            <Step1
+              onNext={async () => {
+                const isValid = await trigger([
+                  "title",
+                  "description",
+                  "category",
+                ]);
+                if (isValid) setStep(2);
+              }}
+              formMethods={formMethods}
+            />
           ) : step === 2 ? (
             <Step2
               onNext={() => setStep(3)}
               onBack={() => setStep(1)}
               imageFiles={imageFiles}
               setImageFiles={setImageFiles}
+              setLocation={setLocation}
             />
           ) : (
             <Step3

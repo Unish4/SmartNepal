@@ -8,6 +8,7 @@ import {
 } from "react-leaflet";
 import { Navigation, MapPin, Search, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import useOfflineStore from "../../store/useOfflineStore.js";
 
 const NEPAL_CENTER = [28.3949, 84.124];
 const DEFAULT_ZOOM = 7;
@@ -29,6 +30,7 @@ const MapCenterer = ({ position }) => {
 };
 
 const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
+  const { isOnline } = useOfflineStore();
   const [position, setPosition] = useState(initialPosition);
   const [isLocating, setIsLocating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,6 +53,10 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
     setPosition({ lat, lng });
     const address = await reverseGeocode(lat, lng);
     onLocationChange({ lat, lng, address });
+    localStorage.setItem(
+      "nepalsewa-last-location",
+      JSON.stringify({ lat, lng, address }),
+    );
   };
 
   const useMyLocation = () => {
@@ -65,11 +71,32 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
         setPosition({ lat, lng });
         const address = await reverseGeocode(lat, lng);
         onLocationChange({ lat, lng, address });
+        localStorage.setItem(
+          "nepalsewa-last-location",
+          JSON.stringify({ lat, lng, address }),
+        );
         setIsLocating(false);
         toast.success("Location detected!");
       },
       () => {
-        toast.error("Could not get your location. Click the map instead.");
+        const cached = localStorage.getItem("nepalsewa-last-location");
+        if (cached) {
+          try {
+            const { lat, lng, address } = JSON.parse(cached);
+            if (typeof lat !== "number" || typeof lng !== "number") {
+              throw new Error("Invalid cached location");
+            }
+            setPosition({ lat, lng });
+            onLocationChange({ lat, lng, address });
+            toast.success(
+              "Could not detect location. Restored last pinned location.",
+            );
+          } catch {
+            toast.error("Could not get your location. Click the map instead.");
+          }
+        } else {
+          toast.error("Could not get your location. Click the map instead.");
+        }
         setIsLocating(false);
       },
       { timeout: 10000 },
@@ -181,7 +208,7 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
         {isLocating ? "Detecting your location..." : "Use my current location"}
       </button>
 
-      <div className="h-72 rounded-xl overflow-hidden border border-[#e2e8f0]">
+      <div className="relative h-72 rounded-xl overflow-hidden border border-[#e2e8f0]">
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
@@ -195,6 +222,15 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
           <MapCenterer position={position} />
           {position && <Marker position={[position.lat, position.lng]} />}
         </MapContainer>
+        {!isOnline && (
+          <div className="absolute top-2 left-12 right-2 z-1000 bg-slate-900/90 text-white text-[10px] sm:text-xs px-3 py-2 rounded-lg backdrop-blur-sm flex items-center gap-2 shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            <span>
+              Map tiles are unavailable offline. You can still tap the grey map
+              to pin coordinates.
+            </span>
+          </div>
+        )}
       </div>
 
       {position ? (

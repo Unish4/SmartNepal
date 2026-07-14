@@ -51,11 +51,6 @@ jobs:
 
       - run: npm ci
       - run: npm test
-      # A production build catches things unit tests never will — import
-      # typos, missing env vars at build time, JSX syntax errors that
-      # only surface under Vite's production transform. This is the same
-      # command Vercel itself runs on deploy, so a failure here means
-      # Vercel would have failed too — caught before merge instead of after.
       - run: npm run build
         env:
           VITE_API_URL: https://smartnepal.onrender.com

@@ -87,6 +87,9 @@ export default defineConfig(({ mode }) => {
                 networkTimeoutSeconds: 4,
                 expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 }, // 24h
                 cacheableResponse: { statuses: [0, 200] },
+                fetchOptions: {
+                  credentials: "include",
+                },
               },
             },
 

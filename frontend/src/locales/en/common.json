@@ -54,7 +54,11 @@
     "footerTagline": "Connecting citizens to their municipalities for a better Nepal.",
     "footerPlatform": "Platform",
     "footerGovernment": "Government",
-    "footerBuiltFor": "Built for Nepal"
+    "footerBuiltFor": "Built for Nepal",
+    "mockTitle": "Large pothole causing accidents on Bagbazaar Road",
+    "mockDesc": "A significant pothole near the temple intersection has been growing for weeks.",
+    "mockLocation": "Bagbazaar, Kathmandu",
+    "mockTime": "2h ago"
   },
   "profile": {
     "title": "My Profile",
@@ -85,5 +89,31 @@
     "label": "Language",
     "english": "English",
     "nepali": "नेपाली"
+  },
+  "pwa": {
+    "installTitleIos": "Install NepalSewa on iOS",
+    "installTitleGeneric": "Install NepalSewa App",
+    "installDescIos": "Safari on iOS does not support automatic installation. Follow these simple steps to add the app to your home screen:",
+    "installDescGeneric": "Install the app on your device for fast access, offline issue reporting, and push updates.",
+    "offlineSupportTitle": "Offline Support",
+    "offlineSupportDesc": "Report issues even without internet",
+    "quickAccessTitle": "Quick Access",
+    "quickAccessDesc": "Launches in standalone fullscreen",
+    "iosStep1Pre": "Tap the",
+    "iosStep1Post": "button in the browser toolbar at the bottom (or top on iPad).",
+    "shareLabel": "Share",
+    "iosStep2Pre": "Scroll down the share sheet menu and select",
+    "iosStep2Post": ".",
+    "addLabel": "Add to Home Screen",
+    "iosStep3Pre": "Tap",
+    "iosStep3Post": "in the top-right corner to complete the installation.",
+    "addTextLabel": "Add",
+    "gotIt": "Got it",
+    "maybeLater": "Maybe Later",
+    "installApp": "Install App",
+    "installShort": "Install",
+    "toastNotAvailable": "Installation prompt is not available. Please try installing from your browser menu.",
+    "toastSuccess": "Thank you for installing NepalSewa!",
+    "toastError": "Failed to trigger installation. Please try again."
   }
 }

@@ -1,6 +1,6 @@
 import { validationResult } from "express-validator";
 import Issue from "../models/Issue.js";
-import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/uploadToCloudinary.js";
 import { categorizeIssue } from "../services/aiService.js";
 import { detectBoundary } from "../services/gisService.js";
 
@@ -50,9 +50,10 @@ export const createIssue = async (req, res, next) => {
     let imageUrls = [];
     if (req.files?.length > 0) {
       const results = await Promise.all(
-        req.files.map((f) =>
-          uploadToCloudinary(f.buffer, "NepalSewa/issues"),
-        ),
+        req.files.map((f, idx) => {
+          const publicId = idempotencyKey ? `${idempotencyKey}_img_${idx}` : null;
+          return uploadToCloudinary(f.buffer, "NepalSewa/issues", undefined, publicId);
+        }),
       );
       imageUrls = results.map((r) => r.secure_url);
     }
@@ -335,7 +336,17 @@ export const deleteIssue = async (req, res, next) => {
         .json({ success: false, message: "Issue not found" });
     }
     assertOwnership(issue, req.user, res);
+
+    const imageUrls = issue.images || [];
+
     await issue.deleteOne();
+
+    if (imageUrls.length > 0) {
+      Promise.all(imageUrls.map((url) => deleteFromCloudinary(url))).catch((err) =>
+        console.error("Failed to delete issue images from Cloudinary on delete", err)
+      );
+    }
+
     res
       .status(200)
       .json({ success: true, message: "Issue deleted successfully" });

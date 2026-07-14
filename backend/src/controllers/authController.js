@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import { validationResult } from "express-validator";
 import ENV from "../config/env.js";
-import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/uploadToCloudinary.js";
 
 const formatUser = (user) => ({
   _id: user._id,
@@ -210,6 +210,9 @@ export const uploadAvatar = async (req, res, next) => {
       });
     }
 
+    const currentUser = await User.findById(req.user._id);
+    const oldAvatar = currentUser?.avatar;
+
     const result = await uploadToCloudinary(
       req.file.buffer,
       "NepalSewa/avatars",
@@ -225,6 +228,12 @@ export const uploadAvatar = async (req, res, next) => {
       { avatar: result.secure_url },
       { new: true },
     ).select("-password");
+
+    if (oldAvatar) {
+      deleteFromCloudinary(oldAvatar).catch((err) =>
+        console.error("Failed to delete old avatar from Cloudinary", err)
+      );
+    }
 
     res.status(200).json({ success: true, user: formatUser(user) });
   } catch (error) {

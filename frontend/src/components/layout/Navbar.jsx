@@ -7,15 +7,18 @@ import {
   LogOut,
   User,
   HardHat,
+  Download,
 } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import useOfflineStore from "../../store/useOfflineStore.js";
 
 const Navbar = () => {
   const { t, i18n } = useTranslation("navbar");
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { deferredPrompt, showIosInstallHint, isStandalone } = useOfflineStore();
 
   const handleLogout = async () => {
     try {
@@ -117,6 +120,18 @@ const Navbar = () => {
 
       {/* Right actions */}
       <div className="ml-auto flex items-center gap-3">
+        {!isStandalone && (deferredPrompt || showIosInstallHint) && (
+          <button
+            onClick={() => useOfflineStore.getState().setShowInstallModal(true)}
+            className="flex items-center gap-1.5 px-3 h-9 rounded-lg border border-[#cbd5e1]
+              text-[#475569] hover:text-[#16a34a] hover:border-[#16a34a] hover:bg-[#f0fdf4]
+              text-xs font-semibold transition-all cursor-pointer shrink-0"
+            title={t("common:pwa.installApp")}
+          >
+            <Download size={13} />
+            <span className="hidden sm:inline">{t("common:pwa.installShort")}</span>
+          </button>
+        )}
         <LanguageSwitcher />
         {isAuthenticated ? (
           <>

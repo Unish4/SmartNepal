@@ -85,7 +85,7 @@ define(['./workbox-416d0ccd'], (function (workbox) { 'use strict';
     "revision": "d41d8cd98f00b204e9800998ecf8427e"
   }, {
     "url": "/index.html",
-    "revision": "0.htlru7rf9ck"
+    "revision": "0.dpjutj2khe4"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/index.html"), {
@@ -95,6 +95,9 @@ define(['./workbox-416d0ccd'], (function (workbox) { 'use strict';
   workbox.registerRoute(/^http:\/\/localhost:3000\/api\/issues/, new workbox.NetworkFirst({
     "cacheName": "nepalSewa-api-issues",
     "networkTimeoutSeconds": 4,
+    "fetchOptions": {
+      "credentials": "include"
+    },
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 100,
       maxAgeSeconds: 86400

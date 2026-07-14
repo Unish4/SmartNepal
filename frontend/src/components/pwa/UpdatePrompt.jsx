@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
+import useOfflineStore from "../../store/useOfflineStore.js";
 
 const SESSION_SUPPRESS_KEY = "nepalsewa-update-postponed";
 
@@ -24,6 +25,13 @@ const UpdatePrompt = () => {
       }
     },
   });
+
+  useEffect(() => {
+    useOfflineStore.setState({
+      needRefresh,
+      updateServiceWorker: () => updateServiceWorker(true),
+    });
+  }, [needRefresh, updateServiceWorker]);
 
   useEffect(() => {
     if (needRefresh) {

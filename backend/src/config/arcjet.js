@@ -7,7 +7,7 @@ import arcjet, {
 import ENV from "./env.js";
 
 
-const isConfigured = !!ENV.ARCJET_KEY;
+const isConfigured = !!ENV.ARCJET_KEY && ENV.NODE_ENV === "production";
 
 // Base client with Shield (for global middleware)
 const baseClient = isConfigured

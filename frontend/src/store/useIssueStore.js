@@ -10,6 +10,14 @@ import {
 } from "../services/issueService.js";
 import { enqueueIssue } from "../lib/offlineQueue.js";
 import useOfflineStore from "./useOfflineStore.js";
+import {
+  get as idbGet,
+  set as idbSet,
+  clear as idbClear,
+  createStore,
+} from "idb-keyval";
+
+const issueCacheStore = createStore("smartnepal-issue-cache-db", "issue-cache");
 
 // Helper: applies a new upvoterIds array to a single issue object.
 // Used by the optimistic update and rollback paths below.
@@ -29,38 +37,91 @@ const useIssueStore = create((set, get) => ({
   // ─── Actions ──────────────────────────────────────────────────────────────
 
   getIssues: async (params = {}) => {
+    const cacheKey = `issues-${JSON.stringify(params)}`;
+    try {
+      const cached = await idbGet(cacheKey, issueCacheStore);
+      if (cached) {
+        set({ issues: cached.issues, pagination: cached.pagination });
+      }
+    } catch (err) {
+      console.warn("Failed to load cached issues:", err);
+    }
+
     set({ isLoading: true, error: null });
     try {
       const res = await fetchIssues(params);
       set({ issues: res.issues, pagination: res.pagination });
+      await idbSet(
+        cacheKey,
+        { issues: res.issues, pagination: res.pagination },
+        issueCacheStore,
+      );
     } catch (error) {
-      set({ error: error.response?.data?.message || "Failed to load issues" });
+      const hasIssues = get().issues?.length > 0;
+      if (!hasIssues) {
+        set({
+          error: error.response?.data?.message || "Failed to load issues",
+        });
+      }
     } finally {
       set({ isLoading: false });
     }
   },
 
   getIssueById: async (id) => {
-    set({ isLoading: true, currentIssue: null, error: null });
+    const cacheKey = `issue-${id}`;
+    try {
+      const cached = await idbGet(cacheKey, issueCacheStore);
+      if (cached) {
+        set({ currentIssue: cached });
+      } else if (get().currentIssue?._id !== id) {
+        set({ currentIssue: null });
+      }
+    } catch (err) {
+      console.warn("Failed to load cached issue detail:", err);
+    }
+
+    set({ isLoading: true, error: null });
     try {
       const res = await fetchIssueById(id);
       set({ currentIssue: res.issue });
+      await idbSet(cacheKey, res.issue, issueCacheStore);
     } catch (error) {
-      set({ error: error.response?.data?.message || "Issue not found" });
+      const hasIssue = get().currentIssue?._id === id;
+      if (!hasIssue) {
+        set({ error: error.response?.data?.message || "Issue not found" });
+      }
     } finally {
       set({ isLoading: false });
     }
   },
-
   getMyIssues: async (params = {}) => {
+    const cacheKey = `myIssues-${JSON.stringify(params)}`;
+    try {
+      const cached = await idbGet(cacheKey, issueCacheStore);
+      if (cached) {
+        set({ myIssues: cached.issues, myIssuesPagination: cached.pagination });
+      }
+    } catch (err) {
+      console.warn("Failed to load cached myIssues:", err);
+    }
+
     set({ isLoading: true, error: null });
     try {
       const res = await fetchMyIssues(params);
       set({ myIssues: res.issues, myIssuesPagination: res.pagination });
+      await idbSet(
+        cacheKey,
+        { issues: res.issues, pagination: res.pagination },
+        issueCacheStore,
+      );
     } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to load your issues",
-      });
+      const hasIssues = get().myIssues?.length > 0;
+      if (!hasIssues) {
+        set({
+          error: error.response?.data?.message || "Failed to load your issues",
+        });
+      }
     } finally {
       set({ isLoading: false });
     }
@@ -76,9 +137,16 @@ const useIssueStore = create((set, get) => ({
       }
       const res = await createIssueRequest(issueData);
       set((state) => ({ issues: [res.issue, ...state.issues] }));
+      await idbClear(issueCacheStore).catch((e) =>
+        console.warn("Cache clear failed:", e),
+      );
       return res;
     } catch (error) {
-      if (!navigator.onLine || error.message === "Network Error" || !error.response) {
+      if (
+        !navigator.onLine ||
+        error.message === "Network Error" ||
+        !error.response
+      ) {
         try {
           const record = await enqueueIssue(issueData);
           await useOfflineStore.getState().refreshPendingCount();
@@ -103,6 +171,9 @@ const useIssueStore = create((set, get) => ({
         currentIssue:
           state.currentIssue?._id === id ? res.issue : state.currentIssue,
       }));
+      await idbClear(issueCacheStore).catch((e) =>
+        console.warn("Cache clear failed:", e),
+      );
       return res;
     } finally {
       set({ isLoading: false });
@@ -119,6 +190,9 @@ const useIssueStore = create((set, get) => ({
         currentIssue:
           state.currentIssue?._id === id ? null : state.currentIssue,
       }));
+      await idbClear(issueCacheStore).catch((e) =>
+        console.warn("Cache clear failed:", e),
+      );
     } finally {
       set({ isLoading: false });
     }

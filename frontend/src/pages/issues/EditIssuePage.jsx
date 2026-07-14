@@ -122,6 +122,10 @@ const EditIssuePage = () => {
             type="text"
             {...register("title", {
               required: "Title is required",
+              minLength: {
+                value: 5,
+                message: "Title must be at least 5 characters",
+              },
               maxLength: {
                 value: 100,
                 message: "Title cannot exceed 100 characters",

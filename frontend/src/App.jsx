@@ -32,6 +32,7 @@ import OfflineBanner from "./components/pwa/OfflineBanner.jsx";
 import InstallPrompt from "./components/pwa/InstallPrompt.jsx";
 import UpdatePrompt from "./components/pwa/UpdatePrompt.jsx";
 import SyncManager from "./components/pwa/SyncManager.jsx";
+import PwaInstallModal from "./components/pwa/PwaInstallModal.jsx";
 
 // Public only route - redirects authenticated users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
@@ -67,6 +68,7 @@ function App() {
       <SyncManager />
       <InstallPrompt />
       <UpdatePrompt />
+      <PwaInstallModal />
       <OfflineBanner />
       <Toaster
         position="top-right"

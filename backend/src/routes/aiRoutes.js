@@ -18,6 +18,7 @@ const router = Router();
 const aiLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 20,
+  skip: () => process.env.NODE_ENV !== "production",
   message: {
     success: false,
     message: "Too many AI requests. Please slow down.",

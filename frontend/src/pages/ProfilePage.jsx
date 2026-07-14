@@ -19,9 +19,12 @@ import {
   HardHat,
   Languages,
   Check,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../store/useAuthStore.js";
+import useOfflineStore from "../store/useOfflineStore.js";
 import {
   NEPAL_LOCATIONS,
   getDistricts,
@@ -59,6 +62,7 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation(["common", "auth"]);
   const { user, updatePreferences, updateProfile, uploadAvatar } =
     useAuthStore();
+  const { deferredPrompt, showIosInstallHint, isStandalone, needRefresh, updateServiceWorker } = useOfflineStore();
 
   const [emailNotif, setEmailNotif] = useState(
     user?.emailNotifications ?? true,
@@ -242,6 +246,37 @@ export default function ProfilePage() {
           },
         ]
       : []),
+    ...(!isStandalone && (deferredPrompt || showIosInstallHint)
+      ? [
+          {
+            onClick: () => useOfflineStore.getState().setShowInstallModal(true),
+            icon: Download,
+            label: i18n.language === "ne" ? "एप डाउनलोड गर्नुहोस्" : "Install App",
+            sub: i18n.language === "ne" ? "तपाईंको उपकरणमा नेपालसेवा डाउनलोड गर्नुहोस्" : "Install NepalSewa on your device",
+            color: "#16a34a",
+            bg: "#f0fdf4",
+          },
+        ]
+      : []),
+    {
+      onClick: () => {
+        if (needRefresh && updateServiceWorker) {
+          updateServiceWorker();
+        } else {
+          window.location.reload();
+        }
+      },
+      icon: RefreshCw,
+      label: needRefresh
+        ? (i18n.language === "ne" ? "एप अपडेट गर्नुहोस्" : "Update App")
+        : (i18n.language === "ne" ? "एप पुनः लोड गर्नुहोस्" : "Reload App"),
+      sub: needRefresh
+        ? (i18n.language === "ne" ? "नयाँ संस्करण उपलब्ध छ, तुरुन्तै लोड गर्नुहोस्" : "A new version is available. Click to reload and update.")
+        : (i18n.language === "ne" ? "रिफ्रेस गर्न वा अपडेटहरू जाँच गर्न क्लिक गर्नुहोस्" : "Click to refresh or check for updates."),
+      color: needRefresh ? "#d97706" : "#475569",
+      bg: needRefresh ? "#fffbeb" : "#f1f5f9",
+      badge: needRefresh ? (i18n.language === "ne" ? "अपडेट उपलब्ध" : "Update Available") : null,
+    },
   ];
 
   return (
@@ -697,38 +732,67 @@ export default function ProfilePage() {
               </div>
 
               <div className="p-6 grid sm:grid-cols-2 gap-4">
-                {quickLinks.map(({ to, icon: Icon, label, sub, color, bg }) => (
-                  <Link
-                    key={to}
-                    to={to}
-                    className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
-                      gap-4 hover:shadow-md hover:border-[#cbd5e1] hover:-translate-y-0.5
-                      transition-all duration-200 group"
-                  >
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                      group-hover:scale-105 transition-transform"
-                      style={{ backgroundColor: bg }}
-                    >
-                      <Icon size={18} style={{ color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-semibold text-[#0f172a]">
-                          {label}
-                        </p>
-                        <ChevronRight
-                          size={14}
-                          className="text-[#cbd5e1] group-hover:text-[#16a34a]
-                          transition-colors shrink-0"
-                        />
+                {quickLinks.map(({ to, onClick, icon: Icon, label, sub, color, bg, badge }) => {
+                  const cardContent = (
+                    <>
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                        group-hover:scale-105 transition-transform"
+                        style={{ backgroundColor: bg }}
+                      >
+                        <Icon size={18} style={{ color }} />
                       </div>
-                      <p className="text-xs text-[#94a3b8] mt-1 leading-relaxed">
-                        {sub}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-[#0f172a]">
+                              {label}
+                            </p>
+                            {badge && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0 animate-pulse">
+                                {badge}
+                              </span>
+                            )}
+                          </div>
+                          <ChevronRight
+                            size={14}
+                            className="text-[#cbd5e1] group-hover:text-[#16a34a]
+                            transition-colors shrink-0"
+                          />
+                        </div>
+                        <p className="text-xs text-[#94a3b8] mt-1 leading-relaxed text-left">
+                          {sub}
+                        </p>
+                      </div>
+                    </>
+                  );
+
+                  if (onClick) {
+                    return (
+                      <button
+                        key={label}
+                        onClick={onClick}
+                        className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
+                          gap-4 hover:shadow-md hover:border-[#cbd5e1] hover:-translate-y-0.5
+                          transition-all duration-200 group w-full text-left cursor-pointer bg-white"
+                      >
+                        {cardContent}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={to}
+                      to={to}
+                      className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
+                        gap-4 hover:shadow-md hover:border-[#cbd5e1] hover:-translate-y-0.5
+                        transition-all duration-200 group bg-white"
+                    >
+                      {cardContent}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>

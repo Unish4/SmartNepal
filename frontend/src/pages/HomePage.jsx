@@ -176,18 +176,17 @@ export default function HomePage() {
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-[#0f172a] line-clamp-2 mb-1">
-                    Large pothole causing accidents on Bagbazaar Road
+                    {t("home.mockTitle")}
                   </p>
                   <p className="text-xs text-[#64748b] mb-3 line-clamp-2">
-                    A significant pothole near the temple intersection has been
-                    growing for weeks.
+                    {t("home.mockDesc")}
                   </p>
                   <div className="flex items-center justify-between text-xs text-[#94a3b8] pt-2 border-t border-[#f1f5f9]">
                     <span className="flex items-center gap-1">
                       <MapPin size={10} />
-                      Bagbazaar, Kathmandu
+                      {t("home.mockLocation")}
                     </span>
-                    <span>2h ago</span>
+                    <span>{t("home.mockTime")}</span>
                   </div>
                 </div>
               </div>
@@ -290,12 +289,17 @@ export default function HomePage() {
                 <div className="w-8 h-8 rounded-lg bg-[#16a34a] flex items-center justify-center">
                   <MapPin size={14} className="text-white" />
                 </div>
-                <span className="font-bold text-white text-[15px]">
-                  {t("app.name")}
+                <span className="font-bold text-white text-[15px] flex items-center gap-1.5">
+                  <span>NepalSewa</span>
+                  <span className="text-[#64748b] text-xs">/</span>
+                  <span className="font-medium text-[#94a3b8] text-sm">नेपाल सेवा</span>
                 </span>
               </div>
-              <p className="text-[#64748b] text-sm max-w-60 leading-relaxed">
-                {t("home.footerTagline")}
+              <p className="text-[#64748b] text-xs leading-relaxed max-w-64">
+                Connecting citizens to their municipalities for a better Nepal.
+              </p>
+              <p className="text-[#475569] text-xs leading-relaxed mt-1 max-w-64">
+                राम्रो नेपालका लागि नागरिकहरूलाई नगरपालिकासँग जोड्दै।
               </p>
             </div>
             <div className="flex gap-12 text-sm">
@@ -303,27 +307,29 @@ export default function HomePage() {
                 <p className="text-[#94a3b8] font-semibold uppercase tracking-wider text-[10px] mb-3">
                   {t("home.footerPlatform")}
                 </p>
-                {["Issues", "Map View", "About"].map((tName) => (
-                  <p
-                    key={tName}
-                    className="text-[#475569] hover:text-white cursor-pointer mb-2 transition-colors"
-                  >
-                    {tName === "Issues" ? t("nav.issues") : tName}
-                  </p>
-                ))}
+                <Link
+                  to="/issues"
+                  className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
+                >
+                  {t("nav.issues")}
+                </Link>
+                <Link
+                  to="/issues/me"
+                  className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
+                >
+                  {t("nav.myReports")}
+                </Link>
               </div>
               <div>
                 <p className="text-[#94a3b8] font-semibold uppercase tracking-wider text-[10px] mb-3">
                   {t("home.footerGovernment")}
                 </p>
-                {["Admin Login", "Municipality Portal"].map((tName) => (
-                  <p
-                    key={tName}
-                    className="text-[#475569] hover:text-white cursor-pointer mb-2 transition-colors"
-                  >
-                    {tName}
-                  </p>
-                ))}
+                <Link
+                  to="/login"
+                  className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
+                >
+                  {t("profile.quickLinks") === "छिटो लिङ्कहरू" ? "कर्मचारी लगइन" : "Staff Login"}
+                </Link>
               </div>
             </div>
           </div>
