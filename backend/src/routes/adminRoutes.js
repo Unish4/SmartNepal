@@ -8,13 +8,21 @@ import {
   getFieldWorkers,
   assignIssue,
 } from "../controllers/adminController.js";
+import {
+  createAdmin,
+  getAdmins,
+  updateAdminJurisdiction,
+} from "../controllers/adminManagementController.js";
 import { getAnalytics } from "../controllers/analyticsController.js";
-import { protect, requireAdmin } from "../middleware/authMiddleware.js";
+import { protect, requireAdmin, requireSuperAdmin } from "../middleware/authMiddleware.js";
 import {
   statusUpdateValidator,
   createFieldWorkerValidator,
   assignIssueValidator,
+  createAdminValidator,
+  updateAdminJurisdictionValidator,
 } from "../utils/validators.js";
+import { scopeToMunicipality } from "../middleware/jurisdiction.js";
 import { validationResult } from "express-validator";
 
 const router = Router();
@@ -28,7 +36,7 @@ const validate = (req, res, next) => {
   next();
 };
 
-router.use(protect, requireAdmin);
+router.use(protect, requireAdmin, scopeToMunicipality);
 
 router.get("/stats", getDashboardStats);
 router.get("/issues", getAllIssues);
@@ -50,5 +58,21 @@ router.post(
 );
 router.get("/field-workers", getFieldWorkers);
 router.patch("/issues/:id/assign", assignIssueValidator, validate, assignIssue);
+
+router.post(
+  "/admins",
+  requireSuperAdmin,
+  createAdminValidator,
+  validate,
+  createAdmin,
+);
+router.get("/admins", requireSuperAdmin, getAdmins);
+router.patch(
+  "/admins/:id/jurisdiction",
+  requireSuperAdmin,
+  updateAdminJurisdictionValidator,
+  validate,
+  updateAdminJurisdiction,
+);
 
 export default router;

@@ -10,99 +10,139 @@ import {
   X,
   HardHat,
   ShieldCheck,
+  Globe2,
+  ShieldPlus,
 } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore.js";
 
-const NAV_LINKS = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/admin/issues", label: "All Issues", icon: ListChecks },
-  { to: "/admin/users", label: "Citizens", icon: Users },
-  { to: "/admin/admins", label: "Admins", icon: ShieldCheck },
-  { to: "/admin/field-workers",label: "Field Workers", icon: HardHat },
-  { to: "/admin/analytics", label: "Analytics", icon: BarChart2 },
-];
-
 // SidebarContent is extracted so it renders identically in both the
 // fixed desktop sidebar and the mobile slide-in drawer.
-const SidebarContent = ({ user, onLogout, onLinkClick }) => (
-  <div className="flex flex-col h-full bg-[#0b0f19] text-slate-300">
-    {/* Logo */}
-    <div className="h-16 flex items-center px-6 border-b border-slate-800/60 shrink-0 gap-2.5">
-      <Link to="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity cursor-pointer">
-        <div className="w-8 h-8 flex items-center justify-center">
-          <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
-        </div>
-        <span className="font-extrabold text-white text-[16px] tracking-tight shrink-0">
-          Nepal<span className="text-emerald-400">Sewa</span>
-        </span>
-      </Link>
-      <span
-        className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10
-        border border-emerald-400/20 px-1.5 py-0.5 rounded-md shrink-0 uppercase tracking-wider"
-      >
-        Admin
-      </span>
-    </div>
+const SidebarContent = ({ user, onLogout, onLinkClick }) => {
+  const isSuperAdmin = user?.role === "super_admin";
 
-    {/* Nav links */}
-    <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-      <p
-        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest
-        px-3 mb-4"
-      >
-        Manage Portal
-      </p>
-      {NAV_LINKS.map(({ to, label, icon: Icon, end }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={end}
-          onClick={onLinkClick}
-          className={({ isActive }) =>
-            `flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold
-            transition-all duration-200 cursor-pointer
-            ${
-              isActive
-                ? "bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 pl-3 shadow-inner"
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-            }`
-          }
-        >
-          <Icon size={18} className="shrink-0" />
-          {label}
-        </NavLink>
-      ))}
-    </nav>
+  const jurisdictionLabel = isSuperAdmin
+    ? "All Municipalities"
+    : user?.jurisdiction?.province
+      ? `${user.jurisdiction.district ? user.jurisdiction.district + ", " : ""}${user.jurisdiction.province}`
+      : "No jurisdiction set";
 
-    {/* Admin info + logout */}
-    <div className="border-t border-slate-800/60 p-5 shrink-0 bg-slate-950/30">
-      <div className="flex items-center gap-3 mb-4.5">
-        <div
-          className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20
-          flex items-center justify-center shrink-0 shadow-inner"
+  const navLinks = [
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { to: "/admin/issues", label: "All Issues", icon: ListChecks },
+    { to: "/admin/users", label: "Citizens", icon: Users },
+    { to: "/admin/admins", label: "Admins", icon: ShieldCheck },
+    { to: "/admin/field-workers", label: "Field Workers", icon: HardHat },
+    { to: "/admin/analytics", label: "Analytics", icon: BarChart2 },
+    ...(isSuperAdmin
+      ? [{ to: "/admin/manage", label: "Admin Accounts", icon: ShieldPlus }]
+      : []),
+  ];
+
+  return (
+    <div className="flex flex-col h-full bg-[#0b0f19] text-slate-300">
+      {/* Logo */}
+      <div className="h-16 flex items-center px-6 border-b border-slate-800/60 shrink-0 gap-2.5">
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 hover:opacity-90 transition-opacity cursor-pointer"
         >
-          <span className="text-sm font-bold text-emerald-400">
-            {user?.name?.[0]?.toUpperCase()}
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
+          </div>
+          <span className="font-extrabold text-white text-[16px] tracking-tight shrink-0">
+            Nepal<span className="text-emerald-400">Sewa</span>
           </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-white truncate">{user?.name}</p>
-          <p className="text-[10px] text-slate-500 truncate mt-0.5">
-            {user?.email}
-          </p>
-        </div>
+        </Link>
+        <span
+          className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10
+          border border-emerald-400/20 px-1.5 py-0.5 rounded-md shrink-0 uppercase tracking-wider"
+        >
+          Admin
+        </span>
       </div>
-      <button
-        onClick={onLogout}
-        className="flex items-center gap-2 text-xs text-slate-500
-          hover:text-rose-400 font-bold transition-colors cursor-pointer w-full"
+
+      <div
+        className={`mx-3 mt-3 px-3 py-2.5 rounded-lg flex items-center gap-2 ${
+          !isSuperAdmin && !user?.jurisdiction?.province
+            ? "bg-amber-500/10 border border-amber-500/30"
+            : "bg-[#1e293b]"
+        }`}
       >
-        <LogOut size={13} className="shrink-0" />
-        Sign out
-      </button>
+        <Globe2
+          size={13}
+          className={
+            !isSuperAdmin && !user?.jurisdiction?.province
+              ? "text-amber-400"
+              : "text-[#4ade80]"
+          }
+        />
+        <span
+          className={`text-xs font-medium ${!isSuperAdmin && !user?.jurisdiction?.province ? "text-amber-300" : "text-[#e2e8f0]"}`}
+        >
+          {jurisdictionLabel}
+        </span>
+      </div>
+
+      {/* Nav links */}
+      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <p
+          className="text-[10px] font-bold text-slate-500 uppercase tracking-widest
+          px-3 mb-4"
+        >
+          Manage Portal
+        </p>
+        {navLinks.map(({ to, label, icon: Icon, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            onClick={onLinkClick}
+            className={({ isActive }) =>
+              `flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold
+              transition-all duration-200 cursor-pointer
+              ${
+                isActive
+                  ? "bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 pl-3 shadow-inner"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+              }`
+            }
+          >
+            <Icon size={18} className="shrink-0" />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Admin info + logout */}
+      <div className="border-t border-slate-800/60 p-5 shrink-0 bg-slate-950/30">
+        <div className="flex items-center gap-3 mb-4.5">
+          <div
+            className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20
+            flex items-center justify-center shrink-0 shadow-inner"
+          >
+            <span className="text-sm font-bold text-emerald-400">
+              {user?.name?.[0]?.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-white truncate">{user?.name}</p>
+            <p className="text-[10px] text-slate-500 truncate mt-0.5">
+              {user?.email}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 text-xs text-slate-500
+            hover:text-rose-400 font-bold transition-colors cursor-pointer w-full"
+        >
+          <LogOut size={13} className="shrink-0" />
+          Sign out
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -176,7 +216,10 @@ const AdminLayout = () => {
           >
             <Menu size={20} />
           </button>
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
+          <Link
+            to="/"
+            className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+          >
             <div className="w-8 h-8 flex items-center justify-center">
               <img
                 src="/icon.png"

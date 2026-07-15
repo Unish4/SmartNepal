@@ -27,6 +27,8 @@ const formatUser = (user) => ({
   emailNotifications: user.emailNotifications,
   preferredLanguage: user.preferredLanguage,
   isEmailVerified: user.isEmailVerified,
+  jurisdiction: user.jurisdiction,
+  department: user.department,
 });
 
 const checkValidation = (req, res) => {
@@ -120,7 +122,7 @@ export const login = async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("password");
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({
         success: false,

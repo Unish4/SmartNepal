@@ -12,6 +12,8 @@ export const getAnalytics = async (req, res, next) => {
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0);
 
+    const filter = req.jurisdictionFilter || {};
+
     const [
       issuesByCategory,
       issuesByStatus,
@@ -23,7 +25,7 @@ export const getAnalytics = async (req, res, next) => {
     ] = await Promise.all([
       // Total issues grouped by category — sorted highest first
       Issue.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
+        { $match: { ...filter, createdAt: { $gte: startDate } } },
         { $group: { _id: "$category", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $project: { _id: 0, category: "$_id", count: 1 } },
@@ -31,20 +33,20 @@ export const getAnalytics = async (req, res, next) => {
 
       // Total issues grouped by status
       Issue.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
+        { $match: { ...filter, createdAt: { $gte: startDate } } },
         { $group: { _id: "$status", count: { $sum: 1 } } },
         { $project: { _id: 0, status: "$_id", count: 1 } },
       ]),
 
       // Total issues grouped by priority
       Issue.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
+        { $match: { ...filter, createdAt: { $gte: startDate } } },
         { $group: { _id: "$priority", count: { $sum: 1 } } },
         { $project: { _id: 0, priority: "$_id", count: 1 } },
       ]),
 
       Issue.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
+        { $match: { ...filter, createdAt: { $gte: startDate } } },
         {
           $group: {
             _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
@@ -58,6 +60,7 @@ export const getAnalytics = async (req, res, next) => {
       Issue.aggregate([
         {
           $match: {
+            ...filter,
             status: "resolved",
             resolvedAt: { $exists: true, $ne: null },
             createdAt: { $gte: startDate },
@@ -88,8 +91,9 @@ export const getAnalytics = async (req, res, next) => {
         },
       ]),
 
-      Issue.countDocuments({ createdAt: { $gte: startDate } }),
+      Issue.countDocuments({ ...filter, createdAt: { $gte: startDate } }),
       Issue.countDocuments({
+        ...filter,
         status: "resolved",
         createdAt: { $gte: startDate },
       }),

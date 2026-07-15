@@ -83,6 +83,7 @@
     "citizen": "Citizen",
     "administrator": "Administrator",
     "fieldWorker": "Field Worker",
+    "superAdmin": "Super Admin",
     "saving": "Saving…"
   },
   "language": {

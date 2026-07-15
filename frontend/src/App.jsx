@@ -26,6 +26,7 @@ import AdminIssuesPage from "./pages/admin/AdminIssuesPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminAdminsPage from "./pages/admin/AdminAdminsPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
+import AdminManagementPage from "./pages/admin/AdminManagementPage";
 
 import FieldLayout from "./components/field/FieldLayout";
 import FieldDashboardPage from "./pages/field/FieldDashboardPage";
@@ -47,7 +48,7 @@ const PublicOnlyRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role !== "admin") return <Navigate to="/" replace />;
+  if (user?.role !== "admin" && user?.role !== "super_admin") return <Navigate to="/" replace />;
   return children;
 };
 
@@ -61,8 +62,19 @@ const FieldWorkerRoute = ({ children }) => {
 const CitizenRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role === "admin" || user?.role === "field_worker")
+  if (
+    user?.role === "admin" ||
+    user?.role === "field_worker" ||
+    user?.role === "super_admin"
+  )
     return <Navigate to="/" replace />;
+  return children;
+};
+
+const SuperAdminRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.role !== "super_admin") return <Navigate to="/admin" replace />;
   return children;
 };
 
@@ -152,6 +164,14 @@ function App() {
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="admins" element={<AdminAdminsPage />} />
           <Route path="analytics" element={<AdminAnalyticsPage />} />
+          <Route
+            path="manage"
+            element={
+              <SuperAdminRoute>
+                <AdminManagementPage />
+              </SuperAdminRoute>
+            }
+          />
         </Route>
 
         <Route

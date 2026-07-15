@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, X, ChevronDown, UserPlus } from "lucide-react";
+import { Search, X, ChevronDown, UserPlus, Globe2 } from "lucide-react";
 import { fetchAllIssues } from "../../services/adminService.js";
 import {
   STATUS_CONFIG,
@@ -12,6 +12,8 @@ import { useDebounce } from "../../hooks/useDebounce.js";
 import StatusUpdateModal from "../admin/StatusUpdateModal.jsx";
 import AssignIssueModal from "../../components/admin/AssignIssueModal.jsx";
 import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
+import useAuthStore from "../../store/useAuthStore.js";
+import { PROVINCES } from "../../constants/province.js";
 
 const AdminIssuesPage = () => {
   const [issues, setIssues] = useState([]);
@@ -25,6 +27,12 @@ const AdminIssuesPage = () => {
   const [editingIssue, setEditingIssue] = useState(null);
   const [assigningIssue, setAssigningIssue] = useState(null);
 
+  // Inside the component:
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === "super_admin";
+  const [province, setProvince] = useState("");
+  const [district, setDistrict] = useState("");
+
   const debouncedSearch = useDebounce(search, 400);
 
   useEffect(() => {
@@ -35,6 +43,8 @@ const AdminIssuesPage = () => {
       setError(null);
       try {
         const params = { page, limit: 15 };
+        if (isSuperAdmin && province) params.province = province;
+        if (isSuperAdmin && district) params.district = district;
         if (debouncedSearch) params.search = debouncedSearch;
         if (category) params.category = category;
         if (statusFilter) params.status = statusFilter;
@@ -59,7 +69,7 @@ const AdminIssuesPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [debouncedSearch, category, statusFilter, page]);
+  }, [debouncedSearch, category, statusFilter, page, province, district, isSuperAdmin]);
 
   // In-place row update after status change — no full refetch needed
   const handleIssueUpdated = (updatedIssue) => {
@@ -72,9 +82,11 @@ const AdminIssuesPage = () => {
     setSearch("");
     setCategory("");
     setStatusFilter("");
+    setProvince("");
+    setDistrict("");
     setPage(1);
   };
-  const hasFilters = !!(search || category || statusFilter);
+  const hasFilters = !!(search || category || statusFilter || province || district);
 
   return (
     <div>
@@ -91,6 +103,17 @@ const AdminIssuesPage = () => {
           )}
         </div>
       </div>
+
+      {!isSuperAdmin && (
+        <p className="text-xs text-[#16a34a] font-medium mt-1 flex items-center gap-1">
+          <Globe2 size={11} />
+          Showing:{" "}
+          {user?.jurisdiction?.district
+            ? `${user.jurisdiction.district}, `
+            : ""}
+          {user?.jurisdiction?.province || "no jurisdiction set"}
+        </p>
+      )}
 
       {/* ── Filter bar  */}
       <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm p-4 mb-5">
@@ -187,6 +210,71 @@ const AdminIssuesPage = () => {
             />
           </div>
 
+          {/* Province & District Filters for Super Admin */}
+          {isSuperAdmin && (
+            <>
+              <div className="relative">
+                <select
+                  value={province}
+                  onChange={(e) => {
+                    setProvince(e.target.value);
+                    setDistrict("");
+                    setPage(1);
+                  }}
+                  className={`h-9 pl-3 pr-7 text-sm border rounded-lg bg-white outline-none
+                    cursor-pointer appearance-none transition-all
+                    ${
+                      province
+                        ? "border-[#16a34a] text-[#16a34a] bg-[#f0fdf4]"
+                        : "border-[#e2e8f0] text-[#475569] hover:border-[#cbd5e1]"
+                    }`}
+                >
+                  <option value="">All Provinces</option>
+                  {Object.keys(PROVINCES).map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={12}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none
+                    ${province ? "text-[#16a34a]" : "text-[#94a3b8]"}`}
+                />
+              </div>
+
+              <div className="relative">
+                <select
+                  value={district}
+                  onChange={(e) => {
+                    setDistrict(e.target.value);
+                    setPage(1);
+                  }}
+                  disabled={!province}
+                  className={`h-9 pl-3 pr-7 text-sm border rounded-lg bg-white outline-none
+                    cursor-pointer appearance-none transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                    ${
+                      district
+                        ? "border-[#16a34a] text-[#16a34a] bg-[#f0fdf4]"
+                        : "border-[#e2e8f0] text-[#475569] hover:border-[#cbd5e1]"
+                    }`}
+                >
+                  <option value="">All Districts</option>
+                  {(province ? PROVINCES[province] : []).map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={12}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none
+                    ${district ? "text-[#16a34a]" : "text-[#94a3b8]"}`}
+                />
+              </div>
+            </>
+          )}
+
           {hasFilters && (
             <button
               onClick={clearFilters}
@@ -222,10 +310,10 @@ const AdminIssuesPage = () => {
                   "Status",
                   "Priority",
                   "Reporter",
+                  "Assigned",
                   "↑",
                   "Date",
                   "Actions",
-                  "Assigned",
                 ].map((h) => (
                   <th
                     key={h}
@@ -240,7 +328,7 @@ const AdminIssuesPage = () => {
             <tbody className="divide-y divide-[#f8fafc]">
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <TableRowSkeleton key={i} colCount={8} />
+                  <TableRowSkeleton key={i} colCount={9} />
                 ))
               ) : issues.length > 0 ? (
                 issues.map((issue) => {
@@ -378,7 +466,7 @@ const AdminIssuesPage = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-4 py-16 text-center text-sm text-[#94a3b8]"
                   >
                     No issues match the current filters.

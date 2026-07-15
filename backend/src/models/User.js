@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["citizen", "admin", "field_worker"],
+      enum: ["citizen", "admin", "field_worker", "super_admin"],
       default: "citizen",
     },
     phone: {
@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema(
         "General",
       ],
     },
+    jurisdiction: {
+      province: {
+        type: String,
+      },
+      district: {
+        type: String,
+      },
+    },
     emailNotifications: {
       type: Boolean,
       default: true,
@@ -81,6 +89,12 @@ userSchema.methods.toJSON = function () {
   delete obj.password;
   return obj;
 };
+
+userSchema.index({
+  role: 1,
+  "jurisdiction.province": 1,
+  "jurisdiction.district": 1,
+});
 
 const User = mongoose.model("User", userSchema);
 

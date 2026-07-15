@@ -40,3 +40,22 @@ export const assignIssueRequest = async (issueId, fieldWorkerId) => {
   });
   return response.data;
 };
+
+// ── admin account management (super_admin only) 
+export const createAdminRequest = async (data) => {
+  const response = await api.post("/api/admin/admins", data);
+  return response.data;
+};
+
+export const fetchAdmins = async () => {
+  const response = await api.get("/api/admin/admins");
+  return response.data;
+};
+
+export const updateAdminJurisdictionRequest = async (adminId, jurisdiction) => {
+  const response = await api.patch(
+    `/api/admin/admins/${adminId}/jurisdiction`,
+    jurisdiction,
+  );
+  return response.data;
+};

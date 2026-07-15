@@ -87,11 +87,7 @@ export default function FieldDashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (assignments.length === 0 && isLoading) {
-      setIsLoading(true);
-    } else {
-      setIsRefreshing(true);
-    }
+    Promise.resolve().then(() => setIsRefreshing(true));
 
     const params = { page, limit: 10 };
     if (activeTab) params.status = activeTab;

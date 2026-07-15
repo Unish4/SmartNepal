@@ -203,14 +203,16 @@ export default function ProfilePage() {
     { icon: MapPin, label: t("auth:register.city"), value: user.city || t("profile.notSet") },
   ];
 
-  const roleLabel = user.role === "admin"
+  const roleLabel = user.role === "super_admin"
+    ? t("profile.superAdmin")
+    : user.role === "admin"
     ? t("profile.administrator")
     : user.role === "field_worker"
     ? t("profile.fieldWorker")
     : t("profile.citizen");
 
   const quickLinks = [
-    ...(user.role !== "admin" && user.role !== "field_worker"
+    ...(user.role === "citizen"
       ? [
           {
             to: "/issues/me",
@@ -222,7 +224,7 @@ export default function ProfilePage() {
           },
         ]
       : []),
-    ...(user.role === "admin"
+    ...(user.role === "admin" || user.role === "super_admin"
       ? [
           {
             to: "/admin",

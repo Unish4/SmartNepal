@@ -110,7 +110,8 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-3 mb-6">
                 {(!isAuthenticated ||
                   (user?.role !== "admin" &&
-                    user?.role !== "field_worker")) && (
+                    user?.role !== "field_worker" &&
+                    user?.role !== "super_admin")) && (
                   <Link
                     to={isAuthenticated ? "/issues/new" : "/register"}
                     className="inline-flex items-center gap-2 h-12 px-7 rounded-xl

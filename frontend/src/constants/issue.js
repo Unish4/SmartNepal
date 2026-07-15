@@ -96,6 +96,12 @@ export const ROLE_CONFIG = {
     bg: "#fffbeb",
     border: "#fde68a",
   },
+  super_admin: {
+    label: "Super Admin",
+    color: "#e11d48",
+    bg: "#fff1f2",
+    border: "#ffe4e6",
+  },
 };
 
 export const FIELD_DEPARTMENTS = [

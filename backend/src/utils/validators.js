@@ -1,5 +1,60 @@
 import { body } from "express-validator";
 
+const VALID_PROVINCES = [
+  "Koshi Province",
+  "Madhesh Province",
+  "Bagmati Province",
+  "Gandaki Province",
+  "Lumbini Province",
+  "Karnali Province",
+  "Sudurpashchim Province",
+];
+
+const PROVINCE_DISTRICT_MAP = {
+  "Koshi Province": [
+    "Bhojpur", "Dhankuta", "Ilam", "Jhapa", "Khotang", "Morang",
+    "Okhaldhunga", "Panchthar", "Sankhuwasabha", "Solukhumbu",
+    "Sunsari", "Taplejung", "Terhathum", "Udayapur"
+  ],
+  "Madhesh Province": [
+    "Bara", "Dhanusha", "Mahottari", "Parsa", "Rautahat", "Saptari",
+    "Sarlahi", "Siraha"
+  ],
+  "Bagmati Province": [
+    "Bhaktapur", "Chitwan", "Dhading", "Dolakha", "Kathmandu",
+    "Kavrepalanchok", "Lalitpur", "Makwanpur", "Nuwakot", "Ramechhap",
+    "Rasuwa", "Sindhuli", "Sindhupalchok"
+  ],
+  "Gandaki Province": [
+    "Baglung", "Gorkha", "Kaski", "Lamjung", "Manang", "Mustang",
+    "Myagdi", "Nawalpur", "Parbat", "Syangja", "Tanahun"
+  ],
+  "Lumbini Province": [
+    "Arghakhanchi", "Banke", "Bardiya", "Dang", "Gulmi", "Kapilvastu",
+    "Nawalparasi West", "Palpa", "Pyuthan", "Rolpa", "Rukum East",
+    "Rupandehi"
+  ],
+  "Karnali Province": [
+    "Dailekh", "Dolpa", "Humla", "Jajarkot", "Jumla", "Kalikot",
+    "Mugu", "Rukum West", "Salyan", "Surkhet"
+  ],
+  "Sudurpashchim Province": [
+    "Achham", "Baitadi", "Bajhang", "Bajura", "Dadeldhura",
+    "Darchula", "Doti", "Kailali", "Kanchanpur"
+  ]
+};
+
+const validateDistrictForProvince = (district, { req }) => {
+  const province = req.body.province;
+  if (!province) return true;
+  const validDistricts = PROVINCE_DISTRICT_MAP[province];
+  if (!validDistricts) return true;
+  if (district && !validDistricts.includes(district)) {
+    throw new Error(`District '${district}' is not valid for '${province}'`);
+  }
+  return true;
+};
+
 // ─── Auth validators
 export const registerValidator = [
   body("name")
@@ -116,7 +171,8 @@ export const updateProfileValidator = [
     .optional({ checkFalsy: true })
     .trim()
     .notEmpty()
-    .withMessage("District cannot be empty"),
+    .withMessage("District cannot be empty")
+    .custom(validateDistrictForProvince),
 
   body("city")
     .optional({ checkFalsy: true })
@@ -297,7 +353,7 @@ export const aiDuplicateValidator = [
     .withMessage("Invalid longitude"),
 ];
 
-// ───  Field worker validators 
+// ───  Field worker validators
 const FIELD_DEPARTMENTS = [
   "Road Maintenance",
   "Water Supply",
@@ -340,6 +396,19 @@ export const createFieldWorkerValidator = [
     .trim()
     .matches(/^[0-9]{10}$/)
     .withMessage("Phone number must be 10 digits"),
+
+  body("province")
+    .trim()
+    .notEmpty()
+    .withMessage("Province is required")
+    .isIn(VALID_PROVINCES)
+    .withMessage("Invalid province"),
+
+  body("district")
+    .trim()
+    .notEmpty()
+    .withMessage("District is required")
+    .custom(validateDistrictForProvince),
 ];
 
 export const assignIssueValidator = [
@@ -366,7 +435,7 @@ export const fieldStatusUpdateValidator = [
     .withMessage("Reason cannot exceed 500 characters"),
 ];
 
-// ──  password reset validators 
+// ──  password reset validators
 export const forgotPasswordValidator = [
   body("email")
     .trim()
@@ -383,4 +452,55 @@ export const resetPasswordValidator = [
     .withMessage("Password is required")
     .isLength({ min: 6, max: 72 })
     .withMessage("Password must be between 6 and 72 characters"),
+];
+
+
+
+export const createAdminValidator = [
+  body("name")
+    .trim()
+    .notEmpty()
+    .withMessage("Name is required")
+    .isLength({ min: 2, max: 60 })
+    .withMessage("Name must be between 2 and 60 characters"),
+
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6, max: 72 })
+    .withMessage("Password must be between 6 and 72 characters"),
+
+  body("province")
+    .trim()
+    .notEmpty()
+    .withMessage("Province is required")
+    .isIn(VALID_PROVINCES)
+    .withMessage("Invalid province"),
+
+  body("district")
+    .optional({ checkFalsy: true })
+    .trim()
+    .custom(validateDistrictForProvince),
+];
+
+export const updateAdminJurisdictionValidator = [
+  body("province")
+    .trim()
+    .notEmpty()
+    .withMessage("Province is required")
+    .isIn(VALID_PROVINCES)
+    .withMessage("Invalid province"),
+
+  body("district")
+    .optional({ checkFalsy: true })
+    .trim()
+    .custom(validateDistrictForProvince),
 ];

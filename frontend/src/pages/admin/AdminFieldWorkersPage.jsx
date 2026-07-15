@@ -7,6 +7,8 @@ import {
 } from "../../services/adminService.js";
 import { FIELD_DEPARTMENTS } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
+import { PROVINCES } from "../../constants/province.js";
+import useAuthStore from "../../store/useAuthStore.js";
 
 const INPUT_CLS =
   "w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] " +
@@ -18,8 +20,9 @@ const AdminFieldWorkersPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Inline "add" form state — toggled open/closed rather than a separate
-  // modal component, since the form is short (4 fields).
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === "super_admin";
+
   const [formOpen, setFormOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState({
@@ -28,6 +31,8 @@ const AdminFieldWorkersPage = () => {
     password: "",
     department: "",
     phone: "",
+    province: isSuperAdmin ? "" : user?.jurisdiction?.province || "",
+    district: isSuperAdmin ? "" : user?.jurisdiction?.district || "",
   });
 
   const loadFieldWorkers = async () => {
@@ -51,7 +56,7 @@ const AdminFieldWorkersPage = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password || !form.department) {
+    if (!form.name || !form.email || !form.password || !form.department || !form.province || !form.district) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -170,6 +175,44 @@ const AdminFieldWorkersPage = () => {
                 placeholder="98XXXXXXXX"
                 className={INPUT_CLS}
               />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                Province <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={form.province}
+                onChange={(e) =>
+                  setForm({ ...form, province: e.target.value, district: "" })
+                }
+                disabled={!isSuperAdmin}
+                className={`${INPUT_CLS} cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
+              >
+                <option value="">Select province</option>
+                {Object.keys(PROVINCES).map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                District <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={form.district}
+                onChange={(e) => setForm({ ...form, district: e.target.value })}
+                disabled={!isSuperAdmin || !form.province}
+                className={`${INPUT_CLS} cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
+              >
+                <option value="">Select district</option>
+                {(form.province ? PROVINCES[form.province] : []).map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <button

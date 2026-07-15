@@ -9,8 +9,18 @@ const isInStandaloneMode = () =>
   window.navigator.standalone === true;
 
 const InstallPrompt = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showIosHint, setShowIosHint] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.deferredPrompt || null;
+    }
+    return null;
+  });
+  const [showIosHint, setShowIosHint] = useState(() => {
+    if (typeof window !== "undefined") {
+      return isIos();
+    }
+    return false;
+  });
 
   // Use lazy initializers to read browser state synchronously on initial render.
   // This avoids cascading render passes caused by setState calls in useEffect on mount.
@@ -31,13 +41,9 @@ const InstallPrompt = () => {
   useEffect(() => {
     if (isStandalone || dismissed) return;
 
-    // Capture early or current prompt
-    if (window.deferredPrompt) {
-      setDeferredPrompt(window.deferredPrompt);
-    }
-
     const handleBeforeInstall = (e) => {
       e.preventDefault();
+      window.deferredPrompt = e;
       setDeferredPrompt(e);
     };
 
@@ -49,8 +55,6 @@ const InstallPrompt = () => {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     window.addEventListener("pwa-install-promptable", handleGlobalPromptable);
-
-    if (isIos()) setShowIosHint(true);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);

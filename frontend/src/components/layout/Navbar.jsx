@@ -29,7 +29,7 @@ const Navbar = () => {
       navigate("/login");
     }
   };
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const isFieldWorker = user?.role === "field_worker";
 
   const navLinks = [

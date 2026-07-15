@@ -15,10 +15,25 @@ const checkValidation = (req, res) => {
   }
 };
 
+// Checks if the issue is within the admin's jurisdiction. Throws a 403 error if not.
+const assertWithinJurisdiction = (issue, user, res) => {
+  if (user.role === "super_admin") return;
+
+  const { province, district } = user.jurisdiction || {};
+  const matchesProvince = province && issue.location?.province === province;
+  const matchesDistrict = !district || issue.location?.district === district;
+
+  if (!matchesProvince || !matchesDistrict) {
+    res.status(403);
+    throw new Error("This issue is outside your assigned jurisdiction");
+  }
+};
+
 //  GET /api/admin/stats
 // Runs five queries in parallel — dashboard loads in one round-trip.
 export const getDashboardStats = async (req, res, next) => {
   try {
+    const filter = req.jurisdictionFilter || {};
     const [
       totalIssues,
       totalUsers,
@@ -76,9 +91,9 @@ export const getAllIssues = async (req, res, next) => {
     const limit = Math.min(50, parseInt(req.query.limit) || 15);
     const skip = (page - 1) * limit;
 
-    const { search, category, status, priority, sort } = req.query;
+    const { search, category, status, priority, sort, province, district } = req.query;
 
-    const match = {};
+    const match = { ...req.jurisdictionFilter }; // Start with jurisdiction filter from middleware
     if (search?.trim()) {
       match.$or = [
         { title: { $regex: search.trim(), $options: "i" } },
@@ -88,6 +103,12 @@ export const getAllIssues = async (req, res, next) => {
     if (category) match.category = String(category);
     if (status) match.status = String(status);
     if (priority) match.priority = String(priority);
+
+    if (req.user.role === "super_admin") {
+      if (province) match["location.province"] = province;
+      if (district) match["location.district"] = district;
+    }
+
     const sortStage = {
       oldest: { createdAt: 1 },
       "most-upvoted": { upvoteCount: -1 },
@@ -146,6 +167,8 @@ export const updateIssueStatus = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Issue not found" });
     }
+
+    assertWithinJurisdiction(issue, req.user, res);
 
     const previousStatus = issue.status;
 
@@ -231,7 +254,23 @@ export const getAllUsers = async (req, res, next) => {
 export const createFieldWorker = async (req, res, next) => {
   try {
     checkValidation(req, res);
-    const { name, email, password, department, phone } = req.body;
+    const { name, email, password, department, phone, province, district } =
+      req.body;
+
+    if (req.user.role !== "super_admin") {
+      const { province: adminProvince, district: adminDistrict } =
+        req.user.jurisdiction || {};
+      if (
+        province !== adminProvince ||
+        (adminDistrict && district !== adminDistrict)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only create field workers within your own jurisdiction",
+        });
+      }
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -252,6 +291,7 @@ export const createFieldWorker = async (req, res, next) => {
         role: "field_worker",
         department,
         phone,
+        jurisdiction: { province, district },
       });
     } catch (err) {
       if (err.code === 11000) {
@@ -273,6 +313,7 @@ export const createFieldWorker = async (req, res, next) => {
         department: fieldWorker.department,
         phone: fieldWorker.phone,
         createdAt: fieldWorker.createdAt,
+        jurisdiction: fieldWorker.jurisdiction,
       },
     });
   } catch (error) {
@@ -286,6 +327,17 @@ export const getFieldWorkers = async (req, res, next) => {
 
     const query = { role: "field_worker" };
     if (department) query.department = department;
+
+    if (req.user.role !== "super_admin") {
+      const { province, district } = req.user.jurisdiction || {};
+      query["jurisdiction.province"] = province || "NO_JURISDICTION_ASSIGNED";
+      if (district) query["jurisdiction.district"] = district;
+    } else {
+      if (req.query.province)
+        query["jurisdiction.province"] = req.query.province;
+      if (req.query.district)
+        query["jurisdiction.district"] = req.query.district;
+    }
 
     const fieldWorkers = await User.find(query)
       .select("-password")
@@ -319,6 +371,19 @@ export const assignIssue = async (req, res, next) => {
       return res
         .status(404)
         .json({ success: false, message: "Field worker not found" });
+    }
+
+    assertWithinJurisdiction(issue, req.user, res);
+    if (req.user.role !== "super_admin") {
+      const { province, district } = req.user.jurisdiction || {};
+      const fw = fieldWorker.jurisdiction || {};
+      if (fw.province !== province || (district && fw.district !== district)) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only assign field workers from your own jurisdiction",
+        });
+      }
     }
 
     if (["resolved", "rejected"].includes(issue.status)) {

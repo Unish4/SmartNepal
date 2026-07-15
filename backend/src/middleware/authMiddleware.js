@@ -54,13 +54,25 @@ export const protect = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    return next();
+  if (req.user?.role !== "admin" && req.user?.role !== "super_admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Not authorized — admin access required",
+    });
   }
-  return res.status(403).json({
-    success: false,
-    message: "Not authorized — admin access required",
-  });
+  next();
+};
+
+export const requireSuperAdmin = (req, res, next) => {
+  if (req.user?.role !== "super_admin") {
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "Not authorized — super admin access required",
+      });
+  }
+  next();
 };
 
 export const requireFieldWorker = (req, res, next) => {
