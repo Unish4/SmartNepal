@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, X, ChevronDown, UserPlus, Globe2 } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  Search,
+  X,
+  ChevronDown,
+  UserPlus,
+  Globe2,
+  AlertTriangle,
+} from "lucide-react";
 import { fetchAllIssues } from "../../services/adminService.js";
 import {
   STATUS_CONFIG,
@@ -14,6 +21,7 @@ import AssignIssueModal from "../../components/admin/AssignIssueModal.jsx";
 import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 import useAuthStore from "../../store/useAuthStore.js";
 import { PROVINCES } from "../../constants/province.js";
+import { isOverdue } from "../../utils/sla.js";
 
 const AdminIssuesPage = () => {
   const [issues, setIssues] = useState([]);
@@ -26,7 +34,8 @@ const AdminIssuesPage = () => {
   const [page, setPage] = useState(1);
   const [editingIssue, setEditingIssue] = useState(null);
   const [assigningIssue, setAssigningIssue] = useState(null);
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const overdueOnly = searchParams.get("overdue") === "true";
   // Inside the component:
   const { user } = useAuthStore();
   const isSuperAdmin = user?.role === "super_admin";
@@ -45,6 +54,7 @@ const AdminIssuesPage = () => {
         const params = { page, limit: 15 };
         if (isSuperAdmin && province) params.province = province;
         if (isSuperAdmin && district) params.district = district;
+        if (overdueOnly) params.overdue = "true";
         if (debouncedSearch) params.search = debouncedSearch;
         if (category) params.category = category;
         if (statusFilter) params.status = statusFilter;
@@ -69,7 +79,16 @@ const AdminIssuesPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [debouncedSearch, category, statusFilter, page, province, district, isSuperAdmin]);
+  }, [
+    debouncedSearch,
+    category,
+    statusFilter,
+    page,
+    province,
+    district,
+    isSuperAdmin,
+    overdueOnly,
+  ]);
 
   // In-place row update after status change — no full refetch needed
   const handleIssueUpdated = (updatedIssue) => {
@@ -84,9 +103,19 @@ const AdminIssuesPage = () => {
     setStatusFilter("");
     setProvince("");
     setDistrict("");
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("overdue");
+    setSearchParams(newParams);
     setPage(1);
   };
-  const hasFilters = !!(search || category || statusFilter || province || district);
+  const hasFilters = !!(
+    search ||
+    category ||
+    statusFilter ||
+    province ||
+    district ||
+    overdueOnly
+  );
 
   return (
     <div>
@@ -101,6 +130,7 @@ const AdminIssuesPage = () => {
               {pagination.total} total report{pagination.total !== 1 ? "s" : ""}
             </p>
           )}
+
         </div>
       </div>
 
@@ -209,6 +239,29 @@ const AdminIssuesPage = () => {
                 ${statusFilter ? "text-[#16a34a]" : "text-[#94a3b8]"}`}
             />
           </div>
+
+          <button
+            onClick={() => {
+              const nextOverdue = !overdueOnly;
+              const newParams = new URLSearchParams(searchParams);
+              if (nextOverdue) {
+                newParams.set("overdue", "true");
+              } else {
+                newParams.delete("overdue");
+              }
+              setSearchParams(newParams);
+              setPage(1);
+            }}
+            className={`flex items-center gap-1.5 h-9 px-3 text-xs font-semibold rounded-lg border transition-colors
+    ${
+      overdueOnly
+        ? "bg-red-50 text-red-700 border-red-200"
+        : "bg-white text-[#475569] border-[#e2e8f0] hover:border-[#cbd5e1]"
+    }`}
+          >
+            <AlertTriangle size={12} />
+            Overdue only
+          </button>
 
           {/* Province & District Filters for Super Admin */}
           {isSuperAdmin && (
@@ -345,6 +398,14 @@ const AdminIssuesPage = () => {
                         <p className="text-sm font-semibold text-[#0f172a] truncate">
                           {issue.title}
                         </p>
+                        {isOverdue(issue) && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600
+                              bg-red-50 border border-red-200 px-1.5 py-0.5 rounded mt-1.5 w-fit"
+                          >
+                            <AlertTriangle size={9} /> Overdue
+                          </span>
+                        )}
                       </td>
 
                       {/* Category */}

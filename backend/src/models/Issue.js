@@ -82,6 +82,21 @@ const issueSchema = new mongoose.Schema(
     aiConfidence: { type: Number },
     rejectionReason: { type: String },
     resolvedAt: { type: Date },
+    slaDeadline: { type: Date },
+    escalated: { type: Boolean, default: false },
+    escalatedAt: { type: Date },
+    escalationState: {
+      type: String,
+      enum: ["unmarked", "processing", "completed", "failed"],
+      default: "unmarked",
+    },
+    escalationErrors: [
+      {
+        adminEmail: { type: String },
+        error: { type: String },
+        occurredAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -97,6 +112,7 @@ issueSchema.index({ author: 1 });
 issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ createdAt: -1 });
 issueSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
+issueSchema.index({ slaDeadline: 1, status: 1 });
 
 const Issue = mongoose.model("Issue", issueSchema);
 export default Issue;

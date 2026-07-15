@@ -7,6 +7,7 @@ import {
   createFieldWorker,
   getFieldWorkers,
   assignIssue,
+  triggerEscalationSweep,
 } from "../controllers/adminController.js";
 import {
   createAdmin,
@@ -14,7 +15,11 @@ import {
   updateAdminJurisdiction,
 } from "../controllers/adminManagementController.js";
 import { getAnalytics } from "../controllers/analyticsController.js";
-import { protect, requireAdmin, requireSuperAdmin } from "../middleware/authMiddleware.js";
+import {
+  protect,
+  requireAdmin,
+  requireSuperAdmin,
+} from "../middleware/authMiddleware.js";
 import {
   statusUpdateValidator,
   createFieldWorkerValidator,
@@ -74,5 +79,6 @@ router.patch(
   validate,
   updateAdminJurisdiction,
 );
+router.post("/escalations/run", requireSuperAdmin, triggerEscalationSweep);
 
 export default router;

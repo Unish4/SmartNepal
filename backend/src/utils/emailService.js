@@ -21,6 +21,8 @@ import User from "../models/User.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { escalationTemplate } from "./emailTemplates.js";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -190,4 +192,13 @@ export const sendVerificationEmail = async (user, rawToken) => {
       : verificationTemplate(user, verifyUrl);
   await sendEmail({ to: user.email, ...emailData });
   logger.info({ userId: user._id }, "Verification email sent");
+};
+
+
+// ── Escalation email 
+export const sendEscalationEmail = async (admin, issue) => {
+  if (!admin?.email) return;
+  const frontendUrl = ENV.CLIENT_URL || "http://localhost:5173";
+  const emailData = escalationTemplate(admin, issue, frontendUrl);
+  await sendEmail({ to: admin.email, ...emailData });
 };

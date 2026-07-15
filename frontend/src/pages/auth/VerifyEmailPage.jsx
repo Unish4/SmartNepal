@@ -80,7 +80,7 @@ export default function VerifyEmailPage() {
               to="/"
               className="inline-block h-10 px-6 leading-10 rounded-lg bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold transition-colors"
             >
-              Continue to SmartNepal
+              Continue to NepalSewa
             </Link>
           </>
         )}

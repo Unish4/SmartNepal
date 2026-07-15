@@ -17,7 +17,7 @@ import {
   createStore,
 } from "idb-keyval";
 
-const issueCacheStore = createStore("smartnepal-issue-cache-db", "issue-cache");
+const issueCacheStore = createStore("nepalsewa-issue-cache-db", "issue-cache");
 
 // Helper: applies a new upvoterIds array to a single issue object.
 // Used by the optimistic update and rollback paths below.

@@ -1,6 +1,6 @@
 import { get, set, del, keys, createStore } from "idb-keyval";
 
-const offlineStore = createStore("smartnepal-offline-db", "pending-issues");
+const offlineStore = createStore("nepalsewa-offline-db", "pending-issues");
 
 const generateId = () =>
   `pending-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;

@@ -51,7 +51,7 @@ i18n
     detection: {
       order: ["localStorage", "navigator"],
       caches: ["localStorage"],
-      lookupLocalStorage: "smartnepal-language",
+      lookupLocalStorage: "nepalsewa-language",
     },
   });
 

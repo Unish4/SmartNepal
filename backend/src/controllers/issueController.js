@@ -1,8 +1,12 @@
 import { validationResult } from "express-validator";
 import Issue from "../models/Issue.js";
-import { uploadToCloudinary, deleteFromCloudinary } from "../utils/uploadToCloudinary.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/uploadToCloudinary.js";
 import { categorizeIssue } from "../services/aiService.js";
 import { detectBoundary } from "../services/gisService.js";
+import { computeSlaDeadline } from "../utils/slaConfig.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -51,18 +55,33 @@ export const createIssue = async (req, res, next) => {
     if (req.files?.length > 0) {
       const results = await Promise.all(
         req.files.map((f, idx) => {
-          const publicId = idempotencyKey ? `${idempotencyKey}_img_${idx}` : null;
-          return uploadToCloudinary(f.buffer, "NepalSewa/issues", undefined, publicId);
+          const publicId = idempotencyKey
+            ? `${idempotencyKey}_img_${idx}`
+            : null;
+          return uploadToCloudinary(
+            f.buffer,
+            "NepalSewa/issues",
+            undefined,
+            publicId,
+          );
         }),
       );
       imageUrls = results.map((r) => r.secure_url);
     }
 
+    const finalPriority = priority || "low";
+    const slaDeadline = computeSlaDeadline(
+      finalPriority,
+      category || req.body.category,
+      new Date(),
+    );
+
     const issue = await Issue.create({
       title,
       description,
       category,
-      priority: priority || "low",
+      priority: finalPriority,
+      slaDeadline,
       location: { address: address || "", lat: parsedLat, lng: parsedLng },
       images: imageUrls,
       idempotencyKey: idempotencyKey || undefined,
@@ -276,8 +295,20 @@ export const updateIssue = async (req, res, next) => {
 
     if (title !== undefined) issue.title = title;
     if (description !== undefined) issue.description = description;
+    const slaInputsChanged =
+      (category !== undefined && category !== issue.category) ||
+      (priority !== undefined && priority !== issue.priority);
+
     if (category !== undefined) issue.category = category;
     if (priority !== undefined) issue.priority = priority;
+
+    if (slaInputsChanged) {
+      issue.slaDeadline = computeSlaDeadline(
+        issue.priority,
+        issue.category,
+        issue.createdAt,
+      );
+    }
     if (address !== undefined) issue.location.address = address;
     const latChanged =
       lat !== undefined && parseFloat(lat) !== issue.location.lat;
@@ -342,8 +373,12 @@ export const deleteIssue = async (req, res, next) => {
     await issue.deleteOne();
 
     if (imageUrls.length > 0) {
-      Promise.all(imageUrls.map((url) => deleteFromCloudinary(url))).catch((err) =>
-        console.error("Failed to delete issue images from Cloudinary on delete", err)
+      Promise.all(imageUrls.map((url) => deleteFromCloudinary(url))).catch(
+        (err) =>
+          console.error(
+            "Failed to delete issue images from Cloudinary on delete",
+            err,
+          ),
       );
     }
 

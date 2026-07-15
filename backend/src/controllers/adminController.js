@@ -6,6 +6,7 @@ import {
   sendAssignmentEmail,
   sendStatusChangeEmail,
 } from "../utils/emailService.js";
+import { runEscalationCheck } from "../services/escalationService.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -34,27 +35,49 @@ const assertWithinJurisdiction = (issue, user, res) => {
 export const getDashboardStats = async (req, res, next) => {
   try {
     const filter = req.jurisdictionFilter || {};
+    const now = new Date();
+
+    const userFilter = { role: "citizen" };
+    if (req.user.role !== "super_admin" && req.user.jurisdiction) {
+      const { province, district } = req.user.jurisdiction;
+      if (province) userFilter.province = province;
+      if (district) userFilter.district = district;
+    }
+
     const [
       totalIssues,
       totalUsers,
       issuesByStatus,
       issuesByCategory,
       recentIssues,
+      overdueCount,
     ] = await Promise.all([
-      Issue.countDocuments(),
-      User.countDocuments(),
+      Issue.countDocuments(filter),
+      User.countDocuments(userFilter),
 
       // Group issues by status — gives { open: 12, resolved: 4, … }
-      Issue.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+      Issue.aggregate([
+        { $match: filter },
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]),
 
       // Group issues by category — gives { "Road Damage": 8, "Garbage": 3, … }
-      Issue.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]),
+      Issue.aggregate([
+        { $match: filter },
+        { $group: { _id: "$category", count: { $sum: 1 } } }
+      ]),
 
-      Issue.find()
+      Issue.find(filter)
         .populate("author", "name")
         .sort({ createdAt: -1 })
         .limit(5)
         .lean(),
+
+      Issue.countDocuments({
+        ...filter,
+        slaDeadline: { $lt: now },
+        status: { $nin: ["resolved", "rejected"] },
+      }),
     ]);
 
     // Convert [{_id: "open", count: 4}] → { open: 4 } for cleaner frontend access.
@@ -76,6 +99,7 @@ export const getDashboardStats = async (req, res, next) => {
         statusCounts,
         categoryCounts,
         recentIssues,
+        overdueCount,
       },
     });
   } catch (error) {
@@ -91,9 +115,23 @@ export const getAllIssues = async (req, res, next) => {
     const limit = Math.min(50, parseInt(req.query.limit) || 15);
     const skip = (page - 1) * limit;
 
-    const { search, category, status, priority, sort, province, district } = req.query;
+    const {
+      search,
+      category,
+      status,
+      priority,
+      sort,
+      province,
+      district,
+      overdue,
+    } = req.query;
 
     const match = { ...req.jurisdictionFilter }; // Start with jurisdiction filter from middleware
+
+    if (overdue === "true") {
+      match.slaDeadline = { $lt: new Date() };
+      match.status = { $nin: ["resolved", "rejected"] };
+    }
     if (search?.trim()) {
       match.$or = [
         { title: { $regex: search.trim(), $options: "i" } },
@@ -425,6 +463,15 @@ export const assignIssue = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Invalid issue ID format" });
     }
+    next(error);
+  }
+};
+
+export const triggerEscalationSweep = async (req, res, next) => {
+  try {
+    const result = await runEscalationCheck();
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
     next(error);
   }
 };

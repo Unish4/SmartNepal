@@ -41,7 +41,7 @@ export const assignIssueRequest = async (issueId, fieldWorkerId) => {
   return response.data;
 };
 
-// ── admin account management (super_admin only) 
+// ── admin account management (super_admin only)
 export const createAdminRequest = async (data) => {
   const response = await api.post("/api/admin/admins", data);
   return response.data;
@@ -57,5 +57,11 @@ export const updateAdminJurisdictionRequest = async (adminId, jurisdiction) => {
     `/api/admin/admins/${adminId}/jurisdiction`,
     jurisdiction,
   );
+  return response.data;
+};
+
+//  manual escalation sweep trigger (super_admin only)
+export const triggerEscalationSweep = async () => {
+  const response = await api.post("/api/admin/escalations/run");
   return response.data;
 };

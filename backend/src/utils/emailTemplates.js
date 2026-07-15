@@ -253,10 +253,10 @@ export const assignedTemplate = (issue, frontendUrl) => ({
 });
 
 export const verificationTemplate = (user, verifyUrl) => ({
-  subject: `Verify your SmartNepal email address`,
+  subject: `Verify your NepalSewa email address`,
   html: baseWrapper(`
     <p style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0f172a;">
-      Welcome to SmartNepal, ${user.name}
+      Welcome to NepalSewa, ${user.name}
     </p>
     <p style="margin:16px 0;font-size:14px;color:#475569;line-height:1.7;">
       Please verify your email address so your municipality knows your reports
@@ -267,13 +267,13 @@ export const verificationTemplate = (user, verifyUrl) => ({
 });
 
 export const passwordResetTemplate = (user, resetUrl) => ({
-  subject: `Reset your SmartNepal password`,
+  subject: `Reset your NepalSewa password`,
   html: baseWrapper(`
     <p style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0f172a;">
       Reset your password
     </p>
     <p style="margin:16px 0;font-size:14px;color:#475569;line-height:1.7;">
-      Hi ${user.name}, we received a request to reset your SmartNepal password.
+      Hi ${user.name}, we received a request to reset your NepalSewa password.
       Click the button below to choose a new one. This link expires in 1 hour.
     </p>
     ${ctaButton(resetUrl, "Reset Password")}
@@ -281,6 +281,54 @@ export const passwordResetTemplate = (user, resetUrl) => ({
       If you didn't request this, you can safely ignore this email — your password will not change.
     </p>
   `),
+});
+
+// ── Template: SLA Escalation
+const escapeHtml = (value) =>
+  String(value ?? "").replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        char
+      ],
+  );
+
+export const escalationTemplate = (admin, issue, frontendUrl) => ({
+  subject: `⚠ SLA breached: ${issue.title.slice(0, 60)} — SmartNepal`,
+  html: baseWrapper(`
+    <p style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0f172a;">
+      An issue has passed its SLA deadline
+    </p>
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;
+      border-radius:20px;font-size:13px;font-weight:600;background:#fef2f2;color:#b91c1c;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;"></span>
+      SLA Breached
+    </span>
+    <p style="margin:16px 0;font-size:14px;color:#475569;line-height:1.7;">
+      Hi ${escapeHtml(admin.name)}, this report in your jurisdiction has not been resolved within
+      its expected response window and needs attention.
+    </p>
+    <div style="background:#f8fafc;border-left:3px solid #ef4444;
+      padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;">
+      <p style="margin:0;font-size:14px;font-weight:600;color:#0f172a;line-height:1.5;">${escapeHtml(issue.title)}</p>
+    </div>
+    <table cellpadding="0" cellspacing="0" style="margin:16px 0;">
+      <tr>
+        <td style="padding-right:24px;">
+          <p style="margin:0;font-size:12px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Category</p>
+          <p style="margin:4px 0 0;font-size:14px;color:#0f172a;font-weight:500;">${issue.category}</p>
+        </td>
+        <td style="padding-right:24px;">
+          <p style="margin:0;font-size:12px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Priority</p>
+          <p style="margin:4px 0 0;font-size:14px;color:#0f172a;font-weight:500;text-transform:capitalize;">${issue.priority}</p>
+        </td>
+        <td>
+          <p style="margin:0;font-size:12px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Status</p>
+          <p style="margin:4px 0 0;font-size:14px;color:#0f172a;font-weight:500;text-transform:capitalize;">${issue.status}</p>
+        </td>
+      </tr>
+    </table>
+    ${ctaButton(`${frontendUrl}/admin/issues`, "Review in Admin Panel")}  `),
 });
 
 // Nepalese templates

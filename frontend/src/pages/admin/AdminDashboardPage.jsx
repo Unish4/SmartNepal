@@ -8,29 +8,50 @@ import {
   AlertCircle,
   TrendingUp,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import { fetchDashboardStats } from "../../services/adminService.js";
 import { STATUS_CONFIG, PRIORITY_CONFIG } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
 
-const StatCard = ({ label, value, icon: Icon, bgClass, textClass, borderClass, sub }) => (
-  <div className="bg-white rounded-2xl border border-[#e2e8f0] hover:border-slate-300 hover:-translate-y-1 hover:shadow-md transition-all duration-300 p-6 flex flex-col justify-between h-36">
-    <div className="flex items-start justify-between">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-[#64748b]">{label}</p>
-        <p className="text-3xl font-extrabold text-[#0f172a] tracking-tight mt-2.5">
-          {value ?? "—"}
-        </p>
+const StatCard = ({
+  label,
+  value,
+  icon: Icon,
+  bgClass,
+  textClass,
+  borderClass,
+  sub,
+  to,
+}) => {
+  const content = (
+    <div className="bg-white rounded-2xl border border-[#e2e8f0] hover:border-slate-300 hover:-translate-y-1 hover:shadow-md transition-all duration-300 p-6 flex flex-col justify-between h-36">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#64748b]">
+            {label}
+          </p>
+          <p className="text-3xl font-extrabold text-[#0f172a] tracking-tight mt-2.5">
+            {value ?? "—"}
+          </p>
+        </div>
+        <div
+          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${bgClass} ${textClass} ${borderClass}`}
+        >
+          <Icon size={18} />
+        </div>
       </div>
-      <div
-        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${bgClass} ${textClass} ${borderClass}`}
-      >
-        <Icon size={18} />
-      </div>
+      {sub && <p className="text-xs text-[#94a3b8] font-medium">{sub}</p>}
     </div>
-    {sub && <p className="text-xs text-[#94a3b8] font-medium">{sub}</p>}
-  </div>
-);
+  );
+  return to ? (
+    <Link to={to}>
+      {content}
+    </Link>
+  ) : (
+    content
+  );
+};
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -124,16 +145,55 @@ export default function AdminDashboardPage() {
       borderClass: "border-purple-100",
       sub: "Registered user accounts",
     },
+    {
+      label: "Overdue",
+      value: stats?.overdueCount ?? 0,
+      icon: AlertTriangle,
+      color: "bg-red-500",
+      bgClass: "bg-red-50/50",
+      textClass: "text-red-600",
+      borderClass: "border-red-100",
+      sub: "Past SLA deadline",
+      to: "/admin/issues?overdue=true",
+    },
   ];
 
   const categoryTheme = {
-    "Road Damage": { bg: "bg-slate-50", border: "border-slate-100", text: "text-slate-700" },
-    "Garbage": { bg: "bg-lime-50/70", border: "border-lime-100", text: "text-lime-700" },
-    "Water Issue": { bg: "bg-sky-50", border: "border-sky-100", text: "text-sky-700" },
-    "Street Light": { bg: "bg-amber-50/50", border: "border-amber-100", text: "text-amber-700" },
-    "Illegal Construction": { bg: "bg-orange-50/50", border: "border-orange-100", text: "text-orange-700" },
-    "Public Space": { bg: "bg-emerald-50/50", border: "border-emerald-100", text: "text-emerald-700" },
-    "Other": { bg: "bg-gray-50", border: "border-gray-100", text: "text-gray-600" },
+    "Road Damage": {
+      bg: "bg-slate-50",
+      border: "border-slate-100",
+      text: "text-slate-700",
+    },
+    Garbage: {
+      bg: "bg-lime-50/70",
+      border: "border-lime-100",
+      text: "text-lime-700",
+    },
+    "Water Issue": {
+      bg: "bg-sky-50",
+      border: "border-sky-100",
+      text: "text-sky-700",
+    },
+    "Street Light": {
+      bg: "bg-amber-50/50",
+      border: "border-amber-100",
+      text: "text-amber-700",
+    },
+    "Illegal Construction": {
+      bg: "bg-orange-50/50",
+      border: "border-orange-100",
+      text: "text-orange-700",
+    },
+    "Public Space": {
+      bg: "bg-emerald-50/50",
+      border: "border-emerald-100",
+      text: "text-emerald-700",
+    },
+    Other: {
+      bg: "bg-gray-50",
+      border: "border-gray-100",
+      text: "text-gray-600",
+    },
   };
 
   return (
@@ -156,7 +216,11 @@ export default function AdminDashboardPage() {
         >
           <Clock size={18} className="text-amber-600 shrink-0 animate-pulse" />
           <p className="text-sm text-amber-800 font-medium">
-            There are <span className="font-bold">{pendingReview} unresolved reports</span> waiting for administrator review.
+            There are{" "}
+            <span className="font-bold">
+              {pendingReview} unresolved reports
+            </span>{" "}
+            waiting for administrator review.
           </p>
           <Link
             to="/admin/issues"
@@ -193,7 +257,8 @@ export default function AdminDashboardPage() {
             <div className="divide-y divide-[#f1f5f9]">
               {stats.recentIssues.map((issue) => {
                 const st = STATUS_CONFIG[issue.status] || STATUS_CONFIG.open;
-                const pr = PRIORITY_CONFIG[issue.priority] || PRIORITY_CONFIG.low;
+                const pr =
+                  PRIORITY_CONFIG[issue.priority] || PRIORITY_CONFIG.low;
                 return (
                   <div
                     key={issue._id}
@@ -221,7 +286,11 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
                       <span
                         className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border"
-                        style={{ backgroundColor: pr.bg + "20", color: pr.color, borderColor: pr.bg + "80" }}
+                        style={{
+                          backgroundColor: pr.bg + "20",
+                          color: pr.color,
+                          borderColor: pr.bg + "80",
+                        }}
                       >
                         {pr.label}
                       </span>
@@ -255,12 +324,14 @@ export default function AdminDashboardPage() {
                 Reports by Category
               </h2>
             </div>
-            {stats?.categoryCounts && Object.keys(stats.categoryCounts).length > 0 ? (
+            {stats?.categoryCounts &&
+            Object.keys(stats.categoryCounts).length > 0 ? (
               <div className="p-6 space-y-3">
                 {Object.entries(stats.categoryCounts)
                   .sort((a, b) => b[1] - a[1])
                   .map(([category, count]) => {
-                    const theme = categoryTheme[category] || categoryTheme["Other"];
+                    const theme =
+                      categoryTheme[category] || categoryTheme["Other"];
                     return (
                       <div
                         key={category}
