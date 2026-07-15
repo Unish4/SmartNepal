@@ -65,3 +65,25 @@ export const triggerEscalationSweep = async () => {
   const response = await api.post("/api/admin/escalations/run");
   return response.data;
 };
+
+export const fetchAuditLog = async (params = {}) => {
+  const response = await api.get("/api/admin/audit-log", { params });
+  return response.data;
+};
+
+
+export const downloadIssuesCSV = async (params = {}) => {
+  const response = await api.get("/api/admin/export/csv", {
+    params,
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const downloadIssuesPDF = async (params = {}) => {
+  const response = await api.get("/api/admin/export/pdf", {
+    params,
+    responseType: "blob",
+  });
+  return response.data;
+};

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Globe2,
   ShieldPlus,
+  ScrollText,
 } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore.js";
 
@@ -36,6 +37,7 @@ const SidebarContent = ({ user, onLogout, onLinkClick }) => {
     ...(isSuperAdmin
       ? [{ to: "/admin/manage", label: "Admin Accounts", icon: ShieldPlus }]
       : []),
+    { to: "/admin/audit-log", label: "Audit Log", icon: ScrollText },
   ];
 
   return (
@@ -125,7 +127,9 @@ const SidebarContent = ({ user, onLogout, onLinkClick }) => {
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate">{user?.name}</p>
+            <p className="text-xs font-bold text-white truncate">
+              {user?.name}
+            </p>
             <p className="text-[10px] text-slate-500 truncate mt-0.5">
               {user?.email}
             </p>

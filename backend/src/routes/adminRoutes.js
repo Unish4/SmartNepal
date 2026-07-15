@@ -14,6 +14,12 @@ import {
   getAdmins,
   updateAdminJurisdiction,
 } from "../controllers/adminManagementController.js";
+
+import { getAuditLog } from "../controllers/auditLogController.js";
+import {
+  exportIssuesCSV,
+  exportIssuesPDF,
+} from "../controllers/exportController.js";
 import { getAnalytics } from "../controllers/analyticsController.js";
 import {
   protect,
@@ -63,6 +69,10 @@ router.post(
 );
 router.get("/field-workers", getFieldWorkers);
 router.patch("/issues/:id/assign", assignIssueValidator, validate, assignIssue);
+
+router.get("/audit-log", getAuditLog);
+router.get("/export/csv", exportIssuesCSV);
+router.get("/export/pdf", exportIssuesPDF);
 
 router.post(
   "/admins",

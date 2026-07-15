@@ -7,6 +7,7 @@ import {
 import { categorizeIssue } from "../services/aiService.js";
 import { detectBoundary } from "../services/gisService.js";
 import { computeSlaDeadline } from "../utils/slaConfig.js";
+import { logAdminAction } from "../utils/auditLogger.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -18,11 +19,19 @@ const checkValidation = (req, res) => {
 
 const assertOwnership = (issue, user, res) => {
   const isOwner = issue.author.toString() === user._id.toString();
-  const isAdmin = user.role === "admin";
-  if (!isOwner && !isAdmin) {
-    res.status(403);
-    throw new Error("Not authorized to modify this issue");
+  if (isOwner) return;
+
+  if (user.role === "super_admin") return;
+
+  if (user.role === "admin") {
+    const { province, district } = user.jurisdiction || {};
+    const matchesProvince = province && issue.location?.province === province;
+    const matchesDistrict = !district || issue.location?.district === district;
+    if (matchesProvince && matchesDistrict) return;
   }
+
+  res.status(403);
+  throw new Error("Not authorized to modify this issue");
 };
 
 //  POST /api/issues
@@ -366,6 +375,7 @@ export const deleteIssue = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Issue not found" });
     }
+    const isOwner = issue.author.toString() === req.user._id.toString();
     assertOwnership(issue, req.user, res);
 
     const imageUrls = issue.images || [];
@@ -380,6 +390,20 @@ export const deleteIssue = async (req, res, next) => {
             err,
           ),
       );
+    }
+    
+    if (!isOwner) {
+      await logAdminAction({
+        actor: req.user,
+        action: "issue_deletion",
+        targetType: "Issue",
+        targetId: issue._id,
+        jurisdiction: {
+          province: issue.location?.province,
+          district: issue.location?.district,
+        },
+        details: { title: issue.title, authorId: issue.author },
+      });
     }
 
     res

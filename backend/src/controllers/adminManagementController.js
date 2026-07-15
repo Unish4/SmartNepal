@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import User from "../models/User.js";
+import { logAdminAction } from "../utils/auditLogger.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -36,15 +37,22 @@ export const createAdmin = async (req, res, next) => {
       });
     } catch (err) {
       if (err.code === 11000) {
-        return res
-          .status(409)
-          .json({
-            success: false,
-            message: "An account with this email already exists",
-          });
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists",
+        });
       }
       throw err;
     }
+
+    await logAdminAction({
+      actor: req.user,
+      action: "admin_created",
+      targetType: "User",
+      targetId: admin._id,
+      jurisdiction: { province, district },
+      details: { name, email },
+    });
 
     res.status(201).json({
       success: true,
@@ -74,7 +82,7 @@ export const getAdmins = async (req, res, next) => {
   }
 };
 
-// ─── PATCH /api/admin/admins/:id/jurisdiction — super_admin only 
+// ─── PATCH /api/admin/admins/:id/jurisdiction — super_admin only
 export const updateAdminJurisdiction = async (req, res, next) => {
   try {
     checkValidation(req, res);
@@ -90,6 +98,14 @@ export const updateAdminJurisdiction = async (req, res, next) => {
       update.$unset = { "jurisdiction.district": 1 };
     }
 
+    const existingAdmin = await User.findOne({ _id: req.params.id, role: "admin" });
+    if (!existingAdmin) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin account not found" });
+    }
+    const previousJurisdiction = existingAdmin.jurisdiction || null;
+
     const admin = await User.findOneAndUpdate(
       { _id: req.params.id, role: "admin" }, // super_admin accounts are never re-scoped
       update,
@@ -101,6 +117,21 @@ export const updateAdminJurisdiction = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Admin account not found" });
     }
+
+    await logAdminAction({
+      actor: req.user,
+      action: "admin_jurisdiction_update",
+      targetType: "User",
+      targetId: admin._id,
+      jurisdiction: {
+        province: admin.jurisdiction?.province,
+        district: admin.jurisdiction?.district,
+      },
+      details: {
+        previousJurisdiction,
+        newJurisdiction: admin.jurisdiction || null,
+      },
+    });
 
     res.status(200).json({ success: true, admin });
   } catch (error) {

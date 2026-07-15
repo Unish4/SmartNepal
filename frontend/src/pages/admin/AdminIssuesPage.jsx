@@ -7,6 +7,8 @@ import {
   UserPlus,
   Globe2,
   AlertTriangle,
+  FileText,
+  Download,
 } from "lucide-react";
 import { fetchAllIssues } from "../../services/adminService.js";
 import {
@@ -22,6 +24,12 @@ import { TableRowSkeleton } from "../../components/ui/SkeletonLoader.jsx";
 import useAuthStore from "../../store/useAuthStore.js";
 import { PROVINCES } from "../../constants/province.js";
 import { isOverdue } from "../../utils/sla.js";
+import {
+  downloadIssuesCSV,
+  downloadIssuesPDF,
+} from "../../services/adminService.js";
+import { downloadBlob } from "../../utils/downloadBlob.js";
+import toast from "react-hot-toast";
 
 const AdminIssuesPage = () => {
   const [issues, setIssues] = useState([]);
@@ -43,6 +51,7 @@ const AdminIssuesPage = () => {
   const [district, setDistrict] = useState("");
 
   const debouncedSearch = useDebounce(search, 400);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -117,6 +126,48 @@ const AdminIssuesPage = () => {
     overdueOnly
   );
 
+  const currentFilterParams = () => {
+    const params = {};
+    if (search) params.search = search;
+    if (category) params.category = category;
+    if (statusFilter) params.status = statusFilter;
+    if (overdueOnly) params.overdue = "true";
+    if (isSuperAdmin && province) params.province = province;
+    if (isSuperAdmin && district) params.district = district;
+    return params;
+  };
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await downloadIssuesCSV(currentFilterParams());
+      downloadBlob(
+        blob,
+        `nepalsewa-issues-${new Date().toISOString().split("T")[0]}.csv`,
+      );
+      toast.success("CSV downloaded");
+    } catch {
+      toast.error("Failed to export CSV");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await downloadIssuesPDF(currentFilterParams());
+      downloadBlob(
+        blob,
+        `nepalsewa-report-${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+      toast.success("PDF downloaded");
+    } catch {
+      toast.error("Failed to export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div>
       {/* ── Page header  */}
@@ -130,7 +181,24 @@ const AdminIssuesPage = () => {
               {pagination.total} total report{pagination.total !== 1 ? "s" : ""}
             </p>
           )}
-
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            disabled={isExporting}
+            className="flex items-center gap-1.5 h-9 px-3 text-xs font-semibold text-[#475569]
+      border border-[#e2e8f0] rounded-lg hover:bg-[#f8fafc] transition-colors disabled:opacity-50"
+          >
+            <Download size={13} /> CSV
+          </button>
+          <button
+            onClick={handleExportPDF}
+            disabled={isExporting}
+            className="flex items-center gap-1.5 h-9 px-3 text-xs font-semibold text-[#475569]
+      border border-[#e2e8f0] rounded-lg hover:bg-[#f8fafc] transition-colors disabled:opacity-50"
+          >
+            <FileText size={13} /> PDF
+          </button>
         </div>
       </div>
 

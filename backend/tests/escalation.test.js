@@ -24,11 +24,7 @@ vi.mock("../src/utils/emailService.js", () => ({
   sendVerificationEmail: vi.fn().mockResolvedValue(),
   sendEscalationEmail: vi.fn().mockResolvedValue(),
 }));
-vi.mock("../src/utils/smsService.js", () => ({
-  sendStatusChangeSMS: vi.fn().mockResolvedValue(),
-  sendAssignmentSMS: vi.fn().mockResolvedValue(),
-  checkSmsBalance: vi.fn().mockResolvedValue(null),
-}));
+
 import { sendEscalationEmail } from "../src/utils/emailService.js";
 
 const registerAndLogin = async (email) => {
