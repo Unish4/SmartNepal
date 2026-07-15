@@ -27,6 +27,8 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminAdminsPage from "./pages/admin/AdminAdminsPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import AdminManagementPage from "./pages/admin/AdminManagementPage";
+import AdminAuditLogPage from "./pages/admin/AdminAuditLogPage"; 
+
 
 import FieldLayout from "./components/field/FieldLayout";
 import FieldDashboardPage from "./pages/field/FieldDashboardPage";
@@ -164,6 +166,7 @@ function App() {
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="admins" element={<AdminAdminsPage />} />
           <Route path="analytics" element={<AdminAnalyticsPage />} />
+          <Route path="audit-log" element={<AdminAuditLogPage />} />
           <Route
             path="manage"
             element={

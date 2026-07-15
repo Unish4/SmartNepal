@@ -22,11 +22,7 @@ vi.mock("../src/utils/emailService.js", () => ({
   sendPasswordResetEmail: vi.fn().mockResolvedValue(),
   sendVerificationEmail: vi.fn().mockResolvedValue(),
 }));
-vi.mock("../src/utils/smsService.js", () => ({
-  sendStatusChangeSMS: vi.fn().mockResolvedValue(),
-  sendAssignmentSMS: vi.fn().mockResolvedValue(),
-  checkSmsBalance: vi.fn().mockResolvedValue(null),
-}));
+
 
 const registerAndLogin = async (email) => {
   const res = await request(app)

@@ -7,6 +7,8 @@ import {
   sendStatusChangeEmail,
 } from "../utils/emailService.js";
 import { runEscalationCheck } from "../services/escalationService.js";
+import { buildIssueMatch } from "../utils/issueQueryBuilder.js"; // ← Phase 29, add to imports
+import { logAdminAction } from "../utils/auditLogger.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -58,13 +60,13 @@ export const getDashboardStats = async (req, res, next) => {
       // Group issues by status — gives { open: 12, resolved: 4, … }
       Issue.aggregate([
         { $match: filter },
-        { $group: { _id: "$status", count: { $sum: 1 } } }
+        { $group: { _id: "$status", count: { $sum: 1 } } },
       ]),
 
       // Group issues by category — gives { "Road Damage": 8, "Garbage": 3, … }
       Issue.aggregate([
         { $match: filter },
-        { $group: { _id: "$category", count: { $sum: 1 } } }
+        { $group: { _id: "$category", count: { $sum: 1 } } },
       ]),
 
       Issue.find(filter)
@@ -114,19 +116,18 @@ export const getAllIssues = async (req, res, next) => {
     // Admins get up to 50 rows — more data-dense than the citizen 12-card grid.
     const limit = Math.min(50, parseInt(req.query.limit) || 15);
     const skip = (page - 1) * limit;
-
     const {
       search,
       category,
       status,
       priority,
-      sort,
+      sort = "newest",
       province,
       district,
       overdue,
     } = req.query;
 
-    const match = { ...req.jurisdictionFilter }; // Start with jurisdiction filter from middleware
+    const match = buildIssueMatch(req); // Start with jurisdiction filter from middleware
 
     if (overdue === "true") {
       match.slaDeadline = { $lt: new Date() };
@@ -228,6 +229,22 @@ export const updateIssueStatus = async (req, res, next) => {
     await issue.populate("author", "name email");
 
     if (status !== previousStatus) {
+      await logAdminAction({
+        actor: req.user,
+        action: "issue_status_change",
+        targetType: "Issue",
+        targetId: issue._id,
+        jurisdiction: {
+          province: issue.location?.province,
+          district: issue.location?.district,
+        },
+        details: {
+          from: previousStatus,
+          to: status,
+          rejectionReason: rejectionReason || undefined,
+        },
+      });
+
       sendStatusChangeEmail(issue._id, status, rejectionReason || null).catch(
         (err) =>
           console.error(
@@ -341,6 +358,15 @@ export const createFieldWorker = async (req, res, next) => {
       throw err;
     }
 
+    await logAdminAction({
+      actor: req.user,
+      action: "field_worker_created",
+      targetType: "User",
+      targetId: fieldWorker._id,
+      jurisdiction: { province, district },
+      details: { name, email, department },
+    });
+
     res.status(201).json({
       success: true,
       fieldWorker: {
@@ -445,6 +471,21 @@ export const assignIssue = async (req, res, next) => {
     await issue.save();
     await issue.populate("author", "name email");
     await issue.populate("assignedTo", "name department");
+
+    await logAdminAction({
+      actor: req.user,
+      action: "issue_assignment",
+      targetType: "Issue",
+      targetId: issue._id,
+      jurisdiction: {
+        province: issue.location?.province,
+        district: issue.location?.district,
+      },
+      details: {
+        assignedTo: fieldWorker._id,
+        assignedToName: fieldWorker.name,
+      },
+    });
 
     sendAssignmentEmail(issue._id, fieldWorker._id).catch((err) =>
       console.error(`Assignment email failed: ${err.message}`),
