@@ -56,7 +56,12 @@ const CATEGORIES = [
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const { isAuthenticated, user } = useAuthStore();
-  const { getCategoryLabel, getCategoryDescription, getStatusLabel, getPriorityLabel } = useIssueLabels();
+  const {
+    getCategoryLabel,
+    getCategoryDescription,
+    getStatusLabel,
+    getPriorityLabel,
+  } = useIssueLabels();
 
   const HOW_IT_WORKS = [
     {
@@ -91,14 +96,16 @@ export default function HomePage() {
                 className="text-4xl md:text-5xl font-bold text-[#0f172a]
                 tracking-tight leading-[1.1] mb-5"
               >
-                {t("home.headline1")}<br />
+                {t("home.headline1")}
+                <br />
                 {i18n.language === "ne" ? (
                   <>
                     राम्रो <span className="text-[#16a34a]">नेपाल।</span>
                   </>
                 ) : (
                   <>
-                    {t("home.headline2")} <span className="text-[#16a34a]">Nepal.</span>
+                    {t("home.headline2")}{" "}
+                    <span className="text-[#16a34a]">Nepal.</span>
                   </>
                 )}
               </h1>
@@ -132,17 +139,15 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-5 text-xs text-[#94a3b8]">
-                {[
-                  t("home.trust1"),
-                  t("home.trust2"),
-                  t("home.trust3"),
-                ].map((text, i) => (
-                  <span key={text} className="flex items-center gap-1.5">
-                    {i > 0 && <span className="text-[#e2e8f0]">·</span>}
-                    <CheckCircle size={11} className="text-[#16a34a]" />
-                    {text}
-                  </span>
-                ))}
+                {[t("home.trust1"), t("home.trust2"), t("home.trust3")].map(
+                  (text, i) => (
+                    <span key={text} className="flex items-center gap-1.5">
+                      {i > 0 && <span className="text-[#e2e8f0]">·</span>}
+                      <CheckCircle size={11} className="text-[#16a34a]" />
+                      {text}
+                    </span>
+                  ),
+                )}
               </div>
             </div>
 
@@ -216,7 +221,13 @@ export default function HomePage() {
                   className="text-[80px] font-black text-[#16a34a]/20 leading-none
                   absolute top-3 right-5 select-none"
                 >
-                  {i18n.language === "ne" ? (n === "01" ? "०१" : n === "02" ? "०२" : "०३") : n}
+                  {i18n.language === "ne"
+                    ? n === "01"
+                      ? "०१"
+                      : n === "02"
+                        ? "०२"
+                        : "०३"
+                    : n}
                 </p>
                 <div
                   className="w-11 h-11 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]
@@ -293,7 +304,9 @@ export default function HomePage() {
                 <span className="font-bold text-white text-[15px] flex items-center gap-1.5">
                   <span>NepalSewa</span>
                   <span className="text-[#64748b] text-xs">/</span>
-                  <span className="font-medium text-[#94a3b8] text-sm">नेपाल सेवा</span>
+                  <span className="font-medium text-[#94a3b8] text-sm">
+                    नेपाल सेवा
+                  </span>
                 </span>
               </div>
               <p className="text-[#64748b] text-xs leading-relaxed max-w-64">
@@ -320,6 +333,12 @@ export default function HomePage() {
                 >
                   {t("nav.myReports")}
                 </Link>
+                <Link
+                  to="/scorecard"
+                  className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
+                >
+                  {t("home.footerScorecards")}
+                </Link>
               </div>
               <div>
                 <p className="text-[#94a3b8] font-semibold uppercase tracking-wider text-[10px] mb-3">
@@ -329,7 +348,15 @@ export default function HomePage() {
                   to="/login"
                   className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
                 >
-                  {t("profile.quickLinks") === "छिटो लिङ्कहरू" ? "कर्मचारी लगइन" : "Staff Login"}
+                  {t("profile.quickLinks") === "छिटो लिङ्कहरू"
+                    ? "कर्मचारी लगइन"
+                    : "Staff Login"}
+                </Link>
+                <Link
+                  to="/login"
+                  className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
+                >
+                  {t("home.footerAdminLogin")}
                 </Link>
               </div>
             </div>
@@ -338,7 +365,9 @@ export default function HomePage() {
             className="border-t border-[#1e293b] mt-10 pt-6 flex items-center
             justify-between text-xs text-[#475569]"
           >
-            <p>© {new Date().getFullYear()} {t("app.name")}</p>
+            <p>
+              © {new Date().getFullYear()} {t("app.name")}
+            </p>
             <p>{t("home.footerBuiltFor")} 🇳🇵</p>
           </div>
         </div>

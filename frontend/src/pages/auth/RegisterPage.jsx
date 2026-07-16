@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff, Loader2, ChevronDown, MapPin } from "lucide-react";
+import { Eye, EyeOff, Loader2, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/useAuthStore";
 import { NEPAL_LOCATIONS, getDistricts, getCities } from "../../constants/nepalLocations.js";
@@ -123,10 +123,10 @@ export default function RegisterPage() {
         style={{ backgroundColor: "#15803d" }}
       >
         <div className="relative z-10 p-8 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center border border-white/20">
-            <MapPin size={15} className="text-white" />
+          <div className="w-8 h-8 flex items-center justify-center shrink-0">
+            <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
           </div>
-          <span className="font-bold text-white text-[15px] tracking-tight">
+          <Link to="/" className="font-bold text-white text-[15px] tracking-tight">
             {i18n.language === "ne" ? (
               <>
                 नेपाल<span style={{ color: "#86efac" }}> सेवा</span>
@@ -136,7 +136,7 @@ export default function RegisterPage() {
                 Nepal<span style={{ color: "#86efac" }}>Sewa</span>
               </>
             )}
-          </span>
+          </Link>
         </div>
         <div className="relative z-10 flex-1 flex flex-col items-start justify-start pt-20 px-10 py-8">
           <div className="text-[80px] leading-none font-serif text-white/10 -mb-4 select-none">
@@ -192,8 +192,8 @@ export default function RegisterPage() {
 
         <div className="lg:hidden p-5 border-b border-[#f1f5f9]">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#16a34a] flex items-center justify-center">
-              <MapPin size={13} className="text-white" />
+            <div className="w-7 h-7 flex items-center justify-center shrink-0">
+              <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
             </div>
             <span className="font-bold text-[#0f172a] text-sm">
               {i18n.language === "ne" ? (

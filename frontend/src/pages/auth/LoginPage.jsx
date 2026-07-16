@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff, AlertCircle, Loader2, MapPin } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/useAuthStore";
 import LanguageSwitcher from "../../components/layout/LanguageSwitcher.jsx";
@@ -93,13 +93,10 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div className="relative z-10 p-8 flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center
-            backdrop-blur-sm border border-white/20 shrink-0"
-          >
-            <MapPin size={15} className="text-white" />
+          <div className="w-8 h-8 flex items-center justify-center shrink-0">
+            <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
           </div>
-          <span className="font-bold text-white text-[15px] tracking-tight">
+          <Link to="/" className="font-bold text-white text-[15px] tracking-tight">
             {i18n.language === "ne" ? (
               <>
                 नेपाल<span style={{ color: "#86efac" }}> सेवा</span>
@@ -109,7 +106,7 @@ export default function LoginPage() {
                 Nepal<span style={{ color: "#86efac" }}>Sewa</span>
               </>
             )}
-          </span>
+          </Link>
         </div>
 
         {/* Centered quote */}
@@ -183,8 +180,8 @@ export default function LoginPage() {
         {/* Mobile logo */}
         <div className="lg:hidden p-5 border-b border-[#f1f5f9]">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#16a34a] flex items-center justify-center">
-              <MapPin size={13} className="text-white" />
+            <div className="w-7 h-7 flex items-center justify-center shrink-0">
+              <img src="/icon.png" alt="" className="w-full h-full rounded-lg" />
             </div>
             <span className="font-bold text-[#0f172a] text-sm">
               {i18n.language === "ne" ? (

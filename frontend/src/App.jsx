@@ -27,8 +27,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminAdminsPage from "./pages/admin/AdminAdminsPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import AdminManagementPage from "./pages/admin/AdminManagementPage";
-import AdminAuditLogPage from "./pages/admin/AdminAuditLogPage"; 
-
+import AdminAuditLogPage from "./pages/admin/AdminAuditLogPage";
 
 import FieldLayout from "./components/field/FieldLayout";
 import FieldDashboardPage from "./pages/field/FieldDashboardPage";
@@ -41,6 +40,9 @@ import UpdatePrompt from "./components/pwa/UpdatePrompt.jsx";
 import SyncManager from "./components/pwa/SyncManager.jsx";
 import PwaInstallModal from "./components/pwa/PwaInstallModal.jsx";
 
+import ScorecardDirectoryPage from "./pages/public/ScorecardDirectoryPage";
+import ScorecardPage from "./pages/public/ScorecardPage";
+
 // Public only route - redirects authenticated users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -50,7 +52,8 @@ const PublicOnlyRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role !== "admin" && user?.role !== "super_admin") return <Navigate to="/" replace />;
+  if (user?.role !== "admin" && user?.role !== "super_admin")
+    return <Navigate to="/" replace />;
   return children;
 };
 
@@ -152,6 +155,7 @@ function App() {
 
         <Route path="verify-email/:token" element={<VerifyEmailPage />} />
 
+
         <Route
           path="/admin"
           element={
@@ -191,6 +195,13 @@ function App() {
 
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+
+          <Route path="scorecard" element={<ScorecardDirectoryPage />} />
+          <Route path="scorecard/:province" element={<ScorecardPage />} />
+          <Route
+            path="scorecard/:province/:district"
+            element={<ScorecardPage />}
+          />
 
           <Route
             path="profile"
