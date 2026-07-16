@@ -54,3 +54,8 @@ export const upvoteIssueRequest = async (id) => {
   const response = await api.post(`/api/issues/${id}/upvote`);
   return response.data;
 };
+
+export const fetchHeatmapData = async (params = {}) => {
+  const response = await api.get("/api/issues/heatmap", { params });
+  return response.data;
+};

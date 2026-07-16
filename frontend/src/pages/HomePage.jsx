@@ -338,6 +338,12 @@ export default function HomePage() {
                   {t("nav.myReports")}
                 </Link>
                 <Link
+                  to="/map"
+                  className="text-[#475569] hover:text-white cursor-pointer mb-2 transition-colors block"
+                >
+                  {t("home.footerMapView")}
+                </Link>{" "}
+                <Link
                   to="/scorecard"
                   className="block text-[#475569] hover:text-white mb-2 transition-colors text-left"
                 >

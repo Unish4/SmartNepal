@@ -133,9 +133,15 @@ export const createIssue = async (req, res, next) => {
         ),
       );
 
-    User.findByIdAndUpdate(req.user._id, { $inc: { "stats.reportsSubmitted": 1 } })
+    User.findByIdAndUpdate(req.user._id, {
+      $inc: { "stats.reportsSubmitted": 1 },
+    })
       .then(() => awardBadgesIfEarned(req.user._id))
-      .catch((err) => console.error(`Failed to update reporter stats for issue ${issue._id}: ${err.message}`));
+      .catch((err) =>
+        console.error(
+          `Failed to update reporter stats for issue ${issue._id}: ${err.message}`,
+        ),
+      );
 
     await issue.populate("author", "name email");
     res.status(201).json({ success: true, issue });
@@ -219,7 +225,7 @@ export const getIssues = async (req, res, next) => {
             let: { issueId: "$_id" },
             pipeline: [
               { $match: { $expr: { $eq: ["$issue", "$$issueId"] } } },
-              { $count: "count" }
+              { $count: "count" },
             ],
             as: "commentCountResult",
           },
@@ -227,18 +233,15 @@ export const getIssues = async (req, res, next) => {
         {
           $addFields: {
             commentCount: {
-              $ifNull: [
-                { $arrayElemAt: ["$commentCountResult.count", 0] },
-                0
-              ]
-            }
-          }
+              $ifNull: [{ $arrayElemAt: ["$commentCountResult.count", 0] }, 0],
+            },
+          },
         },
         {
           $project: {
-            commentCountResult: 0
-          }
-        }
+            commentCountResult: 0,
+          },
+        },
       ]),
 
       Issue.aggregate([{ $match: match }, { $count: "total" }]),
@@ -424,7 +427,7 @@ export const deleteIssue = async (req, res, next) => {
           ),
       );
     }
-    
+
     if (!isOwner) {
       await logAdminAction({
         actor: req.user,
@@ -503,6 +506,45 @@ export const getBoundaryOptions = async (req, res, next) => {
       provinces: provinces.filter(Boolean).sort(),
       districts: districts.filter(Boolean).sort(),
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── GET /api/issues/heatmap
+export const getHeatmapData = async (req, res, next) => {
+  try {
+    const { category, status, days } = req.query;
+
+    const match = {
+      "location.lat": { $exists: true, $ne: null },
+      "location.lng": { $exists: true, $ne: null },
+    };
+    if (typeof category === "string" && category) match.category = category;
+    if (typeof status === "string" && status) match.status = status;
+    if (days) {
+      const parsedDays = parseInt(days, 10);
+      if (Number.isInteger(parsedDays) && parsedDays > 0) {
+        const since = new Date();
+        since.setDate(since.getDate() - parsedDays);
+        match.createdAt = { $gte: since };
+      }
+    }
+    const points = await Issue.aggregate([
+      { $match: match },
+      { $sort: { createdAt: -1 } },
+      {
+        $project: {
+          _id: 0,
+          lat: "$location.lat",
+          lng: "$location.lng",
+          weight: { $min: [{ $add: [{ $size: "$upvoterIds" }, 1] }, 10] },
+        },
+      },
+      { $limit: 10000 },
+    ]);
+
+    res.status(200).json({ success: true, points, count: points.length });
   } catch (error) {
     next(error);
   }

@@ -43,6 +43,8 @@ import PwaInstallModal from "./components/pwa/PwaInstallModal.jsx";
 import ScorecardDirectoryPage from "./pages/public/ScorecardDirectoryPage";
 import ScorecardPage from "./pages/public/ScorecardPage";
 
+import MapViewPage from "./components/issues/MapViewPage";
+
 // Public only route - redirects authenticated users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -214,6 +216,7 @@ function App() {
 
           {/* Issues routes */}
           <Route path="issues" element={<IssuesPage />} />
+          <Route path="map" element={<MapViewPage />} />
           <Route
             path="issues/new"
             element={
