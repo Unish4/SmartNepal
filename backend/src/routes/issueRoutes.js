@@ -21,8 +21,9 @@ import {
   getComments,
   createComment,
   deleteComment,
-} from "../controllers/commentController.js"; // ← Phase 33
+} from "../controllers/commentController.js"; 
 import { arcjetGuard } from "../middleware/arcjetMiddleware.js";
+import { getHeatmapData } from "../controllers/issueController.js"; 
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.post(
   createIssueValidator,
   createIssue,
 );
+router.get("/heatmap", getHeatmapData);
 
 // ── Parameterised routes — always last
 router.get("/:id", getIssueById);

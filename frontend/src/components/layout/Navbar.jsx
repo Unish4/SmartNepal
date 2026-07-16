@@ -7,6 +7,7 @@ import {
   User,
   HardHat,
   Download,
+  Flame,
 } from "lucide-react";
 import useAuthStore from "../../store/useAuthStore";
 import { useTranslation } from "react-i18next";
@@ -90,6 +91,19 @@ const Navbar = () => {
 
       {/* Centre nav */}
       <div className="hidden md:flex items-center gap-1">
+        <NavLink
+          to="/map"
+          className={({ isActive }) =>
+            `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive
+                ? "bg-[#f0fdf4] text-[#16a34a]"
+                : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+            }`
+          }
+        >
+          <Flame size={15} />
+          <span>{i18n.language === "ne" ? "नक्सा" : "Map"}</span>
+        </NavLink>
         {navLinks.map(({ to, label, Icon, admin, field }) => (
           <NavLink
             key={to}
