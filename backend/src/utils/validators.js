@@ -12,36 +12,96 @@ const VALID_PROVINCES = [
 
 const PROVINCE_DISTRICT_MAP = {
   "Koshi Province": [
-    "Bhojpur", "Dhankuta", "Ilam", "Jhapa", "Khotang", "Morang",
-    "Okhaldhunga", "Panchthar", "Sankhuwasabha", "Solukhumbu",
-    "Sunsari", "Taplejung", "Terhathum", "Udayapur"
+    "Bhojpur",
+    "Dhankuta",
+    "Ilam",
+    "Jhapa",
+    "Khotang",
+    "Morang",
+    "Okhaldhunga",
+    "Panchthar",
+    "Sankhuwasabha",
+    "Solukhumbu",
+    "Sunsari",
+    "Taplejung",
+    "Terhathum",
+    "Udayapur",
   ],
   "Madhesh Province": [
-    "Bara", "Dhanusha", "Mahottari", "Parsa", "Rautahat", "Saptari",
-    "Sarlahi", "Siraha"
+    "Bara",
+    "Dhanusha",
+    "Mahottari",
+    "Parsa",
+    "Rautahat",
+    "Saptari",
+    "Sarlahi",
+    "Siraha",
   ],
   "Bagmati Province": [
-    "Bhaktapur", "Chitwan", "Dhading", "Dolakha", "Kathmandu",
-    "Kavrepalanchok", "Lalitpur", "Makwanpur", "Nuwakot", "Ramechhap",
-    "Rasuwa", "Sindhuli", "Sindhupalchok"
+    "Bhaktapur",
+    "Chitwan",
+    "Dhading",
+    "Dolakha",
+    "Kathmandu",
+    "Kavrepalanchok",
+    "Lalitpur",
+    "Makwanpur",
+    "Nuwakot",
+    "Ramechhap",
+    "Rasuwa",
+    "Sindhuli",
+    "Sindhupalchok",
   ],
   "Gandaki Province": [
-    "Baglung", "Gorkha", "Kaski", "Lamjung", "Manang", "Mustang",
-    "Myagdi", "Nawalpur", "Parbat", "Syangja", "Tanahun"
+    "Baglung",
+    "Gorkha",
+    "Kaski",
+    "Lamjung",
+    "Manang",
+    "Mustang",
+    "Myagdi",
+    "Nawalpur",
+    "Parbat",
+    "Syangja",
+    "Tanahun",
   ],
   "Lumbini Province": [
-    "Arghakhanchi", "Banke", "Bardiya", "Dang", "Gulmi", "Kapilvastu",
-    "Nawalparasi West", "Palpa", "Pyuthan", "Rolpa", "Rukum East",
-    "Rupandehi"
+    "Arghakhanchi",
+    "Banke",
+    "Bardiya",
+    "Dang",
+    "Gulmi",
+    "Kapilvastu",
+    "Nawalparasi West",
+    "Palpa",
+    "Pyuthan",
+    "Rolpa",
+    "Rukum East",
+    "Rupandehi",
   ],
   "Karnali Province": [
-    "Dailekh", "Dolpa", "Humla", "Jajarkot", "Jumla", "Kalikot",
-    "Mugu", "Rukum West", "Salyan", "Surkhet"
+    "Dailekh",
+    "Dolpa",
+    "Humla",
+    "Jajarkot",
+    "Jumla",
+    "Kalikot",
+    "Mugu",
+    "Rukum West",
+    "Salyan",
+    "Surkhet",
   ],
   "Sudurpashchim Province": [
-    "Achham", "Baitadi", "Bajhang", "Bajura", "Dadeldhura",
-    "Darchula", "Doti", "Kailali", "Kanchanpur"
-  ]
+    "Achham",
+    "Baitadi",
+    "Bajhang",
+    "Bajura",
+    "Dadeldhura",
+    "Darchula",
+    "Doti",
+    "Kailali",
+    "Kanchanpur",
+  ],
 };
 
 const validateDistrictForProvince = (district, { req }) => {
@@ -454,8 +514,6 @@ export const resetPasswordValidator = [
     .withMessage("Password must be between 6 and 72 characters"),
 ];
 
-
-
 export const createAdminValidator = [
   body("name")
     .trim()
@@ -503,4 +561,13 @@ export const updateAdminJurisdictionValidator = [
     .optional({ checkFalsy: true })
     .trim()
     .custom(validateDistrictForProvince),
+];
+
+export const createCommentValidator = [
+  body("text")
+    .trim()
+    .notEmpty()
+    .withMessage("Comment cannot be empty")
+    .isLength({ max: 1000 })
+    .withMessage("Comment cannot exceed 1000 characters"),
 ];

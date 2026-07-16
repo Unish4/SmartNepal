@@ -13,9 +13,15 @@ import { protect } from "../middleware/authMiddleware.js";
 import {
   createIssueValidator,
   updateIssueValidator,
+  createCommentValidator,
 } from "../utils/validators.js";
 import { upload } from "../middleware/upload.js";
-import { issueCreateArcjet } from "../config/arcjet.js"; 
+import { issueCreateArcjet, commentArcjet } from "../config/arcjet.js";
+import {
+  getComments,
+  createComment,
+  deleteComment,
+} from "../controllers/commentController.js"; // ← Phase 33
 import { arcjetGuard } from "../middleware/arcjetMiddleware.js";
 
 const router = Router();
@@ -33,10 +39,20 @@ router.post(
   createIssue,
 );
 
-// ── Parameterised routes — always last ────────────────────────────────────────
+// ── Parameterised routes — always last
 router.get("/:id", getIssueById);
 router.put("/:id", protect, updateIssueValidator, updateIssue);
 router.delete("/:id", protect, deleteIssue);
 router.post("/:id/upvote", protect, upvoteIssue);
+
+router.get("/:id/comments", getComments);
+router.post(
+  "/:id/comments",
+  protect,
+  arcjetGuard(commentArcjet),
+  createCommentValidator,
+  createComment,
+);
+router.delete("/:id/comments/:commentId", protect, deleteComment);
 
 export default router;

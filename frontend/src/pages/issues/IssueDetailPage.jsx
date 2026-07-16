@@ -26,8 +26,9 @@ import { timeAgo } from "../../utils/timeAgo.js";
 import MiniMap from "../../components/map/MiniMap.jsx";
 import ConfirmDialog from "../../components/ui/ConfirmDialog.jsx";
 import UpvoteButton from "../../components/issues/UpvoteButton.jsx";
+import CommentThread from "../../components/issues/CommentThread.jsx"; 
 
-// ── Timeline ─────────────────────────────────────────────────────────────────
+// ── Timeline 
 function IssueTimeline({ status }) {
   const STEPS = [
     {
@@ -147,7 +148,7 @@ export default function IssueDetailPage() {
     }
   };
 
-  // ── Loading ──────────────────────────────────────────────────────────────
+  // ── Loading 
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-6 animate-pulse space-y-4">
@@ -166,7 +167,7 @@ export default function IssueDetailPage() {
     );
   }
 
-  // ── Error ────────────────────────────────────────────────────────────────
+  // ── Error 
   if (error || !currentIssue) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center">
@@ -243,7 +244,7 @@ export default function IssueDetailPage() {
 
         {/* Two-column grid */}
         <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6 items-start">
-          {/* ── Left column ─────────────────────────────────────────────── */}
+          {/* ── Left column  */}
           <div className="space-y-4">
             {/* Image gallery */}
             {hasImages ? (
@@ -456,6 +457,9 @@ export default function IssueDetailPage() {
               </h4>
               <IssueTimeline status={currentIssue.status} />
             </div>
+
+            {/* Discussion Thread */}
+            <CommentThread issueId={currentIssue._id} />
 
             {/* Upvote + share bar */}
             <div

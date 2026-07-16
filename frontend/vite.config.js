@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
 
       VitePWA({
         registerType: "prompt",
-
         injectRegister: false,
 
         devOptions: {
@@ -45,26 +44,26 @@ export default defineConfig(({ mode }) => {
               src: "/manifest-icon-192.maskable.png",
               sizes: "192x192",
               type: "image/png",
-              purpose: "any"
+              purpose: "any",
             },
             {
               src: "/manifest-icon-192.maskable.png",
               sizes: "192x192",
               type: "image/png",
-              purpose: "maskable"
+              purpose: "maskable",
             },
             {
               src: "/manifest-icon-512.maskable.png",
               sizes: "512x512",
               type: "image/png",
-              purpose: "any"
+              purpose: "any",
             },
             {
               src: "/manifest-icon-512.maskable.png",
               sizes: "512x512",
               type: "image/png",
-              purpose: "maskable"
-            }
+              purpose: "maskable",
+            },
           ],
         },
 
@@ -78,7 +77,7 @@ export default defineConfig(({ mode }) => {
           cleanupOutdatedCaches: true,
 
           runtimeCaching: [
-            // ── Backend API — issue reads 
+            // ── Backend API — issue reads
             {
               urlPattern: new RegExp(`^${apiOriginPattern}/api/issues`),
               handler: "NetworkFirst",
@@ -93,7 +92,7 @@ export default defineConfig(({ mode }) => {
               },
             },
 
-            // ── Cloudinary issue photos 
+            // ── Cloudinary issue photos
             {
               urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
               handler: "CacheFirst",
@@ -107,7 +106,7 @@ export default defineConfig(({ mode }) => {
               },
             },
 
-            // ── OpenStreetMap tiles 
+            // ── OpenStreetMap tiles
             {
               urlPattern: /^https:\/\/[abc]\.tile\.openstreetmap\.org\/.*/i,
               handler: "CacheFirst",
@@ -121,7 +120,7 @@ export default defineConfig(({ mode }) => {
               },
             },
 
-            // ── Google Fonts 
+            // ── Google Fonts
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: "CacheFirst",

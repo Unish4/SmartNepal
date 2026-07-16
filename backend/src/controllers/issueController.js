@@ -206,6 +206,33 @@ export const getIssues = async (req, res, next) => {
             preserveNullAndEmptyArrays: true,
           },
         },
+
+        {
+          $lookup: {
+            from: "comments",
+            let: { issueId: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$issue", "$$issueId"] } } },
+              { $count: "count" }
+            ],
+            as: "commentCountResult",
+          },
+        },
+        {
+          $addFields: {
+            commentCount: {
+              $ifNull: [
+                { $arrayElemAt: ["$commentCountResult.count", 0] },
+                0
+              ]
+            }
+          }
+        },
+        {
+          $project: {
+            commentCountResult: 0
+          }
+        }
       ]),
 
       Issue.aggregate([{ $match: match }, { $count: "total" }]),

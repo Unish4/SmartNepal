@@ -87,7 +87,7 @@ const SidebarContent = ({ user, onLogout, onLinkClick }) => {
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto no-scrollbar">
         <p
           className="text-[10px] font-bold text-slate-500 uppercase tracking-widest
           px-3 mb-4"

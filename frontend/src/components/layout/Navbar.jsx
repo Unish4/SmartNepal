@@ -89,34 +89,32 @@ const Navbar = () => {
       </Link>
 
       {/* Centre nav */}
-      {isAuthenticated && (
-        <div className="hidden md:flex items-center gap-1">
-          {navLinks.map(({ to, label, Icon, admin, field }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? admin
-                      ? "bg-purple-50 text-purple-700"
-                      : field
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-[#f0fdf4] text-[#16a34a]"
-                    : admin
-                      ? "text-[#7c3aed] hover:bg-purple-50"
-                      : field
-                        ? "text-amber-600 hover:bg-amber-50"
-                        : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a]"
-                }`
-              }
-            >
-              <Icon size={15} />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </div>
-      )}
+      <div className="hidden md:flex items-center gap-1">
+        {navLinks.map(({ to, label, Icon, admin, field }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? admin
+                    ? "bg-purple-50 text-purple-700"
+                    : field
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-[#f0fdf4] text-[#16a34a]"
+                  : admin
+                    ? "text-[#7c3aed] hover:bg-purple-50"
+                    : field
+                      ? "text-amber-600 hover:bg-amber-50"
+                      : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+              }`
+            }
+          >
+            <Icon size={15} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </div>
 
       {/* Right actions */}
       <div className="ml-auto flex items-center gap-3">

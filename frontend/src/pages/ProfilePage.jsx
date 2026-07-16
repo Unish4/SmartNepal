@@ -55,14 +55,20 @@ const Toggle = ({ checked, onChange, disabled }) => (
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "ne", label: "नेपाली",  flag: "🇳🇵" },
+  { code: "ne", label: "नेपाली", flag: "🇳🇵" },
 ];
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation(["common", "auth"]);
   const { user, updatePreferences, updateProfile, uploadAvatar } =
     useAuthStore();
-  const { deferredPrompt, showIosInstallHint, isStandalone, needRefresh, updateServiceWorker } = useOfflineStore();
+  const {
+    deferredPrompt,
+    showIosInstallHint,
+    isStandalone,
+    needRefresh,
+    updateServiceWorker,
+  } = useOfflineStore();
 
   const [emailNotif, setEmailNotif] = useState(
     user?.emailNotifications ?? true,
@@ -88,7 +94,9 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       await updatePreferences({ emailNotifications: newValue });
-      toast.success(newValue ? t("profile.emailNotifOn") : t("profile.emailNotifOff"));
+      toast.success(
+        newValue ? t("profile.emailNotifOn") : t("profile.emailNotifOff"),
+      );
     } catch {
       setEmailNotif(!newValue);
       toast.error("Failed to save preference. Please try again.");
@@ -197,19 +205,36 @@ export default function ProfilePage() {
   const INFO_ROWS = [
     { icon: User, label: t("profile.fullName"), value: user.name },
     { icon: Mail, label: t("profile.email"), value: user.email },
-    { icon: Phone, label: t("profile.phone"), value: user.phone || t("profile.notSet") },
-    { icon: MapPin, label: t("profile.province"), value: user.province || t("profile.notSet") },
-    { icon: MapPin, label: t("auth:register.district"), value: user.district || t("profile.notSet") },
-    { icon: MapPin, label: t("auth:register.city"), value: user.city || t("profile.notSet") },
+    {
+      icon: Phone,
+      label: t("profile.phone"),
+      value: user.phone || t("profile.notSet"),
+    },
+    {
+      icon: MapPin,
+      label: t("profile.province"),
+      value: user.province || t("profile.notSet"),
+    },
+    {
+      icon: MapPin,
+      label: t("auth:register.district"),
+      value: user.district || t("profile.notSet"),
+    },
+    {
+      icon: MapPin,
+      label: t("auth:register.city"),
+      value: user.city || t("profile.notSet"),
+    },
   ];
 
-  const roleLabel = user.role === "super_admin"
-    ? t("profile.superAdmin")
-    : user.role === "admin"
-    ? t("profile.administrator")
-    : user.role === "field_worker"
-    ? t("profile.fieldWorker")
-    : t("profile.citizen");
+  const roleLabel =
+    user.role === "super_admin"
+      ? t("profile.superAdmin")
+      : user.role === "admin"
+        ? t("profile.administrator")
+        : user.role === "field_worker"
+          ? t("profile.fieldWorker")
+          : t("profile.citizen");
 
   const quickLinks = [
     ...(user.role === "citizen"
@@ -253,8 +278,12 @@ export default function ProfilePage() {
           {
             onClick: () => useOfflineStore.getState().setShowInstallModal(true),
             icon: Download,
-            label: i18n.language === "ne" ? "एप डाउनलोड गर्नुहोस्" : "Install App",
-            sub: i18n.language === "ne" ? "तपाईंको उपकरणमा नेपालसेवा डाउनलोड गर्नुहोस्" : "Install NepalSewa on your device",
+            label:
+              i18n.language === "ne" ? "एप डाउनलोड गर्नुहोस्" : "Install App",
+            sub:
+              i18n.language === "ne"
+                ? "तपाईंको उपकरणमा नेपालसेवा डाउनलोड गर्नुहोस्"
+                : "Install NepalSewa on your device",
             color: "#16a34a",
             bg: "#f0fdf4",
           },
@@ -270,14 +299,26 @@ export default function ProfilePage() {
       },
       icon: RefreshCw,
       label: needRefresh
-        ? (i18n.language === "ne" ? "एप अपडेट गर्नुहोस्" : "Update App")
-        : (i18n.language === "ne" ? "एप पुनः लोड गर्नुहोस्" : "Reload App"),
+        ? i18n.language === "ne"
+          ? "एप अपडेट गर्नुहोस्"
+          : "Update App"
+        : i18n.language === "ne"
+          ? "एप पुनः लोड गर्नुहोस्"
+          : "Reload App",
       sub: needRefresh
-        ? (i18n.language === "ne" ? "नयाँ संस्करण उपलब्ध छ, तुरुन्तै लोड गर्नुहोस्" : "A new version is available. Click to reload and update.")
-        : (i18n.language === "ne" ? "रिफ्रेस गर्न वा अपडेटहरू जाँच गर्न क्लिक गर्नुहोस्" : "Click to refresh or check for updates."),
+        ? i18n.language === "ne"
+          ? "नयाँ संस्करण उपलब्ध छ, तुरुन्तै लोड गर्नुहोस्"
+          : "A new version is available. Click to reload and update."
+        : i18n.language === "ne"
+          ? "रिफ्रेस गर्न वा अपडेटहरू जाँच गर्न क्लिक गर्नुहोस्"
+          : "Click to refresh or check for updates.",
       color: needRefresh ? "#d97706" : "#475569",
       bg: needRefresh ? "#fffbeb" : "#f1f5f9",
-      badge: needRefresh ? (i18n.language === "ne" ? "अपडेट उपलब्ध" : "Update Available") : null,
+      badge: needRefresh
+        ? i18n.language === "ne"
+          ? "अपडेट उपलब्ध"
+          : "Update Available"
+        : null,
     },
   ];
 
@@ -286,13 +327,6 @@ export default function ProfilePage() {
       {/* Hero header — matches HomePage section style */}
       <section className="bg-white border-b border-[#e2e8f0]">
         <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-          <div
-            className="inline-flex items-center gap-2 bg-[#f0fdf4] text-[#16a34a]
-            text-xs font-semibold px-3 py-1.5 rounded-full border border-[#bbf7d0] mb-5"
-          >
-            <User size={11} />
-            {i18n.language === "ne" ? "तपाईंको नेपाल सेवा खाता" : "Your NepalSewa account"}
-          </div>
 
           <h1
             className="text-3xl md:text-4xl font-bold text-[#0f172a]
@@ -336,7 +370,11 @@ export default function ProfilePage() {
                   className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#16a34a]
                     text-white flex items-center justify-center cursor-pointer
                     hover:bg-[#15803d] transition-colors shadow-sm"
-                  title={i18n.language === "ne" ? "अवतार अपलोड गर्नुहोस्" : "Upload avatar"}
+                  title={
+                    i18n.language === "ne"
+                      ? "अवतार अपलोड गर्नुहोस्"
+                      : "Upload avatar"
+                  }
                 >
                   {isUploadingAvatar ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -404,7 +442,9 @@ export default function ProfilePage() {
                     {t("profile.accountInfo")}
                   </h3>
                   <p className="text-sm text-[#94a3b8] mt-0.5">
-                    {i18n.language === "ne" ? "नेपाल सेवामा तपाईंको दर्ता गरिएको विवरण" : "Your registered details on NepalSewa"}
+                    {i18n.language === "ne"
+                      ? "नेपाल सेवामा तपाईंको दर्ता गरिएको विवरण"
+                      : "Your registered details on NepalSewa"}
                   </p>
                 </div>
                 {!isEditing && (
@@ -466,7 +506,9 @@ export default function ProfilePage() {
                         className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm text-[#0f172a] outline-none focus:border-[#16a34a] focus:ring-2 focus:ring-[#16a34a]/15 transition-all bg-white cursor-pointer appearance-none"
                         style={{ paddingRight: "2.5rem" }}
                       >
-                        <option value="">{t("auth:register.provincePlaceholder")}</option>
+                        <option value="">
+                          {t("auth:register.provincePlaceholder")}
+                        </option>
                         {Object.keys(NEPAL_LOCATIONS).map((p) => (
                           <option key={p} value={p}>
                             {p}
@@ -610,7 +652,9 @@ export default function ProfilePage() {
                   {t("profile.notificationPrefs")}
                 </h3>
                 <p className="text-sm text-[#94a3b8] mt-0.5">
-                  {t("profile.notificationPrefsDesc", { defaultValue: "Choose how NepalSewa keeps you updated" })}
+                  {t("profile.notificationPrefsDesc", {
+                    defaultValue: "Choose how NepalSewa keeps you updated",
+                  })}
                 </p>
               </div>
 
@@ -688,8 +732,10 @@ export default function ProfilePage() {
 
               <div className="p-6">
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-9 h-9 rounded-lg bg-[#f8fafc] border border-[#e2e8f0]
-                    flex items-center justify-center shrink-0">
+                  <div
+                    className="w-9 h-9 rounded-lg bg-[#f8fafc] border border-[#e2e8f0]
+                    flex items-center justify-center shrink-0"
+                  >
                     <Languages size={16} className="text-[#64748b]" />
                   </div>
                   <p className="text-xs text-[#64748b] leading-relaxed flex-1">
@@ -704,15 +750,19 @@ export default function ProfilePage() {
                       disabled={langSaving}
                       className={`flex items-center justify-between gap-2 px-4 py-3
                         rounded-xl border-2 transition-all disabled:opacity-60 cursor-pointer
-                        ${i18n.language === lang.code
-                          ? "border-[#16a34a] bg-[#f0fdf4]"
-                          : "border-[#e2e8f0] hover:border-[#cbd5e1]"
+                        ${
+                          i18n.language === lang.code
+                            ? "border-[#16a34a] bg-[#f0fdf4]"
+                            : "border-[#e2e8f0] hover:border-[#cbd5e1]"
                         }`}
                     >
                       <span className="flex items-center gap-2 text-sm font-medium text-[#0f172a]">
-                        <span>{lang.flag}</span>{lang.label}
+                        <span>{lang.flag}</span>
+                        {lang.label}
                       </span>
-                      {i18n.language === lang.code && <Check size={16} className="text-[#16a34a]" />}
+                      {i18n.language === lang.code && (
+                        <Check size={16} className="text-[#16a34a]" />
+                      )}
                     </button>
                   ))}
                 </div>
@@ -729,72 +779,85 @@ export default function ProfilePage() {
                   {t("profile.quickLinks")}
                 </h3>
                 <p className="text-sm text-[#94a3b8] mt-0.5">
-                  {i18n.language === "ne" ? "आफ्नो रिपोर्ट र सुविधाहरूमा जानुहोस्" : "Jump to your reports and tools"}
+                  {i18n.language === "ne"
+                    ? "आफ्नो रिपोर्ट र सुविधाहरूमा जानुहोस्"
+                    : "Jump to your reports and tools"}
                 </p>
               </div>
 
               <div className="p-6 grid sm:grid-cols-2 gap-4">
-                {quickLinks.map(({ to, onClick, icon: Icon, label, sub, color, bg, badge }) => {
-                  const cardContent = (
-                    <>
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                {quickLinks.map(
+                  ({
+                    to,
+                    onClick,
+                    icon: Icon,
+                    label,
+                    sub,
+                    color,
+                    bg,
+                    badge,
+                  }) => {
+                    const cardContent = (
+                      <>
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
                         group-hover:scale-105 transition-transform"
-                        style={{ backgroundColor: bg }}
-                      >
-                        <Icon size={18} style={{ color }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-[#0f172a]">
-                              {label}
-                            </p>
-                            {badge && (
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0 animate-pulse">
-                                {badge}
-                              </span>
-                            )}
-                          </div>
-                          <ChevronRight
-                            size={14}
-                            className="text-[#cbd5e1] group-hover:text-[#16a34a]
-                            transition-colors shrink-0"
-                          />
+                          style={{ backgroundColor: bg }}
+                        >
+                          <Icon size={18} style={{ color }} />
                         </div>
-                        <p className="text-xs text-[#94a3b8] mt-1 leading-relaxed text-left">
-                          {sub}
-                        </p>
-                      </div>
-                    </>
-                  );
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-[#0f172a]">
+                                {label}
+                              </p>
+                              {badge && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0 animate-pulse">
+                                  {badge}
+                                </span>
+                              )}
+                            </div>
+                            <ChevronRight
+                              size={14}
+                              className="text-[#cbd5e1] group-hover:text-[#16a34a]
+                            transition-colors shrink-0"
+                            />
+                          </div>
+                          <p className="text-xs text-[#94a3b8] mt-1 leading-relaxed text-left">
+                            {sub}
+                          </p>
+                        </div>
+                      </>
+                    );
 
-                  if (onClick) {
-                    return (
-                      <button
-                        key={label}
-                        onClick={onClick}
-                        className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
+                    if (onClick) {
+                      return (
+                        <button
+                          key={label}
+                          onClick={onClick}
+                          className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
                           gap-4 hover:shadow-md hover:border-[#cbd5e1] hover:-translate-y-0.5
                           transition-all duration-200 group w-full text-left cursor-pointer bg-white"
-                      >
-                        {cardContent}
-                      </button>
-                    );
-                  }
+                        >
+                          {cardContent}
+                        </button>
+                      );
+                    }
 
-                  return (
-                    <Link
-                      key={to}
-                      to={to}
-                      className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
+                    return (
+                      <Link
+                        key={to}
+                        to={to}
+                        className="rounded-2xl p-5 border border-[#e2e8f0] flex items-start
                         gap-4 hover:shadow-md hover:border-[#cbd5e1] hover:-translate-y-0.5
                         transition-all duration-200 group bg-white"
-                    >
-                      {cardContent}
-                    </Link>
-                  );
-                })}
+                      >
+                        {cardContent}
+                      </Link>
+                    );
+                  },
+                )}
               </div>
             </div>
           </div>

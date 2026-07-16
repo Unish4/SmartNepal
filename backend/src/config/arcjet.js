@@ -62,4 +62,11 @@ export const scorecardArcjet = isConfigured
     )
   : null;
 
+// ── Comment guard
+export const commentArcjet = isConfigured
+  ? baseClient.withRule(
+      slidingWindow({ mode: "LIVE", interval: "1h", max: 30 }),
+    )
+  : null;
+
 export default baseClient;
