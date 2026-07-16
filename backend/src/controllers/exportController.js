@@ -46,7 +46,7 @@ export const exportIssuesCSV = async (req, res, next) => {
       },
     ];
 
-    const filename = `smartnepal-issues-${new Date().toISOString().split("T")[0]}.csv`;
+    const filename = `nepalsewa-issues-${new Date().toISOString().split("T")[0]}.csv`;
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.write("\uFEFF"); // Write UTF-8 BOM
@@ -125,7 +125,7 @@ export const exportIssuesPDF = async (req, res, next) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="smartnepal-report-${new Date().toISOString().split("T")[0]}.pdf"`,
+      `attachment; filename="nepalsewa-report-${new Date().toISOString().split("T")[0]}.pdf"`,
     );
 
     const doc = new PDFDocument({ margin: 50 });
@@ -134,7 +134,7 @@ export const exportIssuesPDF = async (req, res, next) => {
     doc
       .fontSize(20)
       .fillColor("#16a34a")
-      .text("SmartNepal", { continued: true })
+      .text("NepalSewa", { continued: true })
       .fillColor("#0f172a")
       .text(" — Civic Issue Report");
     doc.moveDown(0.3);

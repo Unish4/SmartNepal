@@ -56,4 +56,10 @@ export const passwordResetArcjet = isConfigured
     )
   : null;
 
+export const scorecardArcjet = isConfigured
+  ? baseClient.withRule(
+      slidingWindow({ mode: "LIVE", interval: "10m", max: 30 }),
+    )
+  : null;
+
 export default baseClient;

@@ -294,7 +294,7 @@ const escapeHtml = (value) =>
   );
 
 export const escalationTemplate = (admin, issue, frontendUrl) => ({
-  subject: `⚠ SLA breached: ${issue.title.slice(0, 60)} — SmartNepal`,
+  subject: `⚠ SLA breached: ${issue.title.slice(0, 60)} — NepalSewa`,
   html: baseWrapper(`
     <p style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0f172a;">
       An issue has passed its SLA deadline
