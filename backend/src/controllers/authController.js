@@ -64,6 +64,35 @@ const checkValidation = (req, res) => {
 const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000;
 const EMAIL_VERIFY_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
+const setTokenCookie = (res, req, token, maxAge = 7 * 24 * 60 * 60 * 1000) => {
+  const isLocalhost =
+    req.headers.host?.includes("localhost") ||
+    req.headers.host?.includes("127.0.0.1");
+  const secure = ENV.NODE_ENV === "production" && !isLocalhost;
+  
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure,
+    sameSite: secure ? "none" : "lax",
+    maxAge,
+    path: "/",
+  });
+};
+
+const clearTokenCookie = (res, req) => {
+  const isLocalhost =
+    req.headers.host?.includes("localhost") ||
+    req.headers.host?.includes("127.0.0.1");
+  const secure = ENV.NODE_ENV === "production" && !isLocalhost;
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure,
+    sameSite: secure ? "none" : "lax",
+    maxAge: 0,
+    path: "/",
+  });
+};
+
 export const register = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -94,6 +123,11 @@ export const register = async (req, res, next) => {
       province,
       district,
       city,
+      tokenVersion: 0,
+      emailNotifications: true,
+      preferredLanguage: "en",
+      isEmailVerified: false,
+      stats: { reportsSubmitted: 0, reportsResolved: 0, commentsPosted: 0 },
     });
     const token = generateToken(user);
 
@@ -112,12 +146,7 @@ export const register = async (req, res, next) => {
       }),
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    setTokenCookie(res, req, token);
 
     res.status(201).json({
       success: true,
@@ -140,7 +169,7 @@ export const login = async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password +twoFactorEnabled +twoFactorSecret");
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -156,24 +185,25 @@ export const login = async (req, res, next) => {
       });
     }
 
-    if (
-      TWO_FACTOR_REQUIRED_ROLES.includes(user.role) &&
-      user.twoFactorEnabled
-    ) {
+
+
+    // Force 2FA check for admin/super_admin/field_worker roles
+    const requiresTwoFactor = TWO_FACTOR_REQUIRED_ROLES.includes(user.role);
+    const hasTwoFactorEnabled = user.twoFactorEnabled === true;
+    
+
+
+    if (requiresTwoFactor && hasTwoFactorEnabled) {
       const pendingToken = generatePendingTwoFactorToken(user._id, user.tokenVersion);
       return res
         .status(200)
         .json({ success: true, requiresTwoFactor: true, pendingToken });
     }
 
+
     const token = generateToken(user);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    setTokenCookie(res, req, token);
 
     res.status(200).json({
       success: true,
@@ -203,12 +233,7 @@ export const getMe = async (req, res, next) => {
 };
 
 export const logout = (req, res) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    secure: ENV.NODE_ENV === "production",
-    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 0,
-  });
+  clearTokenCookie(res, req);
   res.status(200).json({
     success: true,
     message: "Logged out successfully",
@@ -533,12 +558,7 @@ export const verifySetupTwoFactor = async (req, res, next) => {
     await user.save();
 
     const token = generateToken(user, true);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    setTokenCookie(res, req, token);
 
     res.status(200).json({
       success: true,
@@ -588,12 +608,7 @@ export const disableTwoFactor = async (req, res, next) => {
     await user.save();
 
     const token = generateToken(user, false);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    setTokenCookie(res, req, token);
 
     res
       .status(200)
@@ -608,7 +623,6 @@ export const verifyTwoFactorLogin = async (req, res, next) => {
   try {
     if (!checkValidation(req, res)) return;
     const { pendingToken, code } = req.body;
-
     let payload;
     try {
       payload = await verifyPendingTwoFactorToken(pendingToken);
@@ -662,16 +676,12 @@ export const verifyTwoFactorLogin = async (req, res, next) => {
     }
 
     const token = generateToken(user, true);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    setTokenCookie(res, req, token);
 
     const remaining = user.twoFactorBackupCodes.filter(
       (bc) => !bc.usedAt,
     ).length;
+
 
     res.status(200).json({
       success: true,

@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: import.meta.env.VITE_API_URL || "",
   withCredentials: true,
 });
 
@@ -22,31 +22,25 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+
+    if (status === 401) {
       const isAuthRoute = error.config?.url?.includes("/api/auth/");
       if (!isAuthRoute) {
         window.location.href = "/login";
       }
-      
-      if (
-        error.response?.status === 403 &&
-        error.response?.data?.code === "TWO_FACTOR_SETUP_REQUIRED" &&
-        window.location.pathname !== "/security-setup"
-      ) {
-        window.location.href = "/security-setup";
-        return Promise.reject(error);
-      }
+    }
 
-      if (error.response?.status === 429) {
-        toast.error(
-          error.response?.data?.message ||
-            "Too many requests. Please slow down and try again shortly.",
-        );
-      }
+    if (
+      status === 403 &&
+      error.response?.data?.code === "TWO_FACTOR_SETUP_REQUIRED" &&
+      window.location.pathname !== "/security-setup"
+    ) {
+      window.location.href = "/security-setup";
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 429) {
+    if (status === 429) {
       toast.error(
         error.response?.data?.message ||
           "Too many requests. Please slow down and try again shortly.",

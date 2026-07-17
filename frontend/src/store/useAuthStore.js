@@ -83,7 +83,7 @@ const useAuthStore = create(
         set({ isLoading: true });
         try {
           const res = await loginUser(credentials);
-          if (res.requiredTwoFactor) return res;
+          if (res.requiresTwoFactor) return res;
           set({ user: res.user, isAuthenticated: true });
           if (res.user?.preferredLanguage)
             i18n.changeLanguage(res.user.preferredLanguage);
@@ -100,6 +100,8 @@ const useAuthStore = create(
           set({ user: res.user, isAuthenticated: true });
           if (res.user?.preferredLanguage)
             i18n.changeLanguage(res.user.preferredLanguage);
+          // Verify the session by calling checkAuth to ensure cookie is working
+          await useAuthStore.getState().checkAuth();
           return res;
         } finally {
           set({ isLoading: false });

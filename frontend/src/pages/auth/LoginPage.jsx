@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -68,6 +68,13 @@ export default function LoginPage() {
   const [pendingToken, setPendingToken] = useState(null);
   const [twoFactorCode, setTwoFactorCode] = useState("");
 
+  // Monitor twoFactorStep changes
+  useEffect(() => {
+    if (twoFactorStep) {
+      setTwoFactorCode("");
+    }
+  }, [twoFactorStep]);
+
   const {
     register,
     handleSubmit,
@@ -80,7 +87,7 @@ export default function LoginPage() {
     setApiError("");
     try {
       const res = await login(data);
-      if (res.requiredTwoFactor) {
+      if (res.requiresTwoFactor) {
         setTwoFactorStep(true);
         setPendingToken(res.pendingToken);
         return;

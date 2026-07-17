@@ -33,10 +33,9 @@ export const protect = async (req, res, next) => {
     }
 
     // Verify token version to invalidate stale sessions (e.g. after password reset)
-    if (
-      decoded.tokenVersion !== undefined &&
-      decoded.tokenVersion !== user.tokenVersion
-    ) {
+    const tokenVersionInToken = decoded.tokenVersion || 0;
+    const currentTokenVersion = user.tokenVersion || 0;
+    if (tokenVersionInToken !== currentTokenVersion) {
       return res.status(401).json({
         success: false,
         message: "Not authorized, session expired",

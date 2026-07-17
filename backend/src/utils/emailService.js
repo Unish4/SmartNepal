@@ -18,6 +18,7 @@ import {
   verifiedTemplateNe,
 } from "./emailTemplates.js";
 import User from "../models/User.js";
+import logger from "../config/logger.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";

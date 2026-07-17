@@ -104,6 +104,12 @@ describe("Two-factor authentication", () => {
       });
     expect(verifyLoginRes.status).toBe(200);
     expect(verifyLoginRes.headers["set-cookie"]).toBeDefined();
+
+    const meRes = await request(app)
+      .get("/api/auth/me")
+      .set("Cookie", verifyLoginRes.headers["set-cookie"]);
+    expect(meRes.status).toBe(200);
+    expect(meRes.body.user.email).toBe("login2fa@test.com");
   });
 
   it("rejects an incorrect code at the login-verify step", async () => {
