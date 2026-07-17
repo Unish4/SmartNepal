@@ -215,7 +215,15 @@ export default function FieldIssueDetailPage() {
           <h2 className="text-xs font-semibold text-[#0f172a] uppercase tracking-wider mb-2">
             Location
           </h2>
-          <MiniMap lat={issue.location.lat} lng={issue.location.lng} />
+          <MiniMap
+            lat={issue.location.lat}
+            lng={issue.location.lng}
+            zoomControl={true}
+            dragging={true}
+            doubleClickZoom={true}
+            touchZoom={true}
+            keyboard={true}
+          />
           {issue.location.address && (
             <p className="text-xs text-[#94a3b8] mt-2 flex items-center gap-1.5">
               <MapPin size={11} className="text-[#16a34a] shrink-0" />

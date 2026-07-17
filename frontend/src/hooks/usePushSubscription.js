@@ -28,20 +28,23 @@ export const usePushSubscription = () => {
       return;
     }
 
-    navigator.serviceWorker
-      .getRegistration()
+    navigator.serviceWorker.getRegistration()
       .then((reg) => {
         if (reg) {
           return reg.pushManager.getSubscription();
         }
         return null;
       })
-      .then((sub) => setIsSubscribed(!!sub))
+      .then((sub) => {
+        setIsSubscribed(!!sub);
+      })
       .catch((err) => {
         console.error("Error checking push subscription status:", err);
         setIsSubscribed(false);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const subscribe = useCallback(async () => {
@@ -49,14 +52,28 @@ export const usePushSubscription = () => {
     if (!configured)
       throw new Error("Push notifications are not configured on the server");
 
-    const permission = await Notification.requestPermission();
+    let permission = Notification.permission;
+    if (permission !== "granted") {
+      try {
+        permission = await Notification.requestPermission();
+      } catch {
+        permission = await new Promise((resolve) => {
+          Notification.requestPermission(resolve);
+        });
+      }
+    }
     if (permission !== "granted")
       throw new Error("Notification permission was not granted");
 
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (!registration?.active) {
-      throw new Error("Push notifications are not ready on this device");
+    let registration = await navigator.serviceWorker.getRegistration();
+    if (!registration || !registration.active) {
+      const readyPromise = navigator.serviceWorker.ready;
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Service worker activation timed out")), 5000)
+      );
+      registration = await Promise.race([readyPromise, timeoutPromise]);
     }
+    
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
@@ -67,7 +84,14 @@ export const usePushSubscription = () => {
   }, []);
 
   const unsubscribe = useCallback(async () => {
-    const registration = await navigator.serviceWorker.ready;
+    let registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      const readyPromise = navigator.serviceWorker.ready;
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Service worker activation timed out")), 5000)
+      );
+      registration = await Promise.race([readyPromise, timeoutPromise]);
+    }
     const subscription = await registration.pushManager.getSubscription();
     if (subscription) {
       await unsubscribePushRequest(subscription.endpoint);

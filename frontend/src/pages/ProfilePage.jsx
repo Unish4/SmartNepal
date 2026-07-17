@@ -41,6 +41,7 @@ import { ROLE_CONFIG } from "../constants/issue.js";
 import BadgeGrid from "../components/profile/BadgeGrid.jsx";
 import { usePushSubscription } from "../hooks/usePushSubscription.js";
 import { requiresTwoFactor } from "../constants/twoFactor.js";
+import OfflineMapCard from "../components/field/OfflineMapCard.jsx";
 
 const Toggle = ({ checked, onChange, disabled }) => (
   <button
@@ -526,6 +527,8 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
+
+            <OfflineMapCard />
           </div>
 
           {/* Settings — right column */}

@@ -48,10 +48,6 @@ const ConfirmDialog = ({
         onClick={() => !isLoading && onClose()}
       />
 
-      <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
-        onClick={(e) => e.stopPropagation()}
-      ></div>
 
       {/* Dialog card */}
       <div

@@ -24,6 +24,7 @@ import {
 } from "../controllers/commentController.js"; 
 import { arcjetGuard } from "../middleware/arcjetMiddleware.js";
 import { getHeatmapData } from "../controllers/issueController.js"; 
+import { getOfflineMapBounds } from "../controllers/fieldWorkerController.js";
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.post(
   createIssue,
 );
 router.get("/heatmap", getHeatmapData);
+router.get("/offline-map-bounds", protect, getOfflineMapBounds);
 
 // ── Parameterised routes — always last
 router.get("/:id", getIssueById);

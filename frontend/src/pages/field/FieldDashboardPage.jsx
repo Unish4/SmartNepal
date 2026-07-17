@@ -7,6 +7,7 @@ import {
 } from "../../services/fieldWorkerService.js";
 import { STATUS_CONFIG, PRIORITY_CONFIG } from "../../constants/issue.js";
 import { timeAgo } from "../../utils/timeAgo.js";
+import OfflineMapCard from "../../components/field/OfflineMapCard.jsx"; 
 
 const FILTER_TABS = [
   { label: "All", value: "" },
@@ -137,6 +138,8 @@ export default function FieldDashboardPage() {
           />
         </div>
       )}
+
+      <OfflineMapCard />
 
       {/* Filter tabs — horizontal scroll on very small screens */}
       <div

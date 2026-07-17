@@ -8,6 +8,9 @@ import { cleanupUploadedFiles } from "../middleware/upload.js";
 import { notifyStatusChange } from "../services/notificationService.js";
 import { awardBadgesIfEarned } from "../services/badgeService.js"; 
 import User from "../models/User.js"; 
+import Boundary from "../models/Boundary.js"; 
+import { computeBoundingBox } from "../utils/geoUtils.js"; 
+
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -203,4 +206,34 @@ export const updateAssignmentStatus = async (req, res, next) => {
     await cleanupUploadedFiles(req.files);
     req.files = [];
   }
+};
+
+// ─── GET /api/field/offline-map-bounds 
+export const getOfflineMapBounds = async (req, res, next) => {
+  try {
+    const province = req.user.jurisdiction?.province || req.user.province;
+    const district = req.user.jurisdiction?.district || req.user.district;
+
+    if (!province) {
+      return res.status(400).json({
+        success: false,
+        message: "No jurisdiction assigned — contact your admin to set one.",
+      });
+    }
+
+    const boundary = district
+      ? await Boundary.findOne({ type: "district", name: district })
+      : await Boundary.findOne({ type: "province", name: province });
+
+    if (!boundary) {
+      return res.status(404).json({
+        success: false,
+        message: "No boundary data found for your jurisdiction. Run the Phase 17 boundary seed script or contact an administrator.",
+      });
+    }
+
+    const bbox = computeBoundingBox(boundary.geometry);
+
+    res.status(200).json({ success: true, label: district || province, bbox });
+  } catch (error) { next(error); }
 };

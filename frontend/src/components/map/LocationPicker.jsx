@@ -31,6 +31,22 @@ const MapCenterer = ({ position }) => {
 
 const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
   const { isOnline } = useOfflineStore();
+  const [hasOfflineMap, setHasOfflineMap] = useState(
+    () => !!localStorage.getItem("smartnepal-offline-map-meta")
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setHasOfflineMap(!!localStorage.getItem("smartnepal-offline-map-meta"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("offline-map-change", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("offline-map-change", handleStorageChange);
+    };
+  }, []);
+
   const [position, setPosition] = useState(initialPosition);
   const [isLocating, setIsLocating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,9 +59,9 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
       );
       const data = await res.json();
-      return data.display_name || "";
+      return data.display_name || "Pinned coordinates";
     } catch {
-      return "";
+      return `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)} (Offline Pinned)`;
     }
   };
 
@@ -224,10 +240,11 @@ const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
         </MapContainer>
         {!isOnline && (
           <div className="absolute top-2 left-12 right-2 z-1000 bg-slate-900/90 text-white text-[10px] sm:text-xs px-3 py-2 rounded-lg backdrop-blur-sm flex items-center gap-2 shadow-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            <span className={`w-1.5 h-1.5 rounded-full animate-ping ${hasOfflineMap ? "bg-[#16a34a]" : "bg-amber-400"}`} />
             <span>
-              Map tiles are unavailable offline. You can still tap the grey map
-              to pin coordinates.
+              {hasOfflineMap
+                ? "Using downloaded offline map. You can pan/zoom within your cached district."
+                : "Map tiles are unavailable offline. You can download maps from your Profile page to use them offline."}
             </span>
           </div>
         )}

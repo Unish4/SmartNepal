@@ -9,6 +9,7 @@ import { protect, requireFieldWorker } from "../middleware/authMiddleware.js";
 import { fieldStatusUpdateValidator } from "../utils/validators.js";
 import { cleanupUploadedFiles, proofUpload } from "../middleware/upload.js";
 import { requireTwoFactorEnabled } from "../middleware/twoFactor.js";
+import { getOfflineMapBounds } from "../controllers/fieldWorkerController.js"; 
 
 const router = Router();
 
@@ -42,6 +43,7 @@ router.use(protect, requireFieldWorker, requireTwoFactorEnabled);
 
 router.get("/assignments", getMyAssignments);
 router.get("/stats", getFieldStats);
+router.get("/offline-map-bounds", getOfflineMapBounds);
 
 router.patch(
   "/assignments/:id/status",
