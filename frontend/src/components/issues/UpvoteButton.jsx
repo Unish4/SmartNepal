@@ -40,6 +40,7 @@ const UpvoteButton = ({ issue, variant = "overlay" }) => {
       <button
         onClick={handleClick}
         disabled={isPending}
+        aria-label={isUpvoted ? `Remove your upvote (${count} total)` : `Upvote this issue (${count} total)`}
         className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold
           backdrop-blur-sm transition-all disabled:opacity-60
           ${isUpvoted ? "bg-[#16a34a] text-white" : "bg-white/85 text-[#475569] hover:bg-white"}`}
@@ -55,6 +56,7 @@ const UpvoteButton = ({ issue, variant = "overlay" }) => {
     <button
       onClick={handleClick}
       disabled={isPending}
+      aria-label={isUpvoted ? `Remove your upvote (${count} total)` : `Upvote this issue (${count} total)`}
       className={`flex items-center gap-2 h-10 px-5 rounded-lg border font-medium
         text-sm transition-all disabled:opacity-60
         ${

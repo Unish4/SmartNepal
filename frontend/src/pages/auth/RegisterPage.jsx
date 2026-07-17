@@ -228,10 +228,11 @@ export default function RegisterPage() {
               {/* First + Last name */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                  <label htmlFor="firstName" className="block text-xs font-semibold text-[#475569] mb-1.5">
                     {t("register.firstName")}
                   </label>
                   <input
+                    id="firstName"
                     type="text"
                     placeholder={i18n.language === "ne" ? "पहिलो नाम" : "First name"}
                     {...register("firstName", {
@@ -253,10 +254,11 @@ export default function RegisterPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                  <label htmlFor="lastName" className="block text-xs font-semibold text-[#475569] mb-1.5">
                     {t("register.lastName")}
                   </label>
                   <input
+                    id="lastName"
                     type="text"
                     placeholder={i18n.language === "ne" ? "थर" : "Last name"}
                     {...register("lastName", {
@@ -281,10 +283,11 @@ export default function RegisterPage() {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="email" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.email")}
                 </label>
                 <input
+                  id="email"
                   type="email"
                   placeholder={i18n.language === "ne" ? "इमेल ठेगाना" : "Email address"}
                   {...register("email", {
@@ -315,7 +318,7 @@ export default function RegisterPage() {
 
               {/* Phone */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="phone" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.phone")}{" "}
                   <span className="text-[#94a3b8] font-normal">
                     {t("register.phoneOptional")}
@@ -332,6 +335,7 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   <input
+                    id="phone"
                     type="tel"
                     placeholder="98XXXXXXXX"
                     {...register("phone")}
@@ -342,11 +346,12 @@ export default function RegisterPage() {
 
               {/* Province */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="province" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.province")}
                 </label>
                 <div className="relative">
                   <select
+                    id="province"
                     {...register("province")}
                     onChange={(e) => {
                       setProvince(e.target.value);
@@ -371,11 +376,12 @@ export default function RegisterPage() {
 
               {/* District */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="district" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.district")}
                 </label>
                 <div className="relative">
                   <select
+                    id="district"
                     {...register("district")}
                     disabled={!province}
                     onChange={(e) => setDistrict(e.target.value)}
@@ -402,11 +408,12 @@ export default function RegisterPage() {
 
               {/* City */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="city" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.city")}
                 </label>
                 <div className="relative">
                   <select
+                    id="city"
                     {...register("city")}
                     disabled={!district}
                     className={`${SELECT_CLS} ${!district ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -432,11 +439,12 @@ export default function RegisterPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="password" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.password")}
                 </label>
                 <div className="relative">
                   <input
+                    id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder={t("register.passwordPlaceholder")}
                     {...register("password", {
@@ -499,11 +507,12 @@ export default function RegisterPage() {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-[#475569] mb-1.5">
                   {t("register.confirmPassword")}
                 </label>
                 <div className="relative">
                   <input
+                    id="confirmPassword"
                     type={showConfirm ? "text" : "password"}
                     placeholder={t("register.confirmPasswordPlaceholder")}
                     {...register("confirmPassword", {

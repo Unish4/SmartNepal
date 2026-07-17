@@ -129,6 +129,7 @@ const CommentThread = ({ issueId }) => {
                     onClick={() => setCommentToDelete(c._id)}
                     className="text-[#94a3b8] hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-all shrink-0 cursor-pointer"
                     title="Delete comment"
+                    aria-label="Delete comment"
                   >
                     <Trash2 size={14} />
                   </button>

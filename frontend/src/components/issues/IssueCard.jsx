@@ -68,11 +68,10 @@ const IssueCard = ({ issue }) => {
   const showAIBadge = !!(issue.aiCategory && issue.aiConfidence != null);
 
   return (
-    <Link
-      to={`/issues/${issue._id}`}
+    <div
       className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden
         hover:shadow-lg hover:border-[#cbd5e1] hover:-translate-y-0.5
-        transition-all duration-200 group flex flex-col"
+        transition-all duration-200 group flex flex-col relative"
     >
       {/* Image area */}
       <div className="relative h-45 bg-slate-100 overflow-hidden shrink-0">
@@ -106,7 +105,7 @@ const IssueCard = ({ issue }) => {
         </div>
 
         {/* Upvote button — top right */}
-        <div className="absolute top-2.5 right-2.5">
+        <div className="absolute top-2.5 right-2.5 z-10">
           <UpvoteButton issue={issue} variant="overlay" />
         </div>
       </div>
@@ -133,14 +132,19 @@ const IssueCard = ({ issue }) => {
           className="text-sm font-semibold text-[#0f172a] leading-snug
           line-clamp-2 mb-1.5"
         >
-          {issue.title}
+          <Link
+            to={`/issues/${issue._id}`}
+            className="hover:text-[#16a34a] transition-colors after:absolute after:inset-0 after:z-0"
+          >
+            {issue.title}
+          </Link>
         </h3>
 
         <p className="text-xs text-[#64748b] line-clamp-2 leading-relaxed mb-3 flex-1">
           {issue.description}
         </p>
 
-        <div className="flex items-center justify-between text-xs text-[#94a3b8] mb-3">
+        <div className="flex items-center justify-between text-xs text-[#64748b] mb-3">
           <span className="flex items-center gap-1 truncate">
             <MapPin size={10} className="shrink-0" />
             <span className="truncate">
@@ -178,7 +182,7 @@ const IssueCard = ({ issue }) => {
           </div>{" "}
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

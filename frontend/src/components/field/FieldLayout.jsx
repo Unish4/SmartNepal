@@ -68,7 +68,11 @@ const FieldLayout = () => {
       </div>
 
       {/* Page content  */}
-      <main className="flex-1 px-4 py-4 pb-24 max-w-3xl mx-auto w-full">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 px-4 py-4 pb-24 max-w-3xl mx-auto w-full"
+      >
         <Outlet />
       </main>
 

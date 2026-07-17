@@ -300,6 +300,7 @@ const ImageUploader = forwardRef(
                 <button
                   type="button"
                   onClick={() => removeFile(i)}
+                  aria-label={`Remove photo ${i + 1}`}
                   className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full
                   bg-gray-900/60 text-white flex items-center justify-center
                   opacity-0 group-hover:opacity-100 transition-opacity

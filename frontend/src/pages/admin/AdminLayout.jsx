@@ -17,8 +17,6 @@ import {
 import useAuthStore from "../../store/useAuthStore.js";
 import NotificationBell from "../../components/layout/NotificationBell.jsx";
 
-// SidebarContent is extracted so it renders identically in both the
-// fixed desktop sidebar and the mobile slide-in drawer.
 const SidebarContent = ({ user, onLogout, onLinkClick }) => {
   const isSuperAdmin = user?.role === "super_admin";
 
@@ -251,7 +249,11 @@ const AdminLayout = () => {
         </header>
 
         {/* Page content — Outlet renders child pages here */}
-        <main className="flex-1 overflow-y-auto p-5 md:p-7">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto p-5 md:p-7"
+        >
           <Outlet />
         </main>
       </div>

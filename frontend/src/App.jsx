@@ -45,6 +45,7 @@ import ScorecardPage from "./pages/public/ScorecardPage";
 
 import MapViewPage from "./components/issues/MapViewPage";
 import TwoFactorSetupPage from "./pages/TwoFactorSetupPage"; 
+import SkipToContent from "./components/layout/SkipToContent.jsx"; 
 
 // Public only route - redirects authenticated users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
@@ -108,6 +109,7 @@ function App() {
       <UpdatePrompt />
       <PwaInstallModal />
       <OfflineBanner />
+      <SkipToContent />
       <Toaster
         position="top-right"
         toastOptions={{

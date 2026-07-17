@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useFocusTrap } from "../../hooks/useFocusTrap.js";
 
 const ConfirmDialog = ({
   isOpen,
@@ -11,6 +12,9 @@ const ConfirmDialog = ({
   onClose,
 }) => {
   const cancelRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  useFocusTrap(dialogRef, isOpen);
 
   // Escape key support
   useEffect(() => {
@@ -44,8 +48,14 @@ const ConfirmDialog = ({
         onClick={() => !isLoading && onClose()}
       />
 
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+        onClick={(e) => e.stopPropagation()}
+      ></div>
+
       {/* Dialog card */}
       <div
+        ref={dialogRef}
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
         onClick={(e) => e.stopPropagation()}
       >

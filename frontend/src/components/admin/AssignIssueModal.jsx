@@ -1,16 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { X, HardHat, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   fetchFieldWorkers,
   assignIssueRequest,
 } from "../../services/adminService.js";
+import { useFocusTrap } from "../../hooks/useFocusTrap.js";
 
 const AssignIssueModal = ({ issue, onClose, onAssigned }) => {
   const [fieldWorkers, setFieldWorkers] = useState([]);
   const [selectedId, setSelectedId] = useState(issue.assignedTo?._id || "");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const dialogRef = useRef(null);
+  useFocusTrap(dialogRef, true);
 
   useEffect(() => {
     fetchFieldWorkers()
@@ -46,17 +50,27 @@ const AssignIssueModal = ({ issue, onClose, onAssigned }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+    <div
+      className="fixed inset-0 z-9999 flex items-center justify-center p-4"
+      style={{ zIndex: 9999 }}
+    >
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       <div
+        role="dialog"
+        ref={dialogRef}
+        aria-modal="true"
+        aria-labelledby="assign-issue-title"
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex-1 min-w-0 pr-4">
-            <h2 className="text-base font-bold text-[#0f172a]">
+            <h2
+              id="assign-issue-title"
+              className="text-base font-bold text-[#0f172a]"
+            >
               Assign to Field Worker
             </h2>
             <p className="text-xs text-[#94a3b8] mt-0.5 line-clamp-1">
@@ -65,6 +79,7 @@ const AssignIssueModal = ({ issue, onClose, onAssigned }) => {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-[#94a3b8] hover:text-[#475569] transition-colors shrink-0"
           >
             <X size={18} />

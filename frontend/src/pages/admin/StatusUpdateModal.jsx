@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateIssueStatusRequest } from "../../services/adminService.js";
 import { STATUS_CONFIG } from "../../constants/issue.js";
+import { useFocusTrap } from "../../hooks/useFocusTrap.js";
 
 const STATUS_OPTIONS = [
   { value: "open", label: "Open" },
@@ -22,6 +23,9 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
     issue.rejectionReason || "",
   );
   const [isLoading, setIsLoading] = useState(false);
+
+  const dialogRef = useRef(null);
+  useFocusTrap(dialogRef, true);
 
   // Close on Escape
   useEffect(() => {
@@ -59,19 +63,26 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+    <div
+      className="fixed inset-0 z-9999 flex items-center justify-center p-4"
+      style={{ zIndex: 9999 }}
+    >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal card */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-card"
+        ref={dialogRef}
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex-1 min-w-0 pr-4">
-            <h2 className="text-base font-bold text-[#0f172a]">
+            <h2 id="modal-card" className="text-base font-bold text-[#0f172a]">
               Update Status
             </h2>
             <p className="text-xs text-[#94a3b8] mt-0.5 line-clamp-1">
@@ -80,6 +91,7 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-[#94a3b8] hover:text-[#475569] transition-colors shrink-0"
           >
             <X size={18} />

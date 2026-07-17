@@ -94,6 +94,7 @@ const InstallPrompt = () => {
     >
       <button
         onClick={handleDismiss}
+        aria-label="Dismiss install prompt"
         className="absolute top-3 right-3 text-[#94a3b8] hover:text-[#475569] transition-colors cursor-pointer"
       >
         <X size={16} />
