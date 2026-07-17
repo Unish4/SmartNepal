@@ -20,6 +20,13 @@ export default defineConfig(({ mode }) => {
         registerType: "prompt",
         injectRegister: false,
 
+        strategies: "injectManifest",
+        srcDir: "src",
+        filename: "sw.js",
+        injectManifest: {
+          globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+        },
+
         devOptions: {
           enabled: true,
           type: "module",

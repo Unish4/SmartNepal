@@ -26,7 +26,8 @@
     "search": "Search",
     "clearAll": "Clear all filters",
     "viewAll": "View all",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "manage": "Manage"
   },
   "home": {
     "headline1": "Your voice shapes a",
@@ -86,7 +87,17 @@
     "administrator": "Administrator",
     "fieldWorker": "Field Worker",
     "superAdmin": "Super Admin",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "twoFactorAuthentication": "Two-Factor Authentication",
+    "twoFactorEnabled": "Enabled (Secured)",
+    "twoFactorDisabled": "Disabled (Unsecured)",
+    "pushTitle": "Push notifications",
+    "pushDesc": "Get notified on this device, even when SmartNepal isn't open.",
+    "pushEnabled": "Push notifications enabled on this device",
+    "pushDisabled": "Push notifications disabled on this device",
+    "pushError": "Failed to update push notifications",
+    "pushEnable": "Enable",
+    "pushDisable": "Disable"
   },
   "language": {
     "label": "Language",

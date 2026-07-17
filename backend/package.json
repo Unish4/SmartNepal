@@ -38,7 +38,8 @@
     "pdfkit": "^0.19.1",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.10",

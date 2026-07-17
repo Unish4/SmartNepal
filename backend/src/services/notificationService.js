@@ -1,5 +1,6 @@
 import Notification from "../models/Notification.js";
 import logger from "../config/logger.js";
+import { sendPushToUser } from "./pushService.js";
 
 export const notify = async ({ recipient, type, title, message, link }) => {
   if (!recipient) return;
@@ -11,6 +12,9 @@ export const notify = async ({ recipient, type, title, message, link }) => {
       "Failed to create in-app notification",
     );
   }
+  sendPushToUser(recipient, { title, body: message, link }).catch((err) =>
+    logger.error({ err, recipient }, "Push notification failed"),
+  );
 };
 
 // ── Small builder helpers

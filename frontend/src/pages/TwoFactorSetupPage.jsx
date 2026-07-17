@@ -46,8 +46,12 @@ export default function TwoFactorSetupPage() {
   }, [getTwoFactorStatus]);
 
   useEffect(() => {
+    if (user && !requiresTwoFactor(user)) {
+      navigate("/profile");
+      return;
+    }
     loadStatus();
-  }, [loadStatus]);
+  }, [user, loadStatus, navigate]);
 
   const startSetup = async () => {
     setIsSubmitting(true);

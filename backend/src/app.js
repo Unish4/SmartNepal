@@ -26,6 +26,7 @@ import aiRoutes from "./routes/aiRoutes.js";
 import fieldWorkerRoutes from "./routes/fieldWorkerRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js"; 
 import notificationRoutes from "./routes/notificationRoutes.js"; 
+import pushRoutes from "./routes/pushRoutes.js"; 
 
 // ─── Error Handlers
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -132,7 +133,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/field", fieldWorkerRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/push", pushRoutes); 
 
 Sentry.setupExpressErrorHandler(app); 
 

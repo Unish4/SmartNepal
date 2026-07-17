@@ -25,6 +25,8 @@ import {
   FileText,
   CheckCircle2,
   MessageSquare,
+  Smartphone,
+  SmartphoneNfc,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../store/useAuthStore.js";
@@ -37,6 +39,8 @@ import {
 import { ProfileSkeleton } from "../components/ui/SkeletonLoader.jsx";
 import { ROLE_CONFIG } from "../constants/issue.js";
 import BadgeGrid from "../components/profile/BadgeGrid.jsx";
+import { usePushSubscription } from "../hooks/usePushSubscription.js";
+import { requiresTwoFactor } from "../constants/twoFactor.js";
 
 const Toggle = ({ checked, onChange, disabled }) => (
   <button
@@ -83,6 +87,15 @@ export default function ProfilePage() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [langSaving, setLangSaving] = useState(false);
 
+  const {
+    isSupported,
+    isSubscribed,
+    isLoading: pushLoading,
+    subscribe,
+    unsubscribe,
+  } = usePushSubscription();
+  const [pushBusy, setPushBusy] = useState(false);
+
   const [selectedDistrict, setSelectedDistrict] = useState(
     user?.district || "",
   );
@@ -107,6 +120,23 @@ export default function ProfilePage() {
       toast.error("Failed to save preference. Please try again.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePushToggle = async () => {
+    setPushBusy(true);
+    try {
+      if (isSubscribed) {
+        await unsubscribe();
+        toast.success(t("profile.pushDisabled"));
+      } else {
+        await subscribe();
+        toast.success(t("profile.pushEnabled"));
+      }
+    } catch (error) {
+      toast.error(error.message || t("profile.pushError"));
+    } finally {
+      setPushBusy(false);
     }
   };
 
@@ -440,33 +470,62 @@ export default function ProfilePage() {
             </div>
 
             {/* Phase 36 — Security summary card */}
-            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm mb-4 p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {user.twoFactorEnabled ? (
-                    <ShieldCheck size={17} className="text-[#16a34a]" />
-                  ) : (
-                    <ShieldOff size={17} className="text-[#94a3b8]" />
-                  )}
-                  <div>
-                    <p className="text-sm font-semibold text-[#0f172a]">
-                      {t("profile.twoFactorAuthentication")}
-                    </p>
-                    <p className="text-xs text-[#94a3b8] mt-0.5">
-                      {user.twoFactorEnabled
-                        ? t("profile.twoFactorEnabled")
-                        : t("profile.twoFactorDisabled")}
-                    </p>
+            {requiresTwoFactor(user) && (
+              <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm mb-4 p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {user.twoFactorEnabled ? (
+                      <ShieldCheck size={17} className="text-[#16a34a]" />
+                    ) : (
+                      <ShieldOff size={17} className="text-[#94a3b8]" />
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-[#0f172a]">
+                        {t("profile.twoFactorAuthentication")}
+                      </p>
+                      <p className="text-xs text-[#94a3b8] mt-0.5">
+                        {user.twoFactorEnabled
+                          ? t("profile.twoFactorEnabled")
+                          : t("profile.twoFactorDisabled")}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    to="/security-setup"
+                    className="text-xs font-semibold text-[#16a34a] hover:underline"
+                  >
+                    {t("actions.manage")}
+                  </Link>{" "}
+                </div>
+              </div>
+            )}
+
+            {isSupported && (
+              <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm mb-4 p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: isSubscribed ? "#f0fdf4" : "#f8fafc", border: `1px solid ${isSubscribed ? "#bbf7d0" : "#e2e8f0"}` }}>
+                    {isSubscribed ? <Smartphone size={15} className="text-[#16a34a]" /> : <SmartphoneNfc size={15} className="text-[#94a3b8]" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-semibold text-[#0f172a]">{t("profile.pushTitle")}</p>
+                        <p className="text-xs text-[#64748b] mt-0.5">{t("profile.pushDesc")}</p>
+                      </div>
+                      <button
+                        onClick={handlePushToggle}
+                        disabled={pushBusy || pushLoading}
+                        className={`h-9 px-4 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 shrink-0
+                          ${isSubscribed ? "border border-red-200 text-red-600 hover:bg-red-50" : "bg-[#16a34a] hover:bg-[#15803d] text-white"}`}
+                      >
+                        {pushBusy ? "..." : isSubscribed ? t("profile.pushDisable") : t("profile.pushEnable")}
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <Link
-                  to="/security-setup"
-                  className="text-xs font-semibold text-[#16a34a] hover:underline"
-                >
-                  {t("actions.manage")}
-                </Link>{" "}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Settings — right column */}
