@@ -3,7 +3,7 @@ import Issue from "../models/Issue.js";
 import { buildIssueMatch } from "../utils/issueQueryBuilder.js";
 import { toCSV } from "../utils/csvUtils.js";
 
-// ─── GET /api/admin/export/csv 
+// ─── GET /api/admin/export/csv
 export const exportIssuesCSV = async (req, res, next) => {
   try {
     const match = buildIssueMatch(req);
@@ -29,6 +29,10 @@ export const exportIssuesCSV = async (req, res, next) => {
         label: "Resolved At",
         value: (i) =>
           i.resolvedAt ? new Date(i.resolvedAt).toISOString() : "",
+      },
+      {
+        label: "Resolution Cost",
+        value: (i) => (i.resolutionCost != null ? i.resolutionCost : ""),
       },
       {
         label: "SLA Deadline",
@@ -88,7 +92,7 @@ export const exportIssuesCSV = async (req, res, next) => {
   }
 };
 
-// ─── GET /api/admin/export/pdf 
+// ─── GET /api/admin/export/pdf
 export const exportIssuesPDF = async (req, res, next) => {
   try {
     const match = buildIssueMatch(req);

@@ -30,6 +30,7 @@ export default function FieldIssueDetailPage() {
 
   const [resolvePanelOpen, setResolvePanelOpen] = useState(false);
   const [proofFiles, setProofFiles] = useState([]);
+  const [cost, setCost] = useState("");
 
   const [rejectPanelOpen, setRejectPanelOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -85,10 +86,12 @@ export default function FieldIssueDetailPage() {
       const res = await updateAssignmentStatusRequest(id, {
         status: "resolved",
         proofFiles,
+        cost: cost || undefined,
       });
       setIssue(res.issue);
       setResolvePanelOpen(false);
       setProofFiles([]);
+      setCost("");
       toast.success("Marked as resolved — great work!");
     } catch (error) {
       toast.error(
@@ -303,11 +306,31 @@ export default function FieldIssueDetailPage() {
             required.
           </p>
           <ImageUploader onFilesChange={setProofFiles} />
+          <div className="mt-3">
+            <label className="block text-xs font-semibold text-[#475569] mb-1.5">
+              Resolution cost{" "}
+              <span className="text-[#94a3b8] font-normal">
+                (optional, NPR)
+              </span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              placeholder="Enter the cost of resolution"
+              className="w-full h-10 px-3 rounded-lg border border-[#e2e8f0] text-sm
+      text-[#0f172a] placeholder:text-[#94a3b8] outline-none focus:border-[#16a34a]
+      focus:ring-2 focus:ring-[#16a34a]/15 transition-all"
+            />
+          </div>
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => {
                 setResolvePanelOpen(false);
                 setProofFiles([]);
+                setCost("");
               }}
               disabled={isSubmitting}
               className="flex-1 h-11 border border-[#e2e8f0] text-[#475569]

@@ -13,7 +13,8 @@ import {
   notifyStatusChange,
   notifyAssignment,
 } from "../services/notificationService.js";
-import { awardBadgesIfEarned } from "../services/badgeService.js"; 
+import { awardBadgesIfEarned } from "../services/badgeService.js";
+import { buildIssuePipelineStart } from "../utils/issueQueryBuilder.js";
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -132,18 +133,14 @@ export const getAllIssues = async (req, res, next) => {
       overdue,
     } = req.query;
 
-    const match = buildIssueMatch(req); // Start with jurisdiction filter from middleware
+    const pipelineStart = buildIssuePipelineStart(req);
+    const match = { ...req.jurisdictionFilter };
 
     if (overdue === "true") {
       match.slaDeadline = { $lt: new Date() };
       match.status = { $nin: ["resolved", "rejected"] };
     }
-    if (search?.trim()) {
-      match.$or = [
-        { title: { $regex: search.trim(), $options: "i" } },
-        { description: { $regex: search.trim(), $options: "i" } },
-      ];
-    }
+
     if (category) match.category = String(category);
     if (status) match.status = String(status);
     if (priority) match.priority = String(priority);
@@ -160,6 +157,7 @@ export const getAllIssues = async (req, res, next) => {
 
     const [issues, countResult] = await Promise.all([
       Issue.aggregate([
+        ...pipelineStart,
         { $match: match },
         { $addFields: { upvoteCount: { $size: "$upvoterIds" } } },
         { $sort: sortStage },
@@ -176,7 +174,11 @@ export const getAllIssues = async (req, res, next) => {
         },
         { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
       ]),
-      Issue.aggregate([{ $match: match }, { $count: "total" }]),
+      Issue.aggregate([
+        ...pipelineStart,
+        { $match: match },
+        { $count: "total" },
+      ]),
     ]);
 
     const total = countResult[0]?.total ?? 0;
@@ -222,6 +224,14 @@ export const updateIssueStatus = async (req, res, next) => {
       issue.resolvedAt = new Date();
     }
 
+    if (
+      status === "resolved" &&
+      req.body.resolutionCost !== undefined &&
+      req.body.resolutionCost !== ""
+    ) {
+      issue.resolutionCost = parseFloat(req.body.resolutionCost); // ← Phase 41
+    }
+
     issue.status = status;
     if (status === "rejected") {
       issue.rejectionReason = rejectionReason
@@ -237,12 +247,18 @@ export const updateIssueStatus = async (req, res, next) => {
       const updatedIssue = await Issue.findOneAndUpdate(
         { _id: issue._id, resolutionCounted: { $ne: true } },
         { $set: { resolutionCounted: true } },
-        { new: true }
+        { new: true },
       );
       if (updatedIssue) {
-        User.findByIdAndUpdate(issue.author._id, { $inc: { "stats.reportsResolved": 1 } })
+        User.findByIdAndUpdate(issue.author._id, {
+          $inc: { "stats.reportsResolved": 1 },
+        })
           .then(() => awardBadgesIfEarned(issue.author._id))
-          .catch((err) => console.error(`Failed to update resolver stats for issue ${issue._id}: ${err.message}`));
+          .catch((err) =>
+            console.error(
+              `Failed to update resolver stats for issue ${issue._id}: ${err.message}`,
+            ),
+          );
       }
     }
 

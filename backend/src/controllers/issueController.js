@@ -10,6 +10,7 @@ import { computeSlaDeadline } from "../utils/slaConfig.js";
 import { logAdminAction } from "../utils/auditLogger.js";
 import { awardBadgesIfEarned } from "../services/badgeService.js";
 import User from "../models/User.js";
+import { buildIssuePipelineStart } from "../utils/issueQueryBuilder.js"
 
 const checkValidation = (req, res) => {
   const errors = validationResult(req);
@@ -173,28 +174,16 @@ export const getIssues = async (req, res, next) => {
     const { search, category, status, priority, sort, province, district } =
       req.query;
 
-    const match = {};
-
-    if (search?.trim()) {
-      match.$or = [
-        { title: { $regex: search.trim(), $options: "i" } },
-        { description: { $regex: search.trim(), $options: "i" } },
-      ];
-    }
-
-    if (category) match.category = category;
-    if (status) match.status = status;
-    if (priority) match.priority = priority;
-    if (province) match["location.province"] = province;
-    if (district) match["location.district"] = district;
     const sortStage = {
       oldest: { createdAt: 1 },
       "most-upvoted": { upvoteCount: -1 },
     }[sort] ?? { createdAt: -1 }; // default: newest
 
+    const pipelineStart = buildIssuePipelineStart(req);
+
     const [issues, countResult] = await Promise.all([
       Issue.aggregate([
-        { $match: match },
+        ...pipelineStart,
 
         { $addFields: { upvoteCount: { $size: "$upvoterIds" } } },
 
@@ -244,7 +233,7 @@ export const getIssues = async (req, res, next) => {
         },
       ]),
 
-      Issue.aggregate([{ $match: match }, { $count: "total" }]),
+      Issue.aggregate([ ...pipelineStart, { $count: "total" } ]),
     ]);
 
     const total = countResult[0]?.total ?? 0;

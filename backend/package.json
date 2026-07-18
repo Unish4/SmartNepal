@@ -4,8 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
+    "start": "node --import ./src/config/instrument.js src/server.js",
+    "dev": "node --import ./src/config/instrument.js --watch src/server.js",
     "seed:boundaries": "node src/scripts/seedBoundaries.js",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -12,7 +12,6 @@ export const fetchFieldStats = async () => {
   return response.data;
 };
 
-
 export const updateAssignmentStatusRequest = async (id, data) => {
   const formData = new FormData();
   formData.append("status", data.status);
@@ -20,6 +19,9 @@ export const updateAssignmentStatusRequest = async (id, data) => {
   if (data.rejectionReason) {
     formData.append("rejectionReason", data.rejectionReason);
   }
+
+  if (data.cost !== undefined && data.cost !== "")
+    formData.append("cost", data.cost);
 
   if (data.proofFiles?.length > 0) {
     data.proofFiles.forEach((file) => formData.append("proof", file));

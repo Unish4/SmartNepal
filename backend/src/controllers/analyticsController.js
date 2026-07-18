@@ -22,6 +22,7 @@ export const getAnalytics = async (req, res, next) => {
       resolutionTimeByCategory,
       totalIssues,
       resolvedCount,
+      costByCategoryAgg,
     ] = await Promise.all([
       // Total issues grouped by category — sorted highest first
       Issue.aggregate([
@@ -97,6 +98,36 @@ export const getAnalytics = async (req, res, next) => {
         status: "resolved",
         createdAt: { $gte: startDate },
       }),
+
+      Issue.aggregate([
+        // ← Phase 41
+        {
+          $match: {
+            ...filter,
+            status: "resolved",
+            createdAt: { $gte: startDate },
+            resolutionCost: { $exists: true, $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: "$category",
+            totalCost: { $sum: "$resolutionCost" },
+            avgCost: { $avg: "$resolutionCost" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalCost: -1 } },
+        {
+          $project: {
+            _id: 0,
+            category: "$_id",
+            totalCost: { $round: ["$totalCost", 2] },
+            avgCost: { $round: ["$avgCost", 2] },
+            count: 1,
+          },
+        },
+      ]),
     ]);
     const resolutionRate =
       totalIssues > 0
@@ -119,6 +150,10 @@ export const getAnalytics = async (req, res, next) => {
           )
         : null;
 
+    const totalCost = parseFloat(
+      costByCategoryAgg.reduce((sum, c) => sum + c.totalCost, 0).toFixed(2),
+    );
+
     res.status(200).json({
       success: true,
       days,
@@ -132,6 +167,8 @@ export const getAnalytics = async (req, res, next) => {
         resolvedCount,
         resolutionRate,
         avgResolutionHours,
+        costByCategory: costByCategoryAgg,
+        totalCost, // ← Phase 41
       },
     });
   } catch (error) {

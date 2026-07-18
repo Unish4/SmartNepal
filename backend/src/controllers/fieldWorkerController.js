@@ -145,6 +145,7 @@ export const updateAssignmentStatus = async (req, res, next) => {
           success: false,
           message: "Please attach at least one photo as proof of resolution",
         });
+        
       }
 
       const results = await Promise.all(
@@ -155,6 +156,9 @@ export const updateAssignmentStatus = async (req, res, next) => {
       );
       issue.resolutionProof.push(...results.map((r) => r.secure_url));
       issue.resolvedAt = new Date();
+      if (req.body.cost !== undefined && req.body.cost !== "") {
+        issue.resolutionCost = parseFloat(req.body.cost); // ← Phase 41
+      }
     }
 
     if (rejectionReason) {

@@ -357,6 +357,31 @@ export const statusUpdateValidator = [
     .withMessage("Rejection reason is required when rejecting an issue")
     .isLength({ max: 500 })
     .withMessage("Rejection reason cannot exceed 500 characters"),
+
+  body("resolutionCost")
+    .optional({ values: "undefined" })
+    .custom((value) => {
+      if (value === "") {
+        return true;
+      }
+
+      if (typeof value === "number") {
+        return Number.isFinite(value) && value >= 0;
+      }
+
+      if (typeof value !== "string") {
+        return false;
+      }
+
+      const trimmedValue = value.trim();
+      if (trimmedValue === "") {
+        return false;
+      }
+
+      const parsedValue = Number(trimmedValue);
+      return Number.isFinite(parsedValue) && parsedValue >= 0;
+    })
+    .withMessage("Resolution cost must be a non-negative number"),
 ];
 
 // ─── AI endpoint validators
@@ -493,6 +518,11 @@ export const fieldStatusUpdateValidator = [
     .withMessage("Please explain why this issue cannot be resolved")
     .isLength({ max: 500 })
     .withMessage("Reason cannot exceed 500 characters"),
+
+  body("cost")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 })
+    .withMessage("Resolution cost must be a non-negative number"),
 ];
 
 // ──  password reset validators

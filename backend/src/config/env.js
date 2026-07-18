@@ -43,6 +43,17 @@ const ENV = {
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_SUBJECT: process.env.VAPID_SUBJECT,
   TOTP_ENCRYPTION_KEY: process.env.TOTP_ENCRYPTION_KEY,
+  ATLAS_SEARCH_ENABLED: process.env.ATLAS_SEARCH_ENABLED === "true",
+  ATLAS_SEARCH_INDEX:
+    process.env.ATLAS_SEARCH_INDEX && process.env.ATLAS_SEARCH_INDEX !== "null"
+      ? process.env.ATLAS_SEARCH_INDEX
+      : undefined,
 };
+
+if (ENV.ATLAS_SEARCH_ENABLED && !ENV.ATLAS_SEARCH_INDEX) {
+  throw new Error(
+    "ATLAS_SEARCH_INDEX must be configured when ATLAS_SEARCH_ENABLED is true.",
+  );
+}
 
 export default ENV;

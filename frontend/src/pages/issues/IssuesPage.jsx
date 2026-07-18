@@ -385,12 +385,13 @@ export default function IssuesPage() {
                   <p className="text-sm text-[#94a3b8] max-w-xs mb-6">
                     {t("list.emptyDesc")}
                   </p>
-                  {isAuthenticated &&
-                    user?.role !== "admin" &&
-                    user?.role !== "field_worker" && (
+                  {(!isAuthenticated ||
+                    (user?.role !== "admin" &&
+                      user?.role !== "field_worker" &&
+                      user?.role !== "super_admin")) && (
                       <Link
-                        to="/issues/new"
-                        className="h-10 px-6 rounded-lg bg-[#16a34a] hover:bg-[#15803d]
+                        to={isAuthenticated ? "/issues/new" : "/register"}
+                        className="inline-flex items-center justify-center h-10 px-6 rounded-lg bg-[#16a34a] hover:bg-[#15803d]
                         text-white text-sm font-semibold transition-colors"
                       >
                         {t("list.reportFirst")}

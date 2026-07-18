@@ -13,16 +13,15 @@ const STATUS_OPTIONS = [
   { value: "rejected", label: "Rejected" },
 ];
 
-// Props:
-//   issue     — the issue document being updated
-//   onClose   — () => void
-//   onUpdated — (updatedIssue) => void
 const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
   const [status, setStatus] = useState(issue.status);
   const [rejectionReason, setRejectionReason] = useState(
     issue.rejectionReason || "",
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [resolutionCost, setResolutionCost] = useState(
+    issue.resolutionCost ?? "",
+  );
 
   const dialogRef = useRef(null);
   useFocusTrap(dialogRef, true);
@@ -51,6 +50,8 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
         ...(rejectionReason.trim() && {
           rejectionReason: rejectionReason.trim(),
         }),
+        ...(status === "resolved" &&
+          resolutionCost !== "" && { resolutionCost }),
       });
       toast.success(`Status updated to "${status}"`);
       onUpdated(res.issue);
@@ -187,6 +188,27 @@ const StatusUpdateModal = ({ issue, onClose, onUpdated }) => {
             />
           </div>
         </div>
+
+        {status === "resolved" && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Resolution cost{" "}
+              <span className="text-[#94a3b8] font-normal text-xs">
+                (optional, NPR)
+              </span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={resolutionCost}
+              onChange={(e) => setResolutionCost(e.target.value)}
+              placeholder="Enter the cost of resolution"
+              className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-[#e2e8f0]
+        outline-none focus:border-[#16a34a] transition-all"
+            />
+          </div>
+        )}
 
         {/* Rejection reason — only when status is "rejected" */}
         {status === "rejected" && (

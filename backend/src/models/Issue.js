@@ -55,9 +55,6 @@ const issueSchema = new mongoose.Schema(
     images: [{ type: String, default: [] }],
     idempotencyKey: {
       type: String,
-      unique: true,
-      sparse: true,
-      index: true,
     },
     upvoterIds: [
       {
@@ -98,6 +95,7 @@ const issueSchema = new mongoose.Schema(
         occurredAt: { type: Date, default: Date.now },
       },
     ],
+    resolutionCost: { type: Number, min: 0 },
   },
   {
     timestamps: true,

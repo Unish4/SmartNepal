@@ -18,6 +18,7 @@ export default defineConfig({
       MONGODB_URI: "mongodb://localhost/unused", 
       PORT: "3001",
       TOTP_ENCRYPTION_KEY: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2", 
+      ATLAS_SEARCH_ENABLED: "false", 
     },
     setupFiles: ["./tests/setup.js"],
     testTimeout: 20000, // mongodb-memory-server's first boot can be slow

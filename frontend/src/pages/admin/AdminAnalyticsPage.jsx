@@ -565,6 +565,64 @@ export default function AdminAnalyticsPage() {
           )}
         </ChartCard>
       </div>
+      {/* Phase 41 — Resolution cost by category */}
+      <ChartCard
+        title={`Resolution Cost by Category${analytics.totalCost ? ` — NPR ${analytics.totalCost.toLocaleString()} total` : ""}`}
+      >
+        {analytics.costByCategory.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 gap-2">
+            <BarChart2 size={28} className="text-[#e2e8f0]" />
+            <p className="text-xs text-[#94a3b8] text-center max-w-55">
+              No resolution cost has been recorded yet. Field workers and admins
+              can log a cost when marking an issue resolved.
+            </p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart
+              data={analytics.costByCategory}
+              layout="vertical"
+              margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#f3f4f6"
+                horizontal={false}
+              />
+              <XAxis
+                type="number"
+                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="category"
+                tick={{ fontSize: 11, fill: "#374151" }}
+                tickLine={false}
+                axisLine={false}
+                width={105}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                formatter={(value) => [
+                  `NPR ${value.toLocaleString()}`,
+                  "Total cost",
+                ]}
+                cursor={false}
+              />
+              <Bar
+                dataKey="totalCost"
+                name="Total Cost (NPR)"
+                fill="#0d9488"
+                radius={[0, 4, 4, 0]}
+                maxBarSize={22}
+                activeBar={false}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </ChartCard>
     </div>
   );
 }
