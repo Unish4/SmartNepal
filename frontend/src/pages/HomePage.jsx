@@ -320,7 +320,7 @@ export default function HomePage() {
                 राम्रो नेपालका लागि नागरिकहरूलाई नगरपालिकासँग जोड्दै।
               </p>
             </div>
-            <div className="flex gap-12 text-sm">
+            <div className="flex flex-col gap-8 text-sm md:flex-row md:flex-wrap md:gap-12">
               <div>
                 <p className="text-[#94a3b8] font-semibold uppercase tracking-wider text-[10px] mb-3">
                   {t("home.footerPlatform")}
@@ -369,7 +369,21 @@ export default function HomePage() {
                   {t("home.footerAdminLogin")}
                 </Link>
               </div>
+              <div>
+                <p className="text-[#94a3b8] font-semibold uppercase tracking-wider text-[10px] mb-3">
+                  {t("home.footerDevelopers")}
+                </p>
+                <a
+                  href={`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/docs`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#475569] hover:text-white cursor-pointer mb-2 transition-colors block"
+                >
+                  {t("home.footerApiDocs")}
+                </a>
+              </div>
             </div>
+            
           </div>
           <div
             className="border-t border-[#1e293b] mt-10 pt-6 flex items-center

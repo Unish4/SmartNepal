@@ -32,12 +32,12 @@ const MapCenterer = ({ position }) => {
 const LocationPicker = ({ onLocationChange, initialPosition = null }) => {
   const { isOnline } = useOfflineStore();
   const [hasOfflineMap, setHasOfflineMap] = useState(
-    () => !!localStorage.getItem("smartnepal-offline-map-meta")
+    () => !!localStorage.getItem("nepalsewa-offline-map-meta")
   );
 
   useEffect(() => {
     const handleStorageChange = () => {
-      setHasOfflineMap(!!localStorage.getItem("smartnepal-offline-map-meta"));
+      setHasOfflineMap(!!localStorage.getItem("nepalsewa-offline-map-meta"));
     };
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("offline-map-change", handleStorageChange);

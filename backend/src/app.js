@@ -16,6 +16,8 @@ import { shieldGuard } from "./middleware/arcjetMiddleware.js";
 import pinoHttp from "pino-http";
 import * as Sentry from "@sentry/node";
 import logger from "./config/logger.js";
+import swaggerUi from "swagger-ui-express"; 
+import { openapiSpec } from "./config/openapiSpec.js"; 
 
 // ─── Routes
 import healthRoutes from "./routes/healthRoutes.js";
@@ -134,6 +136,10 @@ app.use("/api/field", fieldWorkerRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/push", pushRoutes); 
+app.get("/api/openapi.json", (req, res) => res.json(openapiSpec)); // ← Phase 42
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapiSpec, {
+  customSiteTitle: "NepalSewa API Docs",
+}));
 
 Sentry.setupExpressErrorHandler(app); 
 

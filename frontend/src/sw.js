@@ -9,7 +9,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 registerRoute(
   ({ url }) => url.pathname.startsWith("/api/issues"),
   new NetworkFirst({
-    cacheName: "smartnepal-api-issues",
+    cacheName: "nepalsewa-api-issues",
     networkTimeoutSeconds: 4,
     plugins: [
       new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 }),
@@ -21,7 +21,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.origin === "https://res.cloudinary.com",
   new CacheFirst({
-    cacheName: "smartnepal-cloudinary-images",
+    cacheName: "nepalsewa-cloudinary-images",
     plugins: [
       new ExpirationPlugin({
         maxEntries: 200,
@@ -35,7 +35,7 @@ registerRoute(
 registerRoute(
   ({ url }) => /^[abc]\.tile\.openstreetmap\.org$/.test(url.hostname),
   new CacheFirst({
-    cacheName: "smartnepal-map-tiles",
+    cacheName: "nepalsewa-map-tiles",
     plugins: [
       new ExpirationPlugin({
         maxEntries: 500,
@@ -49,7 +49,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.origin === "https://fonts.googleapis.com",
   new CacheFirst({
-    cacheName: "smartnepal-google-fonts-stylesheets",
+    cacheName: "nepalsewa-google-fonts-stylesheets",
     plugins: [
       new ExpirationPlugin({
         maxEntries: 10,
@@ -62,7 +62,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.origin === "https://fonts.gstatic.com",
   new CacheFirst({
-    cacheName: "smartnepal-google-fonts-webfonts",
+    cacheName: "nepalsewa-google-fonts-webfonts",
     plugins: [
       new ExpirationPlugin({
         maxEntries: 30,
@@ -97,7 +97,7 @@ self.addEventListener("push", (event) => {
     /* ignore malformed payload */
   }
 
-  const title = data.title || "SmartNepal";
+  const title = data.title || "NepalSrewa";
   const options = {
     body: data.body || "",
     icon: "/pwa-192x192.png",

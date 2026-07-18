@@ -6,7 +6,7 @@ import {
   clearOfflineTiles,
 } from "../lib/offlineMapCache.js";
 
-const STORAGE_KEY = "smartnepal-offline-map-meta";
+const STORAGE_KEY = "nepalsewa-offline-map-meta";
 
 export const useOfflineMapDownload = () => {
   const [estimate, setEstimate] = useState(null);

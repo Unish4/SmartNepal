@@ -1,6 +1,6 @@
 import { buildTileList, ZOOM_LEVELS } from "./tileUtils.js";
 
-const TILE_CACHE_NAME = "smartnepal-map-tiles";
+const TILE_CACHE_NAME = "nepalsewa-map-tiles";
 const MAX_CONCURRENT_DOWNLOADS = 6;
 
 export const estimateDownload = (bbox) => {

@@ -8,7 +8,7 @@ const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const apiOrigin = env.VITE_API_URL || "http://localhost:5000";
+  const apiOrigin = env.VITE_API_URL || "http://localhost:3000";
   const apiOriginPattern = escapeRegex(apiOrigin);
 
   return {

@@ -69,4 +69,11 @@ export const commentArcjet = isConfigured
     )
   : null;
 
+// ── Public API guard 
+export const publicApiArcjet = isConfigured
+  ? baseClient.withRule(
+      slidingWindow({ mode: "LIVE", interval: "10m", max: 60 }),
+    )
+  : null;
+
 export default baseClient;
